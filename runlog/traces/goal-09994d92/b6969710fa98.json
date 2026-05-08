@@ -1,0 +1,12 @@
+{
+  "goal_id": "goal-09994d92",
+  "span_id": "b6969710fa98",
+  "name": "executor.execute",
+  "started_at": 1778261521.939119,
+  "ended_at": 1778261521.939154,
+  "duration_s": 0.0,
+  "status": "ok",
+  "args": "[\"Plan(goal='Test goal', tasks=[PlanTask(id='T1', goal='Task 1', tool='catalog', inputs={}, depends_on=[]), PlanTask(id='T2', goal='Task 2', tool='deliverables', inputs={'title': 'Test'}, depends_on=[])], success_criteria=[], estimated_cost_usd=0.0)\", {\"catalog\": \"<function test_execute_with_mocked_tools.<locals>.<lambda> at 0x7f55dbaabab0>\", \"deliverables\": \"<function test_execute_with_mocked_tools.<locals>.<lambda> at 0x7f55dbaab950>\"}]",
+  "kwargs": "{}",
+  "result": "\"ExecutionTrace(plan=Plan(goal='Test goal', tasks=[PlanTask(id='T1', goal='Task 1', tool='catalog', inputs={}, depends_on=[]), PlanTask(id='T2', goal='Task 2', tool='deliverables', inputs={'title': 'Test'}, depends_on=[])], success_criteria=[], estimated_cost_usd=0.0), steps=[{'task_id': 'T1', 'tool': 'catalog', 'status': 'ok', 'inputs': {}, 'output': {'result': {'candidates': [{'name': 'Test'}]}}}, {'task_id': 'T2', 'tool': 'deliverables', 'status': 'ok', 'inputs': {'title': 'Test'}, 'output': {'result': {'artifacts': [{'path': '/tmp/test.md', 'name': 'test.md'}]}}}], artifacts=['/tmp/test.md'], halted_for=None)\""
+}
