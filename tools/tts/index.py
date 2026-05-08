@@ -1,31 +1,57 @@
-"""tools/tts/index.py — TOOL CONTRACT
-
-Inputs: see manifest.json
-Outputs: see manifest.json
-Errors: see manifest.json
-
-Status: SCAFFOLD ONLY. Body wired in PHASE-{3 or 5}.
-"""
+"""tools/tts/index.py — Synthesize speech from text."""
 from __future__ import annotations
+
+import os
+from pathlib import Path
 from typing import Any
+
+from agent.config import CONFIG
 
 
 def run(inputs: dict[str, Any]) -> dict[str, Any]:
-    """Tool entry point invoked by OpenClaw.
+    text = inputs.get("text", "")
+    voice = inputs.get("voice", "voxtral-female-1")
+    fmt = inputs.get("format", "wav")
 
-    Returns a dict with either {"result": ...} on success or {"error": {...}} on failure.
-    """
-    return {
-        "error": {
-            "code": "NOT_IMPLEMENTED",
-            "message": "Tool body is scaffolded but not yet wired. See sprint phase brief.",
-        }
-    }
+    if not text:
+        return {"error": {"code": "SYNTHESIS_FAILED", "message": "Empty text"}}
+    if fmt not in ("wav", "mp3"):
+        return {"error": {"code": "SYNTHESIS_FAILED", "message": f"Unsupported format: {fmt}"}}
+
+    voxtral_url = os.environ.get("BMS_VOXTRAL_URL", "http://127.0.0.1:8810")
+    output_dir = Path(CONFIG.outputs_dir) / "audio"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    path = output_dir / f"tts.{fmt}"
+
+    # Try Voxtral first
+    try:
+        import httpx
+        resp = httpx.post(f"{voxtral_url}/v1/tts", json={"text": text, "voice": voice, "format": fmt}, timeout=60)
+        if resp.status_code == 200:
+            path.write_bytes(resp.content)
+            return {"result": {"audio_path": str(path), "duration_s": 0, "model_used": "voxtral"}}
+    except Exception:
+        pass
+
+    # Fallback to Kokoro
+    try:
+        from kokoro_onnx import Kokoro
+        kokoro = Kokoro()
+        samples, sample_rate = kokoro.create(text, voice=voice)
+        import wave, struct
+        with wave.open(str(path), "w") as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(2)
+            wf.setframerate(sample_rate)
+            wf.writeframes(struct.pack("<" + "h" * len(samples), *samples))
+        return {"result": {"audio_path": str(path), "duration_s": len(samples) / sample_rate, "model_used": "kokoro"}}
+    except Exception:
+        pass
+
+    return {"error": {"code": "MODEL_UNAVAILABLE", "message": "Both Voxtral and Kokoro unavailable"}}
 
 
 if __name__ == "__main__":
-    import json
-    import sys
-
+    import json, sys
     payload = json.loads(sys.stdin.read())
     print(json.dumps(run(payload)))
