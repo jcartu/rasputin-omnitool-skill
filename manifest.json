@@ -1,0 +1,186 @@
+{
+  "schema_version": "2026.4",
+  "name": "become-manus-skill",
+  "version": "0.1.0",
+  "tools": [
+    {
+      "name": "catalog",
+      "description": "Query the OSS capability matrix. Returns candidates filtered by capability and license.",
+      "inputs": {
+        "capability": {"type": "string", "required": false, "description": "filter by capability key (e.g., 'browser_operator')"},
+        "license_only": {"type": "array", "items": {"type": "string"}, "required": false, "description": "filter by license SPDX (e.g., ['MIT', 'Apache-2.0'])"}
+      },
+      "outputs": {
+        "candidates": {"type": "array", "items": {"type": "object"}}
+      },
+      "errors": ["INVALID_CAPABILITY", "NO_MATCH"]
+    },
+    {
+      "name": "docling",
+      "description": "Parse a document at a given path into markdown using Docling.",
+      "inputs": {
+        "path": {"type": "string", "required": true, "description": "path to DOCX/PDF/HTML/etc., must be inside sandbox volume mount"},
+        "max_chars": {"type": "integer", "required": false, "default": 100000}
+      },
+      "outputs": {
+        "markdown": {"type": "string"},
+        "metadata": {"type": "object"}
+      },
+      "errors": ["FILE_NOT_FOUND", "OUTSIDE_ALLOWED_PATH", "PARSE_FAILED"]
+    },
+    {
+      "name": "crawl4ai",
+      "description": "Crawl a URL and return LLM-friendly markdown.",
+      "inputs": {
+        "url": {"type": "string", "required": true},
+        "timeout_s": {"type": "integer", "required": false, "default": 30},
+        "cache_mode": {"type": "string", "required": false, "default": "default", "enum": ["default", "bypass", "only"]}
+      },
+      "outputs": {
+        "markdown": {"type": "string"},
+        "title": {"type": "string"},
+        "links": {"type": "array"}
+      },
+      "errors": ["FETCH_FAILED", "TIMEOUT", "BLOCKED"]
+    },
+    {
+      "name": "sandbox",
+      "description": "Execute code in agent-infra/sandbox.",
+      "inputs": {
+        "operation": {"type": "string", "required": true, "enum": ["code_execute", "jupyter_kernels_list", "file_upload", "file_download"]},
+        "code": {"type": "string", "required": false},
+        "language": {"type": "string", "required": false, "enum": ["python", "bash", "node"]},
+        "file": {"type": "string", "required": false},
+        "destination": {"type": "string", "required": false},
+        "timeout_s": {"type": "integer", "required": false, "default": 60}
+      },
+      "outputs": {
+        "stdout": {"type": "string"},
+        "stderr": {"type": "string"},
+        "exit_code": {"type": "integer"},
+        "artifacts": {"type": "array"}
+      },
+      "errors": ["SANDBOX_UNREACHABLE", "TIMEOUT", "INVALID_OPERATION"]
+    },
+    {
+      "name": "browser",
+      "description": "Operate a browser via Playwright MCP.",
+      "inputs": {
+        "action": {"type": "string", "required": true, "enum": ["navigate", "screenshot", "extract_text", "fill_form", "click"]},
+        "url": {"type": "string", "required": false},
+        "selector": {"type": "string", "required": false},
+        "value": {"type": "string", "required": false}
+      },
+      "outputs": {
+        "result": {"type": "object"}
+      },
+      "errors": ["NAVIGATION_FAILED", "SELECTOR_NOT_FOUND", "TIMEOUT"]
+    },
+    {
+      "name": "deliverables",
+      "description": "Generate deliverable artifacts in various formats.",
+      "inputs": {
+        "title": {"type": "string", "required": true},
+        "sections": {"type": "array", "required": true},
+        "table_data": {"type": "array", "required": false},
+        "chart_spec": {"type": "object", "required": false},
+        "formats": {"type": "array", "required": false, "default": ["md", "pdf", "xlsx", "pptx"], "items": {"type": "string"}}
+      },
+      "outputs": {
+        "artifacts": {"type": "array"}
+      },
+      "errors": ["INVALID_FORMAT", "WRITE_FAILED"]
+    },
+    {
+      "name": "tts",
+      "description": "Synthesize speech from text.",
+      "inputs": {
+        "text": {"type": "string", "required": true},
+        "voice": {"type": "string", "required": false, "default": "voxtral-female-1"},
+        "format": {"type": "string", "required": false, "default": "wav", "enum": ["wav", "mp3"]}
+      },
+      "outputs": {
+        "audio_path": {"type": "string"},
+        "duration_s": {"type": "number"}
+      },
+      "errors": ["MODEL_UNAVAILABLE", "SYNTHESIS_FAILED"]
+    },
+    {
+      "name": "stt",
+      "description": "Transcribe audio.",
+      "inputs": {
+        "audio_path": {"type": "string", "required": true},
+        "language": {"type": "string", "required": false, "default": "auto"}
+      },
+      "outputs": {
+        "transcript": {"type": "string"},
+        "confidence": {"type": "number"}
+      },
+      "errors": ["FILE_NOT_FOUND", "MODEL_UNAVAILABLE", "TRANSCRIPTION_FAILED"]
+    },
+    {
+      "name": "image-gen",
+      "description": "Generate an image via ComfyUI workflow.",
+      "inputs": {
+        "prompt": {"type": "string", "required": true},
+        "style": {"type": "string", "required": false, "default": "photorealistic"},
+        "aspect_ratio": {"type": "string", "required": false, "default": "16:9"},
+        "reference_images": {"type": "array", "required": false, "items": {"type": "string"}}
+      },
+      "outputs": {
+        "image_path": {"type": "string"},
+        "metadata": {"type": "object"}
+      },
+      "errors": ["COMFY_UNREACHABLE", "WORKFLOW_FAILED"]
+    },
+    {
+      "name": "video-gen",
+      "description": "Generate a short video via Wan 2.1.",
+      "inputs": {
+        "prompt": {"type": "string", "required": true},
+        "duration_s": {"type": "number", "required": false, "default": 5},
+        "fps": {"type": "integer", "required": false, "default": 24}
+      },
+      "outputs": {
+        "video_path": {"type": "string"}
+      },
+      "errors": ["GPU_OOM", "WAN_UNAVAILABLE", "GENERATION_FAILED"]
+    },
+    {
+      "name": "music-gen",
+      "description": "Generate music via MusicGen-Melody.",
+      "inputs": {
+        "prompt": {"type": "string", "required": true},
+        "duration_s": {"type": "number", "required": false, "default": 15}
+      },
+      "outputs": {
+        "audio_path": {"type": "string"}
+      },
+      "errors": ["MODEL_UNAVAILABLE", "GENERATION_FAILED"]
+    },
+    {
+      "name": "memory",
+      "description": "Persist and retrieve episodic memory via RASPUTIN MCP.",
+      "inputs": {
+        "operation": {"type": "string", "required": true, "enum": ["store", "retrieve", "search"]},
+        "content": {"type": "string", "required": false},
+        "query": {"type": "string", "required": false},
+        "memory_id": {"type": "string", "required": false},
+        "k": {"type": "integer", "required": false, "default": 5}
+      },
+      "outputs": {
+        "results": {"type": "array"}
+      },
+      "errors": ["MCP_UNREACHABLE", "INVALID_OPERATION"]
+    }
+  ],
+  "permissions": {
+    "filesystem": ["read:./outputs", "write:./outputs"],
+    "network": ["egress:any"],
+    "subprocess": ["docker", "ffmpeg"]
+  },
+  "models_required": [
+    "Qwen3.5-27B (OpenCode Zen)",
+    "Opus 4.7 (Anthropic API)"
+  ]
+}

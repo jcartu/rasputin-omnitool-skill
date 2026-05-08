@@ -1,0 +1,33 @@
+[project]
+name = "become_manus_skill"
+version = "0.1.0"
+description = "OpenClaw skill bundle for Manus-equivalent agent workflows"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+dependencies = [
+    "become_manus_kernel @ file:///home/josh/workspace/become-manus",
+    "openclaw-skill-sdk>=2026.4.0",
+    "anthropic>=0.40",
+    "openai>=1.50",
+    "httpx>=0.27",
+    "playwright>=1.50",
+    "langfuse>=2.50",
+    "promptfoo>=0.100",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
+voice = ["voxtral-tts>=0.5", "kokoro-onnx>=0.4"]
+image = ["comfy-cli>=2.0"]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["tools*", "agent*", "prompts*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
