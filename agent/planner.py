@@ -1,4 +1,4 @@
-"""Planner implementation for become-manus-skill."""
+"""Planner implementation for rasputin-omnitool-skill."""
 from __future__ import annotations
 
 import json

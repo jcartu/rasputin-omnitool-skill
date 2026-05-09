@@ -1,11 +1,11 @@
 [project]
-name = "become_manus_skill"
-version = "0.1.0"
-description = "OpenClaw skill bundle for Manus-equivalent agent workflows"
+name = "rasputin_omnitool_skill"
+version = "0.2.0"
+description = "Rasputin Omnitool agent skill: planner / executor / reviewer loop with 12 tools across research, sandbox, browser, and multimedia"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 dependencies = [
-    "become_manus_kernel @ file:///${HOME}/workspace/become-manus",
+    "rasputin_omnitool @ file:///${HOME}/workspace/rasputin-omnitool",
     "openclaw-skill-sdk>=2026.4.0",
     "anthropic>=0.40",
     "openai>=1.50",

@@ -2,7 +2,7 @@
 # Start the agent-infra/sandbox container for PHASE-3+ testing.
 set -euo pipefail
 
-NAME="become-manus-sandbox"
+NAME="rasputin-omnitool-sandbox"
 PORT="${1:-8080}"
 
 # Stop existing container if running
@@ -12,7 +12,7 @@ echo "Starting $NAME on port $PORT..."
 docker run --rm -d \
   --name "$NAME" \
   -p "$PORT":8080 -p "${PORT}8200":8200 -p "${PORT}8888":8888 \
-  -v /tmp/become-manus-sandbox-volume:/workspace \
+  -v /tmp/rasputin-omnitool-sandbox-volume:/workspace \
   ghcr.io/agent-infra/sandbox:latest
 
 echo "Waiting for sandbox to be ready..."

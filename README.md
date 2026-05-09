@@ -1,8 +1,14 @@
-# become-manus-skill
+# rasputin-omnitool-skill
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
+[![Tests](https://github.com/jcartu/rasputin-omnitool-skill/actions/workflows/tests.yml/badge.svg)](https://github.com/jcartu/rasputin-omnitool-skill/actions/workflows/tests.yml)
 
 OpenClaw skill bundle providing agent workflows: research, browse, parse, sandbox-execute, generate multimedia (image / video / audio / music), and deliver multi-format reports.
 
-Built on top of [become-manus-kernel](../become-manus/) for catalog, library-smoke, and deliverable primitives.
+Built on top of [rasputin-omnitool](https://github.com/jcartu/rasputin-omnitool) for catalog, library-smoke, and deliverable primitives.
+
+> Formerly `become-manus-skill`. Renamed to `rasputin-omnitool-skill` at v0.2.0. Sprint history (audits, evidence, governance docs) under `runlog/sprint-2026-05/` is preserved as-is.
 
 ## What this skill does
 
@@ -18,12 +24,12 @@ A REVISE verdict triggers exactly one re-plan cycle. ABORT halts cleanly with a 
 
 | Tool | Status | Backend |
 |---|---|---|
-| catalog | available | become_manus_kernel.catalog |
+| catalog | available | rasputin_omnitool.catalog |
 | docling | available | Docling library, sandboxed paths |
 | crawl4ai | available | Crawl4AI with URL safety filters |
 | sandbox | available | agent-infra/sandbox HTTP API |
 | browser | available | Playwright sync (5 actions) |
-| deliverables | available | Parameterized kernel.deliverables |
+| deliverables | available | Parameterized rasputin_omnitool.deliverables |
 | tts | available | Voxtral TTS, Kokoro fallback |
 | stt | available | Whisper-large-v3-turbo |
 | image-gen | available | ComfyUI + FLUX.2 [dev] |
@@ -33,19 +39,19 @@ A REVISE verdict triggers exactly one re-plan cycle. ABORT halts cleanly with a 
 
 ## Models
 
-- **Planner**: Qwen3-27B (OpenCode Zen). Configurable via `BECOME_MANUS_PLANNER_MODEL`.
-- **Executor**: same as planner. Configurable via `BECOME_MANUS_EXECUTOR_MODEL`.
-- **Reviewer**: Claude Opus 4.7 (Anthropic API). Configurable via `BECOME_MANUS_REVIEWER_MODEL`.
+- **Planner**: Qwen3-27B (OpenCode Zen). Configurable via `RASPUTIN_OMNITOOL_PLANNER_MODEL`.
+- **Executor**: same as planner. Configurable via `RASPUTIN_OMNITOOL_EXECUTOR_MODEL`.
+- **Reviewer**: Claude Opus 4.7 (Anthropic API). Configurable via `RASPUTIN_OMNITOOL_REVIEWER_MODEL`.
 
 ## Install
 
 ```bash
 # 1. Install the kernel
-cd ../become-manus
+cd ../rasputin-omnitool
 pip install -e .
 
 # 2. Install the skill
-cd ../become-manus-skill
+cd ../rasputin-omnitool-skill
 pip install -e .
 ```
 

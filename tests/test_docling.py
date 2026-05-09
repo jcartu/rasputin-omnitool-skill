@@ -23,16 +23,16 @@ def test_no_path_returns_error():
 def test_parses_fixture_docx(tmp_path):
     # Use kernel's fixture writer if available, otherwise skip
     try:
-        from become_manus_kernel.library_smoke import _write_docx_fixture
+        from rasputin_omnitool.library_smoke import _write_docx_fixture
     except ImportError:
-        pytest.skip("become_manus_kernel not available")
+        pytest.skip("rasputin_omnitool not available")
 
     try:
         from docling.document_converter import DocumentConverter
     except ImportError:
         pytest.skip("docling not installed")
 
-    inbox = Path("/tmp/become-manus-inbox")
+    inbox = Path("/tmp/rasputin-omnitool-inbox")
     inbox.mkdir(exist_ok=True)
     docx_path = inbox / "test.docx"
     _write_docx_fixture(docx_path)
@@ -45,16 +45,16 @@ def test_parses_fixture_docx(tmp_path):
 
 def test_max_chars_truncation(tmp_path):
     try:
-        from become_manus_kernel.library_smoke import _write_docx_fixture
+        from rasputin_omnitool.library_smoke import _write_docx_fixture
     except ImportError:
-        pytest.skip("become_manus_kernel not available")
+        pytest.skip("rasputin_omnitool not available")
 
     try:
         from docling.document_converter import DocumentConverter
     except ImportError:
         pytest.skip("docling not installed")
 
-    inbox = Path("/tmp/become-manus-inbox")
+    inbox = Path("/tmp/rasputin-omnitool-inbox")
     inbox.mkdir(exist_ok=True)
     docx_path = inbox / "test.docx"
     _write_docx_fixture(docx_path)

@@ -1,4 +1,4 @@
-"""Opus-backed reviewer for become-manus-skill execution traces."""
+"""Opus-backed reviewer for rasputin-omnitool-skill execution traces."""
 from __future__ import annotations
 
 import json

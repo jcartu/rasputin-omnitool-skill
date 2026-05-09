@@ -1,4 +1,4 @@
-# become-manus-skill
+# rasputin-omnitool-skill
 
 OSS-stitched Manus-equivalent agent skill. Research, browse, parse documents, run code in a sandbox, generate images/video/audio, and deliver multi-format reports.
 
@@ -33,7 +33,7 @@ result = run_goal("Research quantum computing and generate a PDF report")
 |---|---|
 | `OPENCODE_ZEN_API_KEY` | API key for planner/executor model |
 | `ANTHROPIC_API_KEY` | API key for reviewer (Claude Opus) |
-| `BECOME_MANUS_EXECUTOR_ENDPOINT` | OpenAI-compatible endpoint (default: `http://localhost:11434/v1`) |
+| `RASPUTIN_OMNITOOL_EXECUTOR_ENDPOINT` | OpenAI-compatible endpoint (default: `http://localhost:11434/v1`) |
 
 ## Tools
 
