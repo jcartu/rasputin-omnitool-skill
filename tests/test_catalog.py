@@ -1,10 +1,6 @@
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path("/home/josh/workspace/become-manus")))
-
+from tools.catalog.index import run
 from tools.catalog.index import run
 
 
