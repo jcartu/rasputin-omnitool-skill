@@ -136,6 +136,8 @@
     {
       "name": "video_gen",
       "description": "Generate a short video via Wan 2.1.",
+      "status": "deferred",
+      "deferred_reason": "Wan 2.1 requires dedicated GPU with 96GB VRAM; no live endpoint available for sprint verification. See BACKLOG.md.",
       "inputs": {
         "prompt": {"type": "string", "required": true},
         "duration_s": {"type": "number", "required": false, "default": 5},
@@ -149,6 +151,8 @@
     {
       "name": "music_gen",
       "description": "Generate music via MusicGen-Melody.",
+      "status": "deferred",
+      "deferred_reason": "audiocraft/MusicGen requires heavy torch/torchaudio dependencies; separate venv needed. See BACKLOG.md.",
       "inputs": {
         "prompt": {"type": "string", "required": true},
         "duration_s": {"type": "number", "required": false, "default": 15}
