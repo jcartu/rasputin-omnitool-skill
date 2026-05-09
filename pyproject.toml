@@ -5,7 +5,9 @@ description = "Rasputin Omnitool agent skill: planner / executor / reviewer loop
 requires-python = ">=3.11"
 license = {text = "MIT"}
 dependencies = [
-    "rasputin_omnitool @ file:///${HOME}/workspace/rasputin-omnitool",
+    # rasputin_omnitool kernel must be installed separately:
+    #   pip install -e ../rasputin-omnitool
+    # The skill imports `rasputin_omnitool.catalog` and `rasputin_omnitool.deliverables`.
     "openclaw-skill-sdk>=2026.4.0",
     "anthropic>=0.40",
     "openai>=1.50",

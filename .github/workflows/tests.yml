@@ -1,0 +1,41 @@
+name: tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout kernel
+        uses: actions/checkout@v4
+        with:
+          repository: jcartu/rasputin-omnitool
+          path: rasputin-omnitool
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install kernel
+        run: pip install -e ./rasputin-omnitool
+
+      - name: Install skill
+        run: pip install -e ".[dev]"
+
+      - name: Run pytest
+        run: pytest -q
+        env:
+          PYTHONUNBUFFERED: "1"
