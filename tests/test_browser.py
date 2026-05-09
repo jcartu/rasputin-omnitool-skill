@@ -69,11 +69,25 @@ def test_screenshot_returns_path(mock_sync_playwright):
     assert result["result"]["path"].endswith(".png")
 
 
-def test_fill_form_requires_selector():
+@patch("playwright.sync_api.sync_playwright")
+def test_fill_form_requires_selector(mock_sync_playwright):
+    # Mock just enough so the launch+new_page succeed; the selector check
+    # should fail before anything else.
+    mock_pw = MagicMock()
+    mock_context = MagicMock()
+    mock_context.__enter__.return_value = mock_pw
+    mock_context.__exit__.return_value = None
+    mock_sync_playwright.return_value = mock_context
     result = run({"action": "fill_form", "url": "http://example.com"})
     assert result.get("error", {}).get("code") == "SELECTOR_NOT_FOUND"
 
 
-def test_click_requires_selector():
+@patch("playwright.sync_api.sync_playwright")
+def test_click_requires_selector(mock_sync_playwright):
+    mock_pw = MagicMock()
+    mock_context = MagicMock()
+    mock_context.__enter__.return_value = mock_pw
+    mock_context.__exit__.return_value = None
+    mock_sync_playwright.return_value = mock_context
     result = run({"action": "click", "url": "http://example.com"})
     assert result.get("error", {}).get("code") == "SELECTOR_NOT_FOUND"
