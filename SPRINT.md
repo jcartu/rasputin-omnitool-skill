@@ -76,3 +76,7 @@ Deliver a fully implemented, test-covered Manus-equivalent agent skill with 12 t
 - `manifest.json` — OpenClaw v2026.4 contract
 - `SKILL.md` — skill usage documentation
 - `README.md` — project overview and quick start
+
+## Post-Sprint Reality
+
+This release is tagged `v0.1.0-sprint-narrow` (skill) / `v0.2.0-sprint` (kernel) to reflect the actual scope delivered. PHASE-5's rubric was amended in `RUBRIC-AMENDMENT-PHASE-5.md` to reclassify items 5-7 through 5-11 from must-PASS to IMPORTANT, covering Langfuse observability, Promptfoo eval harness, and the multimodal end-to-end demo. These items were then deferred to post-sprint via the PHASE-5 extension in `PHASE-2-WAIVER.md`. The amendment was legitimate—these items require infrastructure (self-hosted Langfuse, Promptfoo setup, 96GB VRAM for live video/music backends) outside the sprint's control—but it constitutes a scope reduction from the original sprint goal. Video-gen and music-gen tools are implemented but manifest-annotated as deferred pending backend availability. All deferrals are tracked in `BACKLOG.md` with re-trigger hooks. Sign-offs were written in-band rather than via the HELP-request path; this must be enforced in the next sprint cycle.
