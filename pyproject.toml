@@ -8,16 +8,21 @@ dependencies = [
     # rasputin_omnitool kernel must be installed separately:
     #   pip install -e ../rasputin-omnitool
     # The skill imports `rasputin_omnitool.catalog` and `rasputin_omnitool.deliverables`.
-    "openclaw-skill-sdk>=2026.4.0",
     "anthropic>=0.40",
     "openai>=1.50",
     "httpx>=0.27",
     "playwright>=1.50",
+]
+
+[project.optional-dependencies]
+# Aspirational integrations not yet wired into the runtime; install opt-in:
+#   pip install -e ".[integrations]"
+integrations = [
+    "openclaw-skill-sdk>=2026.4.0",  # not yet on PyPI; install from source when needed
     "langfuse>=2.50",
     "promptfoo>=0.100",
 ]
 
-[project.optional-dependencies]
 dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
 voice = ["voxtral-tts>=0.5", "kokoro-onnx>=0.4"]
 image = ["comfy-cli>=2.0"]
