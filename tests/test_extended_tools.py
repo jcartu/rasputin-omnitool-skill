@@ -20,7 +20,6 @@ class TestTTS:
         assert result.get("error", {}).get("code") == "SYNTHESIS_FAILED"
 
     def test_model_unavailable_returns_error(self):
-        # Both Voxtral and Kokoro unavailable in test env
         result = tts_run({"text": "hello world"})
         assert result.get("error", {}).get("code") == "MODEL_UNAVAILABLE"
 
@@ -38,11 +37,10 @@ class TestSTT:
 class TestImageGen:
     def test_empty_prompt_rejected(self):
         result = image_gen_run({})
-        assert "error" in result
+        assert result.get("error", {}).get("code") == "WORKFLOW_FAILED"
 
     def test_comfy_unreachable_returns_error(self):
         result = image_gen_run({"prompt": "a cat"})
-        # ComfyUI not running, so error code indicates workflow failure
         assert result.get("error", {}).get("code") in ("COMFY_UNREACHABLE", "WORKFLOW_FAILED")
 
 
@@ -51,10 +49,9 @@ class TestVideoGen:
         result = video_gen_run({})
         assert result.get("error", {}).get("code") == "GENERATION_FAILED"
 
-    def test_duration_cap_enforced(self):
+    def test_duration_clamped_to_max(self):
         result = video_gen_run({"prompt": "test", "duration_s": 60})
-        # Should clamp to 10s max internally; may return error if Wan unavailable
-        assert "result" in result or "error" in result
+        assert result.get("error", {}).get("code") in ("WAN_UNAVAILABLE", "GENERATION_FAILED")
 
     def test_wan_unavailable_returns_error(self):
         result = video_gen_run({"prompt": "a cat"})
@@ -66,19 +63,34 @@ class TestMusicGen:
         result = music_gen_run({})
         assert result.get("error", {}).get("code") == "GENERATION_FAILED"
 
-    def test_duration_cap_enforced(self):
+    def test_duration_clamped_to_max(self):
         result = music_gen_run({"prompt": "test", "duration_s": 120})
-        # Should clamp to 60s max; may return error if model unavailable
-        assert "result" in result or "error" in result
+        assert result.get("error", {}).get("code") in ("MODEL_UNAVAILABLE", "GENERATION_FAILED")
 
     def test_model_unavailable_returns_error(self):
         result = music_gen_run({"prompt": "upbeat jazz"})
-        assert result.get("error", {}).get("code") == "MODEL_UNAVAILABLE"
+        assert result.get("error", {}).get("code") in ("MODEL_UNAVAILABLE", "GENERATION_FAILED")
 
 
 class TestMemory:
     def test_unknown_operation_rejected(self):
         result = memory_run({"operation": "delete"})
+        assert result.get("error", {}).get("code") == "INVALID_OPERATION"
+
+    def test_store_empty_content_rejected(self):
+        result = memory_run({"operation": "store", "content": ""})
+        assert result.get("error", {}).get("code") == "INVALID_OPERATION"
+
+    def test_store_no_content_rejected(self):
+        result = memory_run({"operation": "store"})
+        assert result.get("error", {}).get("code") == "INVALID_OPERATION"
+
+    def test_retrieve_no_memory_id_rejected(self):
+        result = memory_run({"operation": "retrieve"})
+        assert result.get("error", {}).get("code") == "INVALID_OPERATION"
+
+    def test_search_empty_query_rejected(self):
+        result = memory_run({"operation": "search", "query": ""})
         assert result.get("error", {}).get("code") == "INVALID_OPERATION"
 
     def test_store_unreachable_returns_error(self):

@@ -10,7 +10,7 @@ Deliver a fully implemented, test-covered Manus-equivalent agent skill with 12 t
 - [x] `pyproject.toml` with dependencies and build config
 - [x] `manifest.json` — OpenClaw tool contract (12 tools)
 - [x] `agent/tool_registry.py` — dynamic tool loading
-- [x] `agent/config.py` — configurable cost ceiling, model selection
+- [x] `agent/config.py` — configurable model selection, endpoints, limits
 
 ### PHASE-2: Core Tools ✅
 - [x] `catalog` — OSS capability matrix queries
@@ -24,7 +24,7 @@ Deliver a fully implemented, test-covered Manus-equivalent agent skill with 12 t
 - [x] `planner.py` — goal-to-plan with tool catalog constraints
 - [x] `executor.py` — tool execution with error propagation
 - [x] `reviewer.py` — approve/revise/abort quality gate
-- [x] `observability.py` — Langfuse tracing integration
+- [x] `observability.py` — structured JSON tracing to runlog/traces/ (Langfuse planned)
 - [x] Prompt templates with JSON schema constraints
 
 ### PHASE-4: Integration ✅

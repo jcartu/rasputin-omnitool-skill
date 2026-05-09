@@ -9,8 +9,8 @@ from dataclasses import dataclass
 class Config:
     """Environment-backed config defaults."""
 
-    planner_model: str = os.getenv("BECOME_MANUS_PLANNER_MODEL", "Qwen3.5-27B")
-    executor_model: str = os.getenv("BECOME_MANUS_EXECUTOR_MODEL", "Qwen3.5-27B")
+    planner_model: str = os.getenv("BECOME_MANUS_PLANNER_MODEL", "Qwen3-27B")
+    executor_model: str = os.getenv("BECOME_MANUS_EXECUTOR_MODEL", "Qwen3-27B")
     executor_endpoint: str = os.getenv("BECOME_MANUS_EXECUTOR_ENDPOINT", "http://localhost:11434/v1")
     reviewer_model: str = os.getenv("BECOME_MANUS_REVIEWER_MODEL", "claude-opus-4-7")
     max_goal_cost_usd: float = float(os.getenv("BECOME_MANUS_MAX_GOAL_COST_USD", "0.10"))

@@ -20,12 +20,14 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
     try:
         from audiocraft.models import MusicGen
         import torchaudio
-        model = MusicGen.get_pretrained("melody")
+        model = MusicGen.get_pretrained("facebook/musicgen-melody")
         waves = model.generate([prompt], duration=duration_s)
         torchaudio.save(str(path), waves[0].cpu(), model.sample_rate)
         return {"result": {"audio_path": str(path)}}
-    except Exception:
-        return {"error": {"code": "MODEL_UNAVAILABLE", "message": "MusicGen unavailable"}}
+    except ImportError:
+        return {"error": {"code": "MODEL_UNAVAILABLE", "message": "MusicGen (audiocraft) not installed"}}
+    except Exception as e:
+        return {"error": {"code": "GENERATION_FAILED", "message": f"MusicGen generation failed: {e}"}}
 
 
 if __name__ == "__main__":

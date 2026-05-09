@@ -14,6 +14,27 @@ Do NOT use this skill for:
 - Pure code authoring (`claw-scaffold` or aider-driven workflows are better).
 - Real-time interactive workflows (this skill is async-batch shaped).
 
+## Quick invocation
+
+```python
+import os
+os.environ["OPENCODE_ZEN_API_KEY"] = "your-key"
+os.environ["ANTHROPIC_API_KEY"] = "your-key"
+
+from agent import run_goal
+result = run_goal("Research quantum computing and generate a PDF report")
+# result["review"].verdict → "APPROVE", "REVISE", or "ABORT"
+# result["artifacts"] → list of output file paths
+```
+
+## Required environment variables
+
+| Variable | Purpose |
+|---|---|
+| `OPENCODE_ZEN_API_KEY` | API key for planner/executor model |
+| `ANTHROPIC_API_KEY` | API key for reviewer (Claude Opus) |
+| `BECOME_MANUS_EXECUTOR_ENDPOINT` | OpenAI-compatible endpoint (default: `http://localhost:11434/v1`) |
+
 ## Tools
 
 | Tool | Capability | Status |
@@ -25,7 +46,7 @@ Do NOT use this skill for:
 | browser | Operate a browser via Playwright MCP | available |
 | deliverables | Generate CSV/MD/PDF/XLSX/PPTX outputs | available |
 | tts | Synthesize speech from text (Voxtral default) | available |
-| stt | Transcribe audio (Canary-Qwen default) | available |
+| stt | Transcribe audio (Whisper default) | available |
 | image-gen | Generate images via ComfyUI / FLUX.2 | available |
 | video-gen | Generate short video via Wan 2.1 | available |
 | music-gen | Generate music via MusicGen-Melody | available |
@@ -33,14 +54,10 @@ Do NOT use this skill for:
 
 ## Models
 
-- Planner: 27B (OpenCode Zen, configurable)
-- Executor: 27B (same)
+- Planner: Qwen3-27B (OpenCode Zen, configurable)
+- Executor: Qwen3-27B (same)
 - Reviewer: Opus 4.7 (Anthropic API, used at checkpoint and end-of-goal)
-
-## Cost ceiling
-
-Default: <$0.10 per goal. Configurable via `agent/config.py`.
 
 ## Observability
 
-All planner / executor / reviewer / tool calls are traced via Langfuse. Deploy via `examples/langfuse-up.sh`.
+All planner / executor / reviewer / tool calls are traced to `runlog/traces/<goal-id>/` as structured JSON span events.

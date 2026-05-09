@@ -1,6 +1,7 @@
 """tools/sandbox/index.py — Execute code in agent-infra/sandbox."""
 from __future__ import annotations
 
+import os
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -53,8 +54,11 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
         elif operation == "file_upload":
             file_path = inputs.get("file", "")
             destination = inputs.get("destination", "/workspace/upload")
+            from tools.docling._allowed_paths import is_allowed
+            if not is_allowed(Path(file_path)):
+                return {"error": {"code": "OUTSIDE_ALLOWED_PATH", "message": f"Path outside allowed volumes: {file_path}"}}
             if not Path(file_path).exists():
-                return {"error": {"code": "INVALID_OPERATION", "message": f"File not found: {file_path}"}}
+                return {"error": {"code": "FILE_NOT_FOUND", "message": f"File not found: {file_path}"}}
             with open(file_path, "rb") as f:
                 resp = httpx.post(
                     f"{base_url}/v1/files",
@@ -72,8 +76,9 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
             resp = httpx.get(f"{base_url}/v1/files", params={"path": file_path}, timeout=timeout_s)
             if resp.status_code >= 500:
                 return {"error": {"code": "SANDBOX_UNREACHABLE", "message": f"Sandbox returned {resp.status_code}"}}
-            local_path = Path(tempfile.mktemp(suffix=Path(file_path).suffix))
-            local_path.write_bytes(resp.content)
+            fd, local_path = tempfile.mkstemp(suffix=Path(file_path).suffix)
+            os.close(fd)
+            Path(local_path).write_bytes(resp.content)
             return {"result": {"artifacts": [{"name": Path(file_path).name, "path": str(local_path)}]}}
 
     except httpx.ConnectError:
