@@ -1,122 +1,80 @@
 # become-manus-skill
 
-Open-source, multi-modal agent skill for async, goal-oriented workflows — research, browsing, document parsing, sandboxed code execution, and multimedia generation (image/video/audio).
+OpenClaw skill bundle providing agent workflows: research, browse, parse, sandbox-execute, generate multimedia (image / video / audio / music), and deliver multi-format reports.
 
-## Why this exists
+Built on top of [become-manus-kernel](../become-manus/) for catalog, library-smoke, and deliverable primitives.
 
-Manus.im is a commercial, closed-source agent platform that orchestrates research, browsing, document parsing, code execution, and multimedia generation into cohesive, multi-step workflows. This project recreates that capability using **open-source components stitched together** — no proprietary APIs, no vendor lock-in.
+## What this skill does
 
-Built as an [OpenClaw](https://github.com/openclaw) skill bundle, it plugs into the OpenClaw agent framework and provides a drop-in, self-hosted alternative to Manus's agent loop.
+Given a user goal, the skill:
 
-### Positioning
+1. **Plans** — 27B emits a typed task list using only tools in the manifest.
+2. **Executes** — 27B emits one tool call per turn; a dispatcher runs each tool and feeds results back.
+3. **Reviews** — Opus 4.7 inspects the trace and final artifacts; returns APPROVE / REVISE / ABORT.
 
-| | Manus.im | become-manus-skill | LangGraph | AutoGen | CrewAI |
-|---|---|---|---|---|---|
-| **License** | Closed-source | MIT | MIT | MIT | MIT |
-| **Self-hosted** | No | Yes | Yes | Yes | Yes |
-| **Multi-modal** | Yes | Yes (image/video/audio) | No | Limited | No |
-| **Agent loop** | Proprietary | Planner→Executor→Reviewer | Custom DSL | Custom DSL | Role-based |
-| **Target** | End users | Engineers, researchers | Framework users | Framework users | Framework users |
+A REVISE verdict triggers exactly one re-plan cycle. ABORT halts cleanly with a summary.
 
-### Who this is for
+## Tools (12)
 
-- **Engineers** building self-hosted agent workflows without proprietary dependencies
-- **Researchers** experimenting with multi-step, multi-modal agent architectures
-- **OpenClaw skill authors** looking for a reference implementation of a complex, production-grade skill
-- **Teams** replacing Manus.im with an auditable, self-hosted alternative
+| Tool | Status | Backend |
+|---|---|---|
+| catalog | available | become_manus_kernel.catalog |
+| docling | available | Docling library, sandboxed paths |
+| crawl4ai | available | Crawl4AI with URL safety filters |
+| sandbox | available | agent-infra/sandbox HTTP API |
+| browser | available | Playwright sync (5 actions) |
+| deliverables | available | Parameterized kernel.deliverables |
+| tts | available | Voxtral TTS, Kokoro fallback |
+| stt | available | Whisper-large-v3-turbo |
+| image-gen | available | ComfyUI + FLUX.2 [dev] |
+| video-gen | deferred | Wan 2.1 (requires 96GB VRAM GPU) |
+| music-gen | deferred | MusicGen-Melody (requires audiocraft venv) |
+| memory | available | RASPUTIN MCP @ 8808 |
 
-## Quick start
+## Models
+
+- **Planner**: Qwen3-27B (OpenCode Zen). Configurable via `BECOME_MANUS_PLANNER_MODEL`.
+- **Executor**: same as planner. Configurable via `BECOME_MANUS_EXECUTOR_MODEL`.
+- **Reviewer**: Claude Opus 4.7 (Anthropic API). Configurable via `BECOME_MANUS_REVIEWER_MODEL`.
+
+## Install
 
 ```bash
+# 1. Install the kernel
+cd ../become-manus
 pip install -e .
-python -c "from agent.tool_registry import load_tools; tools = load_tools(); print(f'{len(tools)} tools loaded')"
+
+# 2. Install the skill
+cd ../become-manus-skill
+pip install -e .
 ```
 
-### Running a goal
-
-```python
-import os
-os.environ["OPENCODE_ZEN_API_KEY"] = "your-key"
-os.environ["ANTHROPIC_API_KEY"] = "your-key"
-
-from agent import run_goal
-result = run_goal("Research the latest developments in quantum computing and generate a PDF report")
-print(result["review"].verdict)  # "APPROVE", "REVISE", or "ABORT"
-```
-
-### Required environment variables
-
-| Variable | Purpose | Default |
-|---|---|---|
-| `OPENCODE_ZEN_API_KEY` | API key for planner/executor model | (required) |
-| `ANTHROPIC_API_KEY` | API key for reviewer (Claude Opus) | (required) |
-| `BECOME_MANUS_PLANNER_MODEL` | Model for plan generation | `Qwen3-27B` |
-| `BECOME_MANUS_EXECUTOR_MODEL` | Model for tool execution | `Qwen3-27B` |
-| `BECOME_MANUS_EXECUTOR_ENDPOINT` | OpenAI-compatible endpoint | `http://localhost:11434/v1` |
-| `BECOME_MANUS_REVIEWER_MODEL` | Model for review | `claude-opus-4-7` |
-| `BECOME_MANUS_MAX_STEPS` | Max tool calls per goal | `30` |
-| `BECOME_MANUS_MAX_WALLCLOCK_MIN` | Max wall-clock time per goal | `20` |
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────┐
-│  run_goal() — orchestrates the agent loop   │
-│  ┌─────────┐  ┌─────────┐  ┌────────────┐  │
-│  │ Planner │→│ Executor│→│  Reviewer  │  │
-│  └────┬────┘  └────┬────┘  └────┬───────┘  │
-│       │            │            │           │
-│       └────────────┼────────────┘           │
-│                    ↓                        │
-│  ┌──────────────────────────────────────┐   │
-│  │  Tool Registry (12 tools)            │   │
-│  │  catalog | docling | crawl4ai        │   │
-│  │  sandbox | browser | deliverables    │   │
-│  │  tts | stt | image-gen | video-gen  │   │
-│  │  music-gen | memory                 │   │
-│  └──────────────────────────────────────┘   │
-└─────────────────────────────────────────────┘
-```
-
-The loop: `run_goal(goal)` → **plan** (LLM generates structured task list) → **execute** (dispatches tools one-at-a-time with placeholder substitution) → **review** (Claude Opus evaluates trace, returns APPROVE/REVISE/ABORT). On REVISE, the loop re-plans once with reviewer feedback.
-
-## Tools
-
-| Tool | Capability | Status |
-|---|---|---|
-| `catalog` | Query OSS capability matrix | ✅ available |
-| `docling` | Parse DOCX/PDF/HTML → markdown | ✅ available |
-| `crawl4ai` | Crawl URLs → LLM-friendly markdown | ✅ available |
-| `sandbox` | Execute code in isolated container | ✅ available |
-| `browser` | Browser automation via Playwright MCP | ✅ available |
-| `deliverables` | Generate CSV/MD/PDF/XLSX/PPTX | ✅ available |
-| `tts` | Text-to-speech (Voxtral/Kokoro) | ✅ available |
-| `stt` | Speech-to-text (Whisper) | ✅ available |
-| `image-gen` | Image generation (ComfyUI/FLUX.2) | ✅ available |
-| `video-gen` | Short video (Wan 2.1) | ✅ available |
-| `music-gen` | Music generation (MusicGen-Melody) | ✅ available |
-| `memory` | Episodic memory (RASPUTIN MCP) | ✅ available |
-
-## Layout
-
-- `agent/` — planner, executor, reviewer, config, observability
-- `tools/` — 12 tool implementations
-- `prompts/` — system prompts with JSON schema constraints
-- `tests/` — 63 tests covering all tools and agent loop
-- `examples/` — smoke tests and sandbox setup
-- `manifest.json` — OpenClaw tool contract manifest
-- `SKILL.md` — skill usage guide
-
-## Testing
+## Run a goal
 
 ```bash
-python -m pytest --tb=short -v  # 63 tests
+./examples/run-demo.sh
+# Or programmatically:
+python -c "
+from agent import run_goal
+result = run_goal('Crawl http://example.com and produce a 1-paragraph markdown summary saved to outputs/.')
+print(result['review'].verdict)
+"
+```
+
+## Tests
+
+```bash
+pytest  # 75 tests
 ```
 
 ## Observability
 
-All planner/executor/reviewer/tool calls traced to `runlog/traces/<goal-id>/` as structured JSON span events. Langfuse integration is planned for a future phase.
+All planner / executor / reviewer / tool calls are traced to `runlog/traces/<goal-id>/` as structured JSON span events. Langfuse integration is deferred to post-sprint.
+
+## Skill manifest
+
+OpenClaw consumes `manifest.json` to know what tools the skill provides. See it for full input/output/error schemas per tool.
 
 ## License
 
-MIT
+MIT.
