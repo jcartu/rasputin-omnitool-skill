@@ -1,0 +1,12 @@
+{
+  "goal_id": "goal-67d82df6",
+  "span_id": "ec2011817ab8",
+  "name": "planner.plan",
+  "started_at": 1778261326.6605487,
+  "ended_at": 1778261326.6606898,
+  "duration_s": 0.0001,
+  "status": "ok",
+  "args": "[\"Research durable browser automation options.\", [{\"name\": \"web_search\", \"capabilities\": [\"research\"]}]]",
+  "kwargs": "{}",
+  "result": "\"Plan(goal='Research durable browser automation options.', tasks=[PlanTask(id='task-1', goal='Collect cited sources about durable browser automation options.', tool='web_search', inputs={'require_citations': True}, depends_on=[])], success_criteria=['Research includes cited recommendations.'], estimated_cost_usd=0.01)\""
+}

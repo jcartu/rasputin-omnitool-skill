@@ -1,0 +1,12 @@
+{
+  "goal_id": "goal-daa6f929",
+  "span_id": "724fbdfaa38f",
+  "name": "executor.execute",
+  "started_at": 1778261513.9556687,
+  "ended_at": 1778261513.9556797,
+  "duration_s": 0.0,
+  "status": "error",
+  "args": "[\"Plan(goal='Test goal', tasks=[PlanTask(id='T1', goal='Task 1', tool='nonexistent', inputs={}, depends_on=[])], success_criteria=[], estimated_cost_usd=0.0)\", {\"catalog\": \"<function test_executor_handles_unknown_tool.<locals>.<lambda> at 0x7efd25f08bf0>\"}]",
+  "kwargs": "{}",
+  "result": null
+}

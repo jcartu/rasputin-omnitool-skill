@@ -1,0 +1,12 @@
+{
+  "goal_id": "goal-49d8bace",
+  "span_id": "7ebb01a2cad0",
+  "name": "planner.plan",
+  "started_at": 1778261402.4046423,
+  "ended_at": 1778261402.4047408,
+  "duration_s": 0.0001,
+  "status": "error",
+  "args": "[\"Research durable browser automation options.\", [{\"name\": \"web_search\", \"capabilities\": [\"research\"]}]]",
+  "kwargs": "{}",
+  "result": null
+}
