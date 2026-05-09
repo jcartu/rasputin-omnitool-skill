@@ -119,7 +119,7 @@
       "errors": ["FILE_NOT_FOUND", "MODEL_UNAVAILABLE", "TRANSCRIPTION_FAILED"]
     },
     {
-      "name": "image-gen",
+      "name": "image_gen",
       "description": "Generate an image via ComfyUI workflow.",
       "inputs": {
         "prompt": {"type": "string", "required": true},
@@ -134,7 +134,7 @@
       "errors": ["COMFY_UNREACHABLE", "WORKFLOW_FAILED"]
     },
     {
-      "name": "video-gen",
+      "name": "video_gen",
       "description": "Generate a short video via Wan 2.1.",
       "inputs": {
         "prompt": {"type": "string", "required": true},
@@ -147,7 +147,7 @@
       "errors": ["GPU_OOM", "WAN_UNAVAILABLE", "GENERATION_FAILED"]
     },
     {
-      "name": "music-gen",
+      "name": "music_gen",
       "description": "Generate music via MusicGen-Melody.",
       "inputs": {
         "prompt": {"type": "string", "required": true},

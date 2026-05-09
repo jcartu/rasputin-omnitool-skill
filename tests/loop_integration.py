@@ -1,14 +1,14 @@
-"""Skipped placeholder tests for agent loop integration."""
+"""Integration test for the full agent loop. Wired in PHASE-4."""
 from __future__ import annotations
 
 import pytest
 
-pytestmark = pytest.mark.skip(reason="PHASE-2 scaffold only; loop wiring lands in later phases")
+
+@pytest.mark.skip(reason="wired in PHASE-4")
+def test_plan_execute_review_with_mocked_tools():
+    raise NotImplementedError
 
 
-def test_planner_executor_reviewer_loop_placeholder() -> None:
-    pass
-
-
-def test_observability_trace_loop_placeholder() -> None:
-    pass
+@pytest.mark.skip(reason="wired in PHASE-4")
+def test_plan_execute_review_end_to_end_real_tools():
+    raise NotImplementedError
