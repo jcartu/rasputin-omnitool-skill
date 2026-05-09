@@ -5,7 +5,7 @@ import json
 import sys
 from typing import Any
 
-from become_manus_kernel import CAPABILITIES, all_candidates, candidate_summary
+from rasputin_omnitool import CAPABILITIES, all_candidates, candidate_summary
 
 
 def _error(code: str, message: str) -> dict[str, Any]:

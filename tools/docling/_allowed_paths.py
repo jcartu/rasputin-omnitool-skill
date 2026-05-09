@@ -5,7 +5,7 @@ from agent.config import CONFIG
 ALLOWED_PREFIXES = [
     Path(CONFIG.outputs_dir).resolve(),
     Path("/mnt/sandbox").resolve(),
-    Path("/tmp/become-manus-inbox").resolve(),
+    Path("/tmp/rasputin-omnitool-inbox").resolve(),
 ]
 
 

@@ -40,7 +40,7 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     try:
-        from become_manus_kernel.deliverables import (
+        from rasputin_omnitool.deliverables import (
             _write_minimal_xlsx,
             _write_minimal_pptx,
             _write_fallback_chart_png,
