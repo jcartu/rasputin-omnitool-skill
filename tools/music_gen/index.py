@@ -1,4 +1,4 @@
-"""tools/music-gen/index.py — Generate music via MusicGen-Melody."""
+"""tools/music_gen/index.py — Generate music via MusicGen-Melody."""
 from __future__ import annotations
 from pathlib import Path
 from typing import Any

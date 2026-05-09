@@ -47,9 +47,9 @@ result = run_goal("Research quantum computing and generate a PDF report")
 | deliverables | Generate CSV/MD/PDF/XLSX/PPTX outputs | available |
 | tts | Synthesize speech from text (Voxtral default) | available |
 | stt | Transcribe audio (Whisper default) | available |
-| image-gen | Generate images via ComfyUI / FLUX.2 | available |
-| video-gen | Generate short video via Wan 2.1 | available |
-| music-gen | Generate music via MusicGen-Melody | available |
+| image_gen | Generate images via ComfyUI / FLUX.2 | available |
+| video_gen | Generate short video via Wan 2.1 | available |
+| music_gen | Generate music via MusicGen-Melody | available |
 | memory | Persist and retrieve episodic memory via RASPUTIN MCP | available |
 
 ## Models

@@ -1,4 +1,4 @@
-"""tools/image-gen/index.py — Generate images via ComfyUI."""
+"""tools/image_gen/index.py — Generate images via ComfyUI."""
 from __future__ import annotations
 import time
 from pathlib import Path

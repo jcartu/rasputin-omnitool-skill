@@ -1,4 +1,4 @@
-"""tools/video-gen/index.py — Generate short video via Wan 2.1."""
+"""tools/video_gen/index.py — Generate short video via Wan 2.1."""
 from __future__ import annotations
 import time
 from pathlib import Path
