@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import time
+import uuid
 from typing import Any
 
 
@@ -39,7 +40,7 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
     # Resolve output dir
     output_dir = Path(CONFIG.outputs_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
-    goal_id = inputs.get("_goal_id", f"adhoc-{int(time.time())}")
+    goal_id = inputs.get("_goal_id", f"adhoc-{uuid.uuid4().hex}")
     prefix = f"{goal_id}-deliverable"
 
     try:

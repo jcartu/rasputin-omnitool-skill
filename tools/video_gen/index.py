@@ -1,6 +1,6 @@
 """tools/video_gen/index.py — Generate short video via Wan 2.1."""
 from __future__ import annotations
-import time
+import uuid
 from pathlib import Path
 from typing import Any
 
@@ -112,7 +112,7 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
 
     output_dir = Path(CONFIG.outputs_dir) / "video"
     output_dir.mkdir(parents=True, exist_ok=True)
-    goal_id = inputs.get("_goal_id", f"adhoc-{int(time.time())}")
+    goal_id = inputs.get("_goal_id", f"adhoc-{uuid.uuid4().hex}")
     step_id = inputs.get("_step_id", "step")
     path = output_dir / f"{goal_id}-{step_id}.webp"
 

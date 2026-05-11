@@ -3,7 +3,8 @@ from __future__ import annotations
 
 import logging
 import os
-import time
+import uuid
+from pathlib import Path
 from pathlib import Path
 from typing import Any
 
@@ -25,7 +26,7 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
     voxtral_url = os.environ.get("RASPUTIN_OMNITOOL_VOXTRAL_URL", "http://127.0.0.1:8810")
     output_dir = Path(CONFIG.outputs_dir) / "audio"
     output_dir.mkdir(parents=True, exist_ok=True)
-    goal_id = inputs.get("_goal_id", f"adhoc-{int(time.time())}")
+    goal_id = inputs.get("_goal_id", f"adhoc-{uuid.uuid4().hex}")
     step_id = inputs.get("_step_id", "step")
     path = output_dir / f"{goal_id}-{step_id}.{fmt}"
 

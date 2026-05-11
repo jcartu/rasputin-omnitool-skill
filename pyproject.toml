@@ -1,6 +1,6 @@
 [project]
 name = "rasputin_omnitool_skill"
-version = "0.2.0"
+version = "0.4.0"
 description = "Rasputin Omnitool agent skill: planner / executor / reviewer loop with 12 tools across research, sandbox, browser, and multimedia"
 requires-python = ">=3.11"
 license = {text = "MIT"}
