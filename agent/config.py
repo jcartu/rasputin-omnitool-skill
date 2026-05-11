@@ -9,8 +9,8 @@ from dataclasses import dataclass
 class Config:
     """Environment-backed config defaults."""
 
-    planner_model: str = os.getenv("RASPUTIN_OMNITOOL_PLANNER_MODEL", "Qwen3-27B")
-    executor_model: str = os.getenv("RASPUTIN_OMNITOOL_EXECUTOR_MODEL", "Qwen3-27B")
+    planner_model: str = os.getenv("RASPUTIN_OMNITOOL_PLANNER_MODEL", "gpt-oss-120b")
+    executor_model: str = os.getenv("RASPUTIN_OMNITOOL_EXECUTOR_MODEL", "gpt-oss-120b")
     executor_endpoint: str = os.getenv("RASPUTIN_OMNITOOL_EXECUTOR_ENDPOINT", "http://localhost:11434/v1")
     reviewer_model: str = os.getenv("RASPUTIN_OMNITOOL_REVIEWER_MODEL", "claude-opus-4-7")
     max_goal_cost_usd: float = float(os.getenv("RASPUTIN_OMNITOOL_MAX_GOAL_COST_USD", "0.10"))

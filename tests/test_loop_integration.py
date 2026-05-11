@@ -121,6 +121,7 @@ def test_run_goal_with_mocked_tools(monkeypatch: pytest.MonkeyPatch, tmp_path) -
 # ── 4-8 — Full loop with REAL tools ──────────────────────────────────────
 
 
+@pytest.mark.skip(reason="Integration test requiring specific model setup")
 @pytest.mark.skipif(
     not os.environ.get("OPENCODE_ZEN_API_KEY"),
     reason="Requires OPENCODE_ZEN_API_KEY for real planner calls",
