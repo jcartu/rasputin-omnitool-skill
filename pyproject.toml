@@ -24,7 +24,7 @@ integrations = [
     "promptfoo>=0.100",
 ]
 
-dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "promptfoo>=0.100"]
 voice = ["voxtral-tts>=0.5", "kokoro-onnx>=0.4"]
 image = ["comfy-cli>=2.0"]
 

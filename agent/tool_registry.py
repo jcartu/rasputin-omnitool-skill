@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib
 import json
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Optional
@@ -149,6 +150,10 @@ def load_tools() -> dict[str, Callable]:
 
     Returns dict[str, Callable] for the executor's tool dispatch.
     """
+    # Mock mode for evals: return canned successful outputs
+    if os.environ.get("RASPUTIN_OMNITOOL_MOCK_TOOLS") == "true":
+        return _load_mock_tools()
+
     discovered = probe_backends(discover_tools())
     # Backward compat: return dict[str, Callable] as executor expects
     return {name: tool.run for name, tool in discovered.items()}
@@ -163,6 +168,24 @@ def load_tool_metadata() -> list[dict]:
     """Load tool metadata for the planner (name + description)."""
     tools = discover_tools()
     return [
-        {"name": t.name, "description": t.description}
-        for t in tools.values()
     ]
+
+
+def _load_mock_tools() -> dict[str, Callable]:
+    """Return tools whose run() returns canned successful outputs.
+
+    Used for evals that test agent-loop logic without backend dependencies.
+    """
+    real_tools = discover_tools()
+    mock_runners: dict[str, Callable] = {}
+    for name, tool in real_tools.items():
+        def _mock_run(inputs: dict, _name=name) -> dict:
+            return {
+                "result": {
+                    "_mock": True,
+                    "_tool": _name,
+                    "_inputs": inputs,
+                }
+            }
+        mock_runners[name] = _mock_run
+    return mock_runners
