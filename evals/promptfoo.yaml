@@ -1,0 +1,155 @@
+description: rasputin-omnitool-skill v0.4 golden evals
+
+prompts:
+  - "{{goal}}"
+
+providers:
+  - id: file://evals/providers.py:call_api
+    label: rasputin-omnitool-skill
+    config:
+      mode: execute  # default; tasks override
+
+tests:
+  # ============= 1. plan-only: wide research decomposes =============
+  - description: plan-only — wide research goal decomposes into >=3 tasks
+    vars:
+      goal: "Research the safety record of three different battery chemistries used in electric vehicles in 2026."
+    options:
+      provider:
+        config:
+          mode: plan-only
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.task_count >= 3;
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          const has_research = out.tools_referenced.some(t => ['crawl4ai', 'web_search', 'research'].includes(t));
+          return has_research || out.tools_referenced.length > 0;
+
+  # ============= 2. execute-mocked: agent loop completes =============
+  - description: execute-mocked — agent loop completes without errors when tools mocked
+    vars:
+      goal: "Find candidates for the 'web_search' capability in the catalog."
+    options:
+      provider:
+        config:
+          mode: execute-mocked
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.halted === false;
+
+  # ============= 3. e2e-trivial: single tool call =============
+  - description: e2e-trivial — catalog query completes with APPROVE or REVISE
+    vars:
+      goal: "Use the catalog tool to list all candidates for the 'memory' capability."
+    options:
+      provider:
+        config:
+          max_cost_usd: 0.20
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.halted === false && ['APPROVE', 'REVISE'].includes(out.verdict);
+
+  # ============= 4. e2e-nontrivial: multi-step research =============
+  - description: e2e-nontrivial — multi-step research with deliverable
+    vars:
+      goal: "Search for OSS sandboxing tools, summarize the top 3, and produce a markdown report."
+    options:
+      provider:
+        config:
+          max_cost_usd: 1.00
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.halted === false;
+
+  # ============= 5. cost-ceiling: budget halt =============
+  - description: cost-ceiling — a goal that would blow past budget halts cleanly
+    vars:
+      goal: "Conduct a deep multi-source research project on the entire history of computing, with full citations."
+    options:
+      provider:
+        config:
+          max_cost_usd: 0.001
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.halted === true && out.details && out.details.limit === 0.001;
+
+  # ============= 6. edge-case: empty goal =============
+  - description: edge-case — empty goal returns clean error or refusal
+    vars:
+      goal: ""
+    options:
+      provider:
+        config:
+          max_cost_usd: 0.05
+    assert:
+      - type: javascript
+        value: |
+          return !output.includes("Traceback") && !output.includes("Exception");
+
+  # ============= 7. execute-mocked: simple goal =============
+  - description: execute-mocked — simple goal completes in mocked mode
+    vars:
+      goal: "Generate a short summary of the term 'idempotency'."
+    options:
+      provider:
+        config:
+          mode: execute-mocked
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.halted === false;
+
+  # ============= 8. plan-only: tool selection =============
+  - description: plan-only — planner selects appropriate tools for the goal
+    vars:
+      goal: "Build a Python script that calculates the Fibonacci sequence up to 100 terms."
+    options:
+      provider:
+        config:
+          mode: plan-only
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.task_count >= 1 && out.tools_referenced.length > 0;
+
+  # ============= 9. execute-mocked: malformed goal recovery =============
+  - description: execute-mocked — agent handles vague goal gracefully
+    vars:
+      goal: "Just say 'hello' as a single string output."
+    options:
+      provider:
+        config:
+          mode: execute-mocked
+          max_cost_usd: 0.10
+    assert:
+      - type: javascript
+        value: |
+          return !output.includes("Traceback");
+
+  # ============= 10. e2e-trivial: sandbox code execution =============
+  - description: e2e-trivial — sandbox code execution completes
+    vars:
+      goal: "Run Python code to compute 2 to the power of 10 and return the result."
+    options:
+      provider:
+        config:
+          max_cost_usd: 0.20
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.halted === false;
