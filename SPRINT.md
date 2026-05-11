@@ -84,3 +84,27 @@ This release is tagged `v0.1.0-sprint-narrow` (skill) / `v0.2.0-sprint` (kernel)
 ## Post-Release Rename
 
 After the v0.1.0-sprint-narrow release, the project was rebranded `become-manus-skill` -> `rasputin-omnitool-skill` and the kernel `become-manus` -> `rasputin-omnitool`. The rename was applied in place: package directories, env vars (`BECOME_MANUS_*` -> `RASPUTIN_OMNITOOL_*`), CLI entrypoints, sandbox container/inbox names, display strings, and READMEs. Historical artifacts under `outputs/become-manus/` (kernel) and the sprint-2026-05 audit trail (skill) are preserved as-is to keep the governance record honest. New release tags: kernel `v0.3.0`, skill `v0.2.0`.
+
+---
+
+## v0..4 Sprint (2026-05-11)
+
+**Status:** COMPLETE  
+**Branch:** `refactor/v0.4-truth-pass`
+
+Expanded rasputin-omnitool-skill from 12 to 18 tools, added real observability (Langfuse + cost telemetry), eval harness (Promptfoo), compose stack (3 profiles), and Open WebUI plugin surface.
+
+| Phase | Deliverable | Tests | Commits |
+|---|---|---|---|
+| PHASE-0 | Truth pass v2 (catalog dedupe, env rename, F-A1/A3/A4) | 79 pass | 2 |
+| PHASE-1 | Plugin discovery (per-tool manifests, auto-discovery) | 88 pass | 1 |
+| PHASE-2 | Compose stack (docker-compose.yml, 3 profiles, bootstrap.sh) | 93 pass | 4 |
+| PHASE-3 | Observability (Langfuse, cost telemetry, ceiling enforcement) | 103 pass | 4 |
+| PHASE-4 | Evals (Promptfoo, 10 golden tasks, CI workflow) | 103 pass | 3 |
+| PHASE-5 | 6 new tools (web_search, slides, mail, wide_research, coding_agent, webapp_builder) | 116 pass | 6 |
+| PHASE-6 | Open WebUI plugin (chat-driven goal invocation) | 121 pass | 1 |
+| PHASE-7 | Release (READMEs updated, SPRINT.md, evidence) | 121 pass | — |
+
+**Final test count:** 121 passed, 3 skipped
+
+All phase evidence files in `sprints/v0.4-sprint/runlog/`.

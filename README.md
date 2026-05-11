@@ -14,13 +14,13 @@ Built on top of [rasputin-omnitool](https://github.com/jcartu/rasputin-omnitool)
 
 Given a user goal, the skill:
 
-1. **Plans** — 27B emits a typed task list using only tools in the manifest.
-2. **Executes** — 27B emits one tool call per turn; a dispatcher runs each tool and feeds results back.
+1. **Plans** — Planner model emits a typed task list using only tools in the manifest.
+2. **Executes** — Dispatcher runs each tool and feeds results back.
 3. **Reviews** — Opus 4.7 inspects the trace and final artifacts; returns APPROVE / REVISE / ABORT.
 
 A REVISE verdict triggers exactly one re-plan cycle. ABORT halts cleanly with a summary.
 
-## Tools (12)
+## Tools (18)
 
 | Tool | Status | Backend |
 |---|---|---|
@@ -36,11 +36,17 @@ A REVISE verdict triggers exactly one re-plan cycle. ABORT halts cleanly with a 
 | video-gen | deferred | Wan 2.1 (requires 96GB VRAM GPU) |
 | music-gen | deferred | MusicGen-Melody (requires audiocraft venv) |
 | memory | available | RASPUTIN MCP @ 8808 |
+| web_search | available | SearXNG |
+| slides | available | Marp CLI (PDF/HTML/PPTX) |
+| mail | available | Himalaya CLI (IMAP/SMTP) |
+| wide_research | available | LLM decomposition + web_search |
+| coding_agent | available | aider subprocess |
+| webapp_builder | available | bolt.diy subprocess |
 
 ## Models
 
-- **Planner**: Qwen3-27B (OpenCode Zen). Configurable via `RASPUTIN_OMNITOOL_PLANNER_MODEL`.
-- **Executor**: same as planner. Configurable via `RASPUTIN_OMNITOOL_EXECUTOR_MODEL`.
+- **Planner**: Configurable via `RASPUTIN_OMNITOOL_PLANNER_MODEL` (default: `gpt-oss-120b`).
+- **Executor**: Same as planner. Configurable via `RASPUTIN_OMNITOOL_EXECUTOR_MODEL`.
 - **Reviewer**: Claude Opus 4.7 (Anthropic API). Configurable via `RASPUTIN_OMNITOOL_REVIEWER_MODEL`.
 
 ## Install
@@ -70,12 +76,32 @@ print(result['review'].verdict)
 ## Tests
 
 ```bash
-pytest  # 75 tests
+pytest  # 121 tests
 ```
 
 ## Observability
 
-All planner / executor / reviewer / tool calls are traced to `runlog/traces/<goal-id>/` as structured JSON span events. Langfuse integration is deferred to post-sprint.
+Real Langfuse-backed tracing. All planner / executor / reviewer / tool calls produce spans with token counts and dollar costs. Cost ceiling enforcement halts goals cleanly when `RASPUTIN_OMNITOOL_MAX_COST_USD` is exceeded.
+
+See [docs/OBSERVABILITY.md](docs/OBSERVABILITY.md).
+
+## Evals
+
+Promptfoo eval harness with 10 golden tasks. CI runs on PRs with `[run-evals]` label.
+
+See [docs/EVALS.md](docs/EVALS.md).
+
+## User Surface
+
+Open WebUI plugin for chat-driven goal invocation. Streams executor status to chat, returns verdict + artifacts.
+
+See [docs/OPEN_WEBUI_SETUP.md](docs/OPEN_WEBUI_SETUP.md).
+
+## Compose Stack
+
+Docker Compose with 3 profiles (cpu, gpu-single, gpu-multi). Bundles sandbox, SearXNG, Langfuse, and more.
+
+See [docs/COMPOSE.md](docs/COMPOSE.md).
 
 ## Skill manifest
 
