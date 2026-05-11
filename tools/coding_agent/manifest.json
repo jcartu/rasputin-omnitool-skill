@@ -1,0 +1,29 @@
+{
+  "name": "coding_agent",
+  "version": "0.4.0",
+  "description": "Execute coding tasks in a repository via aider subprocess. Handles file edits, bug fixes, and feature additions.",
+  "inputs": {
+    "task": {
+      "type": "string",
+      "required": true
+    },
+    "repo_path": {
+      "type": "string",
+      "required": false
+    },
+    "model": {
+      "type": "string",
+      "required": false
+    },
+    "timeout_s": {
+      "type": "integer",
+      "required": false,
+      "default": 300
+    }
+  },
+  "outputs": {
+    "output": {"type": "string"},
+    "stderr": {"type": "string"}
+  },
+  "errors": ["AIDER_FAILED", "AIDER_NOT_INSTALLED", "TIMEOUT", "INVALID_INPUT"]
+}
