@@ -1,0 +1,22 @@
+{
+  "name": "slides",
+  "version": "0.4.0",
+  "description": "Generate presentation slides from Markdown content using Marp CLI. Supports PDF, HTML, and PPTX output.",
+  "inputs": {
+    "markdown": {
+      "type": "string",
+      "required": true
+    },
+    "format": {
+      "type": "string",
+      "required": false,
+      "enum": ["pdf", "html", "pptx"],
+      "default": "pdf"
+    }
+  },
+  "outputs": {
+    "path": {"type": "string"},
+    "format": {"type": "string"}
+  },
+  "errors": ["MARP_FAILED", "MARP_NOT_INSTALLED", "TIMEOUT", "INVALID_INPUT", "INVALID_FORMAT"]
+}
