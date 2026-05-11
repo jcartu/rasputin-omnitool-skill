@@ -15,7 +15,7 @@ except ModuleNotFoundError:
 
 from agent.config import CONFIG
 from agent.executor import ExecutionTrace
-from agent.observability import observe
+from agent.observability import observe, check_cost_ceiling, record_call_cost, extract_usage
 
 Verdict = Literal["APPROVE", "REVISE", "ABORT"]
 
@@ -40,6 +40,9 @@ class Review:
 def review(trace: ExecutionTrace, artifacts: list[str]) -> Review:
     """Review an execution trace and artifacts with Claude Opus."""
 
+    # Check cost ceiling before LLM call
+    check_cost_ceiling(CONFIG.reviewer_model, est_prompt=20_000, est_completion=2_000)
+
     system_prompt = _PROMPT_PATH.read_text(encoding="utf-8")
     client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
     response = client.messages.create(
@@ -49,6 +52,10 @@ def review(trace: ExecutionTrace, artifacts: list[str]) -> Review:
         system=system_prompt,
         messages=[{"role": "user", "content": _build_user_message(trace, artifacts)}],
     )
+    # Record cost telemetry
+    prompt_tokens, completion_tokens = extract_usage(response)
+    record_call_cost(CONFIG.reviewer_model, prompt_tokens, completion_tokens)
+
     return _parse_review(_response_text(response))
 
 

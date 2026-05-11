@@ -11,7 +11,7 @@ from openai import OpenAI
 from pydantic import BaseModel, Field, ValidationError
 
 from agent.config import CONFIG
-from agent.observability import observe
+from agent.observability import observe, check_cost_ceiling, record_call_cost, extract_usage
 
 
 PROMPT_PATH = Path(__file__).resolve().parent.parent / "prompts" / "planner.md"
@@ -150,13 +150,17 @@ def _completion(client: OpenAI, messages: list[dict[str, str]], retry_error: str
         temperature=0.2,
         response_format={"type": "json_object"},
     )
+    # Record cost telemetry
+    prompt_tokens, completion_tokens = extract_usage(response)
+    record_call_cost(CONFIG.planner_model, prompt_tokens, completion_tokens)
     return _extract_content(response)
 
 
 @observe("planner.plan")
 def plan(goal: str, tools: list[dict], context: dict[str, Any] | None = None) -> Plan:
     """Create a validated plan for a goal using the configured planner model."""
-
+    # Check cost ceiling before LLM call
+    check_cost_ceiling(CONFIG.planner_model, est_prompt=4000, est_completion=2000)
     allowed_tools = _tool_names(tools)
     messages = _build_messages(goal, tools, context)
     client = OpenAI(

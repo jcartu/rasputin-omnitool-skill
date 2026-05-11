@@ -9,6 +9,8 @@ from typing import Any, Callable, Optional
 
 from jsonschema import validate, ValidationError
 
+from agent.observability import observe
+
 TOOLS_DIR = Path(__file__).parent.parent / "tools"
 SCHEMA_PATH = Path(__file__).parent / "schemas" / "tool_manifest.schema.json"
 
@@ -104,7 +106,8 @@ def discover_tools(tools_dir: Path = TOOLS_DIR) -> dict[str, ToolDefinition]:
             version=manifest["version"],
             description=manifest["description"],
             schema=manifest,
-            run=run_callable,
+            # Auto-wrap with @observe for Langfuse tracing
+            run=observe(f"tool.{manifest['name']}")(run_callable),
             source_dir=tool_dir,
             available=True,
         )
