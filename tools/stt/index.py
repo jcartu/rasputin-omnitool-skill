@@ -1,8 +1,11 @@
 """tools/stt/index.py — Transcribe audio."""
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 
 def run(inputs: dict[str, Any]) -> dict[str, Any]:
@@ -31,8 +34,8 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
                 "model_used": "openai/whisper-large-v3-turbo",
             }
         }
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.warning("whisper_transformers_unavailable", extra={"error": str(exc)})
 
     try:
         from faster_whisper import WhisperModel

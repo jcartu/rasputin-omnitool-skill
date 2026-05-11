@@ -30,11 +30,11 @@ def test_rejects_link_local():
 
 
 def test_allows_loopback_when_env_set():
-    os.environ["BMS_ALLOW_LOOPBACK_CRAWL"] = "1"
+    os.environ["RASPUTIN_OMNITOOL_ALLOW_LOOPBACK_CRAWL"] = "1"
     try:
         result = run({"url": "http://127.0.0.1:8080"})
         if "error" in result:
             assert "loopback" not in result["error"]["message"].lower()
             assert result["error"]["code"] != "FETCH_FAILED" or "loopback" not in result["error"]["message"].lower()
     finally:
-        os.environ.pop("BMS_ALLOW_LOOPBACK_CRAWL", None)
+        os.environ.pop("RASPUTIN_OMNITOOL_ALLOW_LOOPBACK_CRAWL", None)

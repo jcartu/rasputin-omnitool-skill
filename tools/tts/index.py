@@ -1,11 +1,15 @@
 """tools/tts/index.py — Synthesize speech from text."""
 from __future__ import annotations
 
+import logging
 import os
+import time
 from pathlib import Path
 from typing import Any
 
 from agent.config import CONFIG
+
+logger = logging.getLogger(__name__)
 
 
 def run(inputs: dict[str, Any]) -> dict[str, Any]:
@@ -18,10 +22,12 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
     if fmt not in ("wav", "mp3"):
         return {"error": {"code": "SYNTHESIS_FAILED", "message": f"Unsupported format: {fmt}"}}
 
-    voxtral_url = os.environ.get("BMS_VOXTRAL_URL", "http://127.0.0.1:8810")
+    voxtral_url = os.environ.get("RASPUTIN_OMNITOOL_VOXTRAL_URL", "http://127.0.0.1:8810")
     output_dir = Path(CONFIG.outputs_dir) / "audio"
     output_dir.mkdir(parents=True, exist_ok=True)
-    path = output_dir / f"tts.{fmt}"
+    goal_id = inputs.get("_goal_id", f"adhoc-{int(time.time())}")
+    step_id = inputs.get("_step_id", "step")
+    path = output_dir / f"{goal_id}-{step_id}.{fmt}"
 
     # Try Voxtral first
     try:
@@ -30,8 +36,8 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
         if resp.status_code == 200:
             path.write_bytes(resp.content)
             return {"result": {"audio_path": str(path), "duration_s": 0, "model_used": "voxtral"}}
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.warning("voxtral_unavailable", extra={"error": str(exc)})
 
     # Fallback to Kokoro
     try:
@@ -45,8 +51,8 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
             wf.setframerate(sample_rate)
             wf.writeframes(struct.pack("<" + "h" * len(samples), *samples))
         return {"result": {"audio_path": str(path), "duration_s": len(samples) / sample_rate, "model_used": "kokoro"}}
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.warning("kokoro_unavailable", extra={"error": str(exc)})
 
     return {"error": {"code": "MODEL_UNAVAILABLE", "message": "Both Voxtral and Kokoro unavailable"}}
 

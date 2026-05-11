@@ -9,6 +9,7 @@ Status: WIRED (PHASE-3).
 from __future__ import annotations
 
 from pathlib import Path
+import time
 from typing import Any
 
 
@@ -38,6 +39,8 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
     # Resolve output dir
     output_dir = Path(CONFIG.outputs_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
+    goal_id = inputs.get("_goal_id", f"adhoc-{int(time.time())}")
+    prefix = f"{goal_id}-deliverable"
 
     try:
         from rasputin_omnitool.deliverables import (
@@ -66,17 +69,17 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
         md_content = "\n".join(md_lines)
 
         if "md" in formats:
-            p = output_dir / "deliverable.md"
+            p = output_dir / f"{prefix}.md"
             p.write_text(md_content)
-            artifacts.append({"name": "deliverable.md", "path": str(p), "size_bytes": p.stat().st_size, "format": "md"})
+            artifacts.append({"name": f"{prefix}.md", "path": str(p), "size_bytes": p.stat().st_size, "format": "md"})
 
         if "csv" in formats and table_data:
             import csv
-            p = output_dir / "deliverable.csv"
+            p = output_dir / f"{prefix}.csv"
             with p.open("w", newline="") as f:
                 w = csv.writer(f)
                 w.writerows(table_data)
-            artifacts.append({"name": "deliverable.csv", "path": str(p), "size_bytes": p.stat().st_size, "format": "csv"})
+            artifacts.append({"name": f"{prefix}.csv", "path": str(p), "size_bytes": p.stat().st_size, "format": "csv"})
 
         if "html" in formats:
             import html as html_mod
@@ -89,42 +92,42 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
                 )
                 html_rows = f"<table>{header}{body_rows}</table>"
             html_content = f"""<!doctype html><html><head><meta charset='utf-8'><title>{html_mod.escape(str(title))}</title><style>body{{font-family:Inter,Arial,sans-serif;margin:40px}}table{{border-collapse:collapse;width:100%}}td,th{{border:1px solid #ddd;padding:8px}}</style></head><body><h1>{html_mod.escape(str(title))}</h1>{html_rows}</body></html>"""
-            p = output_dir / "deliverable.html"
+            p = output_dir / f"{prefix}.html"
             p.write_text(html_content)
-            artifacts.append({"name": "deliverable.html", "path": str(p), "size_bytes": p.stat().st_size, "format": "html"})
+            artifacts.append({"name": f"{prefix}.html", "path": str(p), "size_bytes": p.stat().st_size, "format": "html"})
 
         if "pdf" in formats:
             try:
                 from weasyprint import HTML as HTMLToPdf
-                html_path = output_dir / "deliverable.html"
+                html_path = output_dir / f"{prefix}.html"
                 if not html_path.exists():
                     html_path.write_text(f"<!doctype html><html><body><h1>{title}</h1></body></html>")
-                p = output_dir / "deliverable.pdf"
+                p = output_dir / f"{prefix}.pdf"
                 HTMLToPdf(filename=str(html_path)).write_pdf(str(p))
             except Exception:
-                p = output_dir / "deliverable.pdf"
+                p = output_dir / f"{prefix}.pdf"
                 p.write_bytes(b"%PDF-1.4\n% Become Manus fallback PDF\n1 0 obj <<>> endobj\ntrailer <<>>\n%%EOF\n")
-            artifacts.append({"name": "deliverable.pdf", "path": str(p), "size_bytes": p.stat().st_size, "format": "pdf"})
+            artifacts.append({"name": f"{prefix}.pdf", "path": str(p), "size_bytes": p.stat().st_size, "format": "pdf"})
 
         if "xlsx" in formats:
             rows = [["Section", "Content"]] + [[s.get("heading", ""), s.get("body", "")] for s in sections]
             if table_data:
                 rows = table_data
-            p = output_dir / "deliverable.xlsx"
+            p = output_dir / f"{prefix}.xlsx"
             _write_minimal_xlsx(p, rows)
-            artifacts.append({"name": "deliverable.xlsx", "path": str(p), "size_bytes": p.stat().st_size, "format": "xlsx"})
+            artifacts.append({"name": f"{prefix}.xlsx", "path": str(p), "size_bytes": p.stat().st_size, "format": "xlsx"})
 
         if "pptx" in formats:
             bullets = [s.get("heading", "") + ": " + s.get("body", "") for s in sections]
-            p = output_dir / "deliverable.pptx"
+            p = output_dir / f"{prefix}.pptx"
             _write_minimal_pptx(p, title, bullets)
-            artifacts.append({"name": "deliverable.pptx", "path": str(p), "size_bytes": p.stat().st_size, "format": "pptx"})
+            artifacts.append({"name": f"{prefix}.pptx", "path": str(p), "size_bytes": p.stat().st_size, "format": "pptx"})
 
         if "png" in formats and chart_spec:
             chart_rows = [{"capability": str(k), "score": float(v)} for k, v in chart_spec.items()]
-            p = output_dir / "deliverable_chart.png"
+            p = output_dir / f"{prefix}_chart.png"
             _write_fallback_chart_png(p, chart_rows)
-            artifacts.append({"name": "deliverable_chart.png", "path": str(p), "size_bytes": p.stat().st_size, "format": "png"})
+            artifacts.append({"name": f"{prefix}_chart.png", "path": str(p), "size_bytes": p.stat().st_size, "format": "png"})
 
         return {"result": {"artifacts": artifacts}}
 

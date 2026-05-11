@@ -1,6 +1,7 @@
 """tools/music_gen/index.py — Generate music via MusicGen-Melody."""
 from __future__ import annotations
 from pathlib import Path
+import time
 from typing import Any
 
 from agent.config import CONFIG
@@ -15,7 +16,9 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
 
     output_dir = Path(CONFIG.outputs_dir) / "music"
     output_dir.mkdir(parents=True, exist_ok=True)
-    path = output_dir / f"music.wav"
+    goal_id = inputs.get("_goal_id", f"adhoc-{int(time.time())}")
+    step_id = inputs.get("_step_id", "step")
+    path = output_dir / f"{goal_id}-{step_id}.wav"
 
     try:
         from audiocraft.models import MusicGen

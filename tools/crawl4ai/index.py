@@ -66,14 +66,14 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
         }
 
     hostname = parsed.hostname or ""
-    allow_loopback = os.environ.get("BMS_ALLOW_LOOPBACK_CRAWL", "0") == "1"
+    allow_loopback = os.environ.get("RASPUTIN_OMNITOOL_ALLOW_LOOPBACK_CRAWL", "0") == "1"
     if not allow_loopback:
         blocked, reason = _is_blocked_host(hostname)
         if blocked:
             return {
                 "error": {
                     "code": "FETCH_FAILED",
-                    "message": f"Loopback/internal URL blocked ({reason}). Set BMS_ALLOW_LOOPBACK_CRAWL=1 to allow.",
+                    "message": f"Loopback/internal URL blocked ({reason}). Set RASPUTIN_OMNITOOL_ALLOW_LOOPBACK_CRAWL=1 to allow.",
                 }
             }
 

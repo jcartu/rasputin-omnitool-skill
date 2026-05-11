@@ -114,7 +114,9 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
 
     output_dir = Path(CONFIG.outputs_dir) / "images"
     output_dir.mkdir(parents=True, exist_ok=True)
-    path = output_dir / f"image.png"
+    goal_id = inputs.get("_goal_id", f"adhoc-{int(time.time())}")
+    step_id = inputs.get("_step_id", "step")
+    path = output_dir / f"{goal_id}-{step_id}.png"
 
     try:
         import httpx
