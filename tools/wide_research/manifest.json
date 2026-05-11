@@ -1,0 +1,29 @@
+{
+  "name": "wide_research",
+  "version": "0.4.0",
+  "description": "Conduct parallel multi-source research on a topic. Decomposes into sub-queries, executes searches, and synthesizes a comprehensive markdown report.",
+  "inputs": {
+    "topic": {
+      "type": "string",
+      "required": true
+    },
+    "max_sub_queries": {
+      "type": "integer",
+      "required": false,
+      "default": 5
+    },
+    "depth": {
+      "type": "string",
+      "required": false,
+      "enum": ["shallow", "standard", "deep"],
+      "default": "standard"
+    }
+  },
+  "outputs": {
+    "topic": {"type": "string"},
+    "sub_queries": {"type": "array"},
+    "report": {"type": "string"},
+    "path": {"type": "string"}
+  },
+  "errors": ["DECOMPOSITION_FAILED", "SUB_QUERY_FAILED", "INVALID_INPUT"]
+}
