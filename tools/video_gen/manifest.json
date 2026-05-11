@@ -29,5 +29,13 @@
     "GENERATION_FAILED"
   ],
   "status": "deferred",
-  "deferred_reason": "Wan 2.1 requires dedicated GPU with 96GB VRAM; no live endpoint available for sprint verification. See BACKLOG.md."
+  "deferred_reason": "Wan 2.1 requires dedicated GPU with 96GB VRAM; no live endpoint available for sprint verification. See BACKLOG.md.",
+  "backends": [
+    {
+      "name": "wan",
+      "health_url": "http://localhost:8810/health",
+      "required": true
+    }
+  ],
+  "requires_compose_profile": "gpu-multi"
 }

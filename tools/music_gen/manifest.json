@@ -23,5 +23,13 @@
     "GENERATION_FAILED"
   ],
   "status": "deferred",
-  "deferred_reason": "audiocraft/MusicGen requires heavy torch/torchaudio dependencies; separate venv needed. See BACKLOG.md."
+  "deferred_reason": "audiocraft/MusicGen requires heavy torch/torchaudio dependencies; separate venv needed. See BACKLOG.md.",
+  "backends": [
+    {
+      "name": "musicgen",
+      "health_url": "http://localhost:8811/health",
+      "required": true
+    }
+  ],
+  "requires_compose_profile": "gpu-multi"
 }

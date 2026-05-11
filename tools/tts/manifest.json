@@ -33,5 +33,12 @@
   "errors": [
     "MODEL_UNAVAILABLE",
     "SYNTHESIS_FAILED"
+  ],
+  "backends": [
+    {
+      "name": "voxtral",
+      "health_url": "http://localhost:8810/health",
+      "required": false
+    }
   ]
 }

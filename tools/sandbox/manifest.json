@@ -58,5 +58,12 @@
     "SANDBOX_UNREACHABLE",
     "TIMEOUT",
     "INVALID_OPERATION"
+  ],
+  "backends": [
+    {
+      "name": "sandbox_api",
+      "health_url": "http://localhost:8080/v1/health",
+      "required": true
+    }
   ]
 }

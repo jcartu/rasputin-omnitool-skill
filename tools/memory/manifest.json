@@ -38,5 +38,12 @@
   "errors": [
     "MCP_UNREACHABLE",
     "INVALID_OPERATION"
+  ],
+  "backends": [
+    {
+      "name": "rasputin_mcp",
+      "health_url": "http://localhost:8808/health",
+      "required": true
+    }
   ]
 }

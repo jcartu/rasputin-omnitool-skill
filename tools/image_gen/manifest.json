@@ -36,5 +36,13 @@
   "errors": [
     "COMFY_UNREACHABLE",
     "WORKFLOW_FAILED"
+  ],
+  "backends": [
+    {
+      "name": "comfyui",
+      "health_url": "http://localhost:8188/",
+      "required": true,
+      "health_timeout_s": 5
+    }
   ]
 }
