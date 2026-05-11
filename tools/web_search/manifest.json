@@ -1,0 +1,53 @@
+{
+  "name": "web_search",
+  "version": "0.4.0",
+  "description": "Search the web via SearXNG. Returns titles, URLs, and snippets for the given query.",
+  "inputs": {
+    "query": {
+      "type": "string",
+      "required": true
+    },
+    "max_results": {
+      "type": "integer",
+      "required": false,
+      "default": 10
+    },
+    "categories": {
+      "type": "string",
+      "required": false,
+      "default": "general"
+    },
+    "time_range": {
+      "type": "string",
+      "required": false,
+      "enum": ["day", "week", "month", "year", ""]
+    },
+    "language": {
+      "type": "string",
+      "required": false,
+      "default": "en"
+    }
+  },
+  "outputs": {
+    "query": {"type": "string"},
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {"type": "string"},
+          "url": {"type": "string"},
+          "snippet": {"type": "string"}
+        }
+      }
+    }
+  },
+  "errors": ["SEARXNG_UNREACHABLE", "TIMEOUT", "INVALID_INPUT"],
+  "backends": [
+    {
+      "name": "searxng",
+      "health_url": "http://localhost:8080/health",
+      "required": true
+    }
+  ]
+}
