@@ -121,9 +121,17 @@ class TestSTTLogging:
     """F-A1: STT warning paths must log, not swallow silently."""
     def test_whisper_failure_logs_warning(self, caplog, tmp_path, monkeypatch):
         import logging
+        import builtins
         caplog.set_level(logging.WARNING)
         # Bypass path allowlist so we reach the whisper path
         monkeypatch.setattr("tools.docling._allowed_paths.is_allowed", lambda p: True)
+        # Force both whisper backends to fail by raising ImportError on import
+        original_import = builtins.__import__
+        def fail_import(name, *args, **kwargs):
+            if name in ("transformers", "faster_whisper"):
+                raise ImportError(f"No module '{name}'")
+            return original_import(name, *args, **kwargs)
+        monkeypatch.setattr(builtins, "__import__", fail_import)
         # Create a minimal WAV to pass the exists() check
         import wave, struct
         wav_path = tmp_path / "test.wav"
@@ -133,9 +141,10 @@ class TestSTTLogging:
             wf.setframerate(16000)
             wf.writeframes(struct.pack("<h", 0) * 100)
         result = stt_run({"audio_path": str(wav_path)})
-        # Either succeeds (whisper installed) or fails with TRANSCRIPTION_FAILED (whisper not installed)
-        # In either case, the code path is exercised — no silent swallowing
-        assert "result" in result or result.get("error", {}).get("code") == "TRANSCRIPTION_FAILED"
+        # Must fail with TRANSCRIPTION_FAILED and emit at least one warning
+        assert result.get("error", {}).get("code") == "TRANSCRIPTION_FAILED"
+        warning_records = [r for r in caplog.records if r.levelno == logging.WARNING]
+        assert len(warning_records) >= 1, "Expected at least one warning log for failed whisper backend"
 
 class TestUniqueFilenames:
     """F-A4: consecutive ad-hoc invocations must never produce the same path."""
