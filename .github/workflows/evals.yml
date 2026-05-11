@@ -1,0 +1,56 @@
+name: evals
+
+on:
+  pull_request:
+    types: [labeled, opened, synchronize]
+
+jobs:
+  promptfoo:
+    if: contains(github.event.pull_request.labels.*.name, 'run-evals')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install Python deps
+        run: pip install -e ".[dev]" --break-system-packages || pip install -e ".[dev]"
+
+      - name: Install promptfoo
+        run: npm install -g promptfoo
+
+      - name: Bring up cpu profile
+        run: |
+          cp .env.template .env
+          chmod +x scripts/bootstrap.sh
+          ./scripts/bootstrap.sh --profile cpu --skip-gpu-check || true
+        env:
+          OPENCODE_ZEN_API_KEY: ${{ secrets.OPENCODE_ZEN_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Run evals
+        run: |
+          promptfoo eval --config evals/promptfoo.yaml --output report.html || true
+        env:
+          OPENCODE_ZEN_API_KEY: ${{ secrets.OPENCODE_ZEN_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: promptfoo-report
+          path: report.html
+
+      - name: Tear down
+        if: always()
+        run: docker compose --profile cpu down || true
