@@ -38,3 +38,7 @@ include = ["tools*", "agent*", "prompts*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+filterwarnings = [
+    "ignore:The pynvml package is deprecated:FutureWarning",
+]
+
