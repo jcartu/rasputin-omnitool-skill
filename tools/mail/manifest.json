@@ -1,0 +1,44 @@
+{
+  "name": "mail",
+  "version": "0.4.0",
+  "description": "Send, list, and read email via Himalaya CLI. Supports IMAP/SMTP operations.",
+  "inputs": {
+    "operation": {
+      "type": "string",
+      "required": true,
+      "enum": ["send", "list", "read"]
+    },
+    "to": {
+      "type": "string",
+      "required": false
+    },
+    "subject": {
+      "type": "string",
+      "required": false
+    },
+    "body": {
+      "type": "string",
+      "required": false
+    },
+    "folder": {
+      "type": "string",
+      "required": false,
+      "default": "INBOX"
+    },
+    "limit": {
+      "type": "integer",
+      "required": false,
+      "default": 20
+    },
+    "message_id": {
+      "type": "string",
+      "required": false
+    }
+  },
+  "outputs": {
+    "status": {"type": "string"},
+    "output": {"type": "string"},
+    "content": {"type": "string"}
+  },
+  "errors": ["HIMALAYA_FAILED", "HIMALAYA_NOT_INSTALLED", "TIMEOUT", "INVALID_INPUT", "INVALID_OPERATION"]
+}
