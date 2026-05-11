@@ -78,6 +78,45 @@
       "status": "available"
     },
     {
+      "name": "coding_agent",
+      "version": "0.4.0",
+      "description": "Execute coding tasks in a repository via aider subprocess. Handles file edits, bug fixes, and feature additions.",
+      "inputs": {
+        "task": {
+          "type": "string",
+          "required": true
+        },
+        "repo_path": {
+          "type": "string",
+          "required": false
+        },
+        "model": {
+          "type": "string",
+          "required": false
+        },
+        "timeout_s": {
+          "type": "integer",
+          "required": false,
+          "default": 300
+        }
+      },
+      "outputs": {
+        "output": {
+          "type": "string"
+        },
+        "stderr": {
+          "type": "string"
+        }
+      },
+      "errors": [
+        "AIDER_FAILED",
+        "AIDER_NOT_INSTALLED",
+        "TIMEOUT",
+        "INVALID_INPUT"
+      ],
+      "status": "available"
+    },
+    {
       "name": "crawl4ai",
       "version": "0.4.0",
       "description": "Crawl a URL and return LLM-friendly markdown.",
@@ -239,6 +278,67 @@
       "status": "available"
     },
     {
+      "name": "mail",
+      "version": "0.4.0",
+      "description": "Send, list, and read email via Himalaya CLI. Supports IMAP/SMTP operations.",
+      "inputs": {
+        "operation": {
+          "type": "string",
+          "required": true,
+          "enum": [
+            "send",
+            "list",
+            "read"
+          ]
+        },
+        "to": {
+          "type": "string",
+          "required": false
+        },
+        "subject": {
+          "type": "string",
+          "required": false
+        },
+        "body": {
+          "type": "string",
+          "required": false
+        },
+        "folder": {
+          "type": "string",
+          "required": false,
+          "default": "INBOX"
+        },
+        "limit": {
+          "type": "integer",
+          "required": false,
+          "default": 20
+        },
+        "message_id": {
+          "type": "string",
+          "required": false
+        }
+      },
+      "outputs": {
+        "status": {
+          "type": "string"
+        },
+        "output": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        }
+      },
+      "errors": [
+        "HIMALAYA_FAILED",
+        "HIMALAYA_NOT_INSTALLED",
+        "TIMEOUT",
+        "INVALID_INPUT",
+        "INVALID_OPERATION"
+      ],
+      "status": "available"
+    },
+    {
       "name": "memory",
       "version": "0.4.0",
       "description": "Persist and retrieve episodic memory via RASPUTIN MCP.",
@@ -371,6 +471,43 @@
       "status": "available"
     },
     {
+      "name": "slides",
+      "version": "0.4.0",
+      "description": "Generate presentation slides from Markdown content using Marp CLI. Supports PDF, HTML, and PPTX output.",
+      "inputs": {
+        "markdown": {
+          "type": "string",
+          "required": true
+        },
+        "format": {
+          "type": "string",
+          "required": false,
+          "enum": [
+            "pdf",
+            "html",
+            "pptx"
+          ],
+          "default": "pdf"
+        }
+      },
+      "outputs": {
+        "path": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        }
+      },
+      "errors": [
+        "MARP_FAILED",
+        "MARP_NOT_INSTALLED",
+        "TIMEOUT",
+        "INVALID_INPUT",
+        "INVALID_FORMAT"
+      ],
+      "status": "available"
+    },
+    {
       "name": "stt",
       "version": "0.4.0",
       "description": "Transcribe audio.",
@@ -469,6 +606,147 @@
         "GENERATION_FAILED"
       ],
       "status": "deferred"
+    },
+    {
+      "name": "web_search",
+      "version": "0.4.0",
+      "description": "Search the web via SearXNG. Returns titles, URLs, and snippets for the given query.",
+      "inputs": {
+        "query": {
+          "type": "string",
+          "required": true
+        },
+        "max_results": {
+          "type": "integer",
+          "required": false,
+          "default": 10
+        },
+        "categories": {
+          "type": "string",
+          "required": false,
+          "default": "general"
+        },
+        "time_range": {
+          "type": "string",
+          "required": false,
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "year",
+            ""
+          ]
+        },
+        "language": {
+          "type": "string",
+          "required": false,
+          "default": "en"
+        }
+      },
+      "outputs": {
+        "query": {
+          "type": "string"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "snippet": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "errors": [
+        "SEARXNG_UNREACHABLE",
+        "TIMEOUT",
+        "INVALID_INPUT"
+      ],
+      "status": "available"
+    },
+    {
+      "name": "webapp_builder",
+      "version": "0.4.0",
+      "description": "Build web applications from natural language prompts via bolt.diy subprocess. Generates full-stack web apps in the specified output directory.",
+      "inputs": {
+        "prompt": {
+          "type": "string",
+          "required": true
+        },
+        "output_dir": {
+          "type": "string",
+          "required": false
+        }
+      },
+      "outputs": {
+        "path": {
+          "type": "string"
+        },
+        "output": {
+          "type": "string"
+        }
+      },
+      "errors": [
+        "BOLT_FAILED",
+        "BOLT_NOT_INSTALLED",
+        "TIMEOUT",
+        "INVALID_INPUT"
+      ],
+      "status": "available"
+    },
+    {
+      "name": "wide_research",
+      "version": "0.4.0",
+      "description": "Conduct parallel multi-source research on a topic. Decomposes into sub-queries, executes searches, and synthesizes a comprehensive markdown report.",
+      "inputs": {
+        "topic": {
+          "type": "string",
+          "required": true
+        },
+        "max_sub_queries": {
+          "type": "integer",
+          "required": false,
+          "default": 5
+        },
+        "depth": {
+          "type": "string",
+          "required": false,
+          "enum": [
+            "shallow",
+            "standard",
+            "deep"
+          ],
+          "default": "standard"
+        }
+      },
+      "outputs": {
+        "topic": {
+          "type": "string"
+        },
+        "sub_queries": {
+          "type": "array"
+        },
+        "report": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "errors": [
+        "DECOMPOSITION_FAILED",
+        "SUB_QUERY_FAILED",
+        "INVALID_INPUT"
+      ],
+      "status": "available"
     }
   ],
   "permissions": {
