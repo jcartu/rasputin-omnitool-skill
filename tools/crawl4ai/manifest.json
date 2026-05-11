@@ -1,0 +1,42 @@
+{
+  "name": "crawl4ai",
+  "version": "0.4.0",
+  "description": "Crawl a URL and return LLM-friendly markdown.",
+  "inputs": {
+    "url": {
+      "type": "string",
+      "required": true
+    },
+    "timeout_s": {
+      "type": "integer",
+      "required": false,
+      "default": 30
+    },
+    "cache_mode": {
+      "type": "string",
+      "required": false,
+      "default": "default",
+      "enum": [
+        "default",
+        "bypass",
+        "only"
+      ]
+    }
+  },
+  "outputs": {
+    "markdown": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "links": {
+      "type": "array"
+    }
+  },
+  "errors": [
+    "FETCH_FAILED",
+    "TIMEOUT",
+    "BLOCKED"
+  ]
+}

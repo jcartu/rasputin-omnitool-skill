@@ -1,0 +1,30 @@
+{
+  "name": "docling",
+  "version": "0.4.0",
+  "description": "Parse a document at a given path into markdown using Docling.",
+  "inputs": {
+    "path": {
+      "type": "string",
+      "required": true,
+      "description": "path to DOCX/PDF/HTML/etc., must be inside sandbox volume mount"
+    },
+    "max_chars": {
+      "type": "integer",
+      "required": false,
+      "default": 100000
+    }
+  },
+  "outputs": {
+    "markdown": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "errors": [
+    "FILE_NOT_FOUND",
+    "OUTSIDE_ALLOWED_PATH",
+    "PARSE_FAILED"
+  ]
+}

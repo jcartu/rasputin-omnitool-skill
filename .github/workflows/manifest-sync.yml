@@ -1,0 +1,20 @@
+name: manifest-sync
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify-manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[dev]"
+      - name: Regenerate skill manifest
+        run: python scripts/regenerate-skill-manifest.py
+      - name: Verify no diff
+        run: git diff --exit-code manifest.json || (echo 'manifest.json out of sync with tools/*/manifest.json — run scripts/regenerate-skill-manifest.py'; exit 1)

@@ -1,0 +1,29 @@
+{
+  "name": "stt",
+  "version": "0.4.0",
+  "description": "Transcribe audio.",
+  "inputs": {
+    "audio_path": {
+      "type": "string",
+      "required": true
+    },
+    "language": {
+      "type": "string",
+      "required": false,
+      "default": "auto"
+    }
+  },
+  "outputs": {
+    "transcript": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    }
+  },
+  "errors": [
+    "FILE_NOT_FOUND",
+    "MODEL_UNAVAILABLE",
+    "TRANSCRIPTION_FAILED"
+  ]
+}

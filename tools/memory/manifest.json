@@ -1,0 +1,42 @@
+{
+  "name": "memory",
+  "version": "0.4.0",
+  "description": "Persist and retrieve episodic memory via RASPUTIN MCP.",
+  "inputs": {
+    "operation": {
+      "type": "string",
+      "required": true,
+      "enum": [
+        "store",
+        "retrieve",
+        "search"
+      ]
+    },
+    "content": {
+      "type": "string",
+      "required": false
+    },
+    "query": {
+      "type": "string",
+      "required": false
+    },
+    "memory_id": {
+      "type": "string",
+      "required": false
+    },
+    "k": {
+      "type": "integer",
+      "required": false,
+      "default": 5
+    }
+  },
+  "outputs": {
+    "results": {
+      "type": "array"
+    }
+  },
+  "errors": [
+    "MCP_UNREACHABLE",
+    "INVALID_OPERATION"
+  ]
+}

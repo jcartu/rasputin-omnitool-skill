@@ -1,0 +1,40 @@
+{
+  "name": "image_gen",
+  "version": "0.4.0",
+  "description": "Generate an image via ComfyUI workflow.",
+  "inputs": {
+    "prompt": {
+      "type": "string",
+      "required": true
+    },
+    "style": {
+      "type": "string",
+      "required": false,
+      "default": "photorealistic"
+    },
+    "aspect_ratio": {
+      "type": "string",
+      "required": false,
+      "default": "16:9"
+    },
+    "reference_images": {
+      "type": "array",
+      "required": false,
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "outputs": {
+    "image_path": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "errors": [
+    "COMFY_UNREACHABLE",
+    "WORKFLOW_FAILED"
+  ]
+}

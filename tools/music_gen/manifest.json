@@ -1,0 +1,27 @@
+{
+  "name": "music_gen",
+  "version": "0.4.0",
+  "description": "Generate music via MusicGen-Melody.",
+  "inputs": {
+    "prompt": {
+      "type": "string",
+      "required": true
+    },
+    "duration_s": {
+      "type": "number",
+      "required": false,
+      "default": 15
+    }
+  },
+  "outputs": {
+    "audio_path": {
+      "type": "string"
+    }
+  },
+  "errors": [
+    "MODEL_UNAVAILABLE",
+    "GENERATION_FAILED"
+  ],
+  "status": "deferred",
+  "deferred_reason": "audiocraft/MusicGen requires heavy torch/torchaudio dependencies; separate venv needed. See BACKLOG.md."
+}

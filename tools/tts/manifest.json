@@ -1,0 +1,37 @@
+{
+  "name": "tts",
+  "version": "0.4.0",
+  "description": "Synthesize speech from text.",
+  "inputs": {
+    "text": {
+      "type": "string",
+      "required": true
+    },
+    "voice": {
+      "type": "string",
+      "required": false,
+      "default": "voxtral-female-1"
+    },
+    "format": {
+      "type": "string",
+      "required": false,
+      "default": "wav",
+      "enum": [
+        "wav",
+        "mp3"
+      ]
+    }
+  },
+  "outputs": {
+    "audio_path": {
+      "type": "string"
+    },
+    "duration_s": {
+      "type": "number"
+    }
+  },
+  "errors": [
+    "MODEL_UNAVAILABLE",
+    "SYNTHESIS_FAILED"
+  ]
+}

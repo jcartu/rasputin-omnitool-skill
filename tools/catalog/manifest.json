@@ -1,0 +1,32 @@
+{
+  "name": "catalog",
+  "version": "0.4.0",
+  "description": "Query the OSS capability matrix. Returns candidates filtered by capability and license.",
+  "inputs": {
+    "capability": {
+      "type": "string",
+      "required": false,
+      "description": "filter by capability key (e.g., 'browser_operator')"
+    },
+    "license_only": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "required": false,
+      "description": "filter by license SPDX (e.g., ['MIT', 'Apache-2.0'])"
+    }
+  },
+  "outputs": {
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "errors": [
+    "INVALID_CAPABILITY",
+    "NO_MATCH"
+  ]
+}

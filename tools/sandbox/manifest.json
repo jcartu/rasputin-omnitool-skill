@@ -1,0 +1,62 @@
+{
+  "name": "sandbox",
+  "version": "0.4.0",
+  "description": "Execute code in agent-infra/sandbox.",
+  "inputs": {
+    "operation": {
+      "type": "string",
+      "required": true,
+      "enum": [
+        "code_execute",
+        "jupyter_kernels_list",
+        "file_upload",
+        "file_download"
+      ]
+    },
+    "code": {
+      "type": "string",
+      "required": false
+    },
+    "language": {
+      "type": "string",
+      "required": false,
+      "enum": [
+        "python",
+        "bash",
+        "node"
+      ]
+    },
+    "file": {
+      "type": "string",
+      "required": false
+    },
+    "destination": {
+      "type": "string",
+      "required": false
+    },
+    "timeout_s": {
+      "type": "integer",
+      "required": false,
+      "default": 60
+    }
+  },
+  "outputs": {
+    "stdout": {
+      "type": "string"
+    },
+    "stderr": {
+      "type": "string"
+    },
+    "exit_code": {
+      "type": "integer"
+    },
+    "artifacts": {
+      "type": "array"
+    }
+  },
+  "errors": [
+    "SANDBOX_UNREACHABLE",
+    "TIMEOUT",
+    "INVALID_OPERATION"
+  ]
+}

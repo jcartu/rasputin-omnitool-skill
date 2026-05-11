@@ -1,0 +1,40 @@
+{
+  "name": "browser",
+  "version": "0.4.0",
+  "description": "Operate a browser via Playwright MCP.",
+  "inputs": {
+    "action": {
+      "type": "string",
+      "required": true,
+      "enum": [
+        "navigate",
+        "screenshot",
+        "extract_text",
+        "fill_form",
+        "click"
+      ]
+    },
+    "url": {
+      "type": "string",
+      "required": false
+    },
+    "selector": {
+      "type": "string",
+      "required": false
+    },
+    "value": {
+      "type": "string",
+      "required": false
+    }
+  },
+  "outputs": {
+    "result": {
+      "type": "object"
+    }
+  },
+  "errors": [
+    "NAVIGATION_FAILED",
+    "SELECTOR_NOT_FOUND",
+    "TIMEOUT"
+  ]
+}

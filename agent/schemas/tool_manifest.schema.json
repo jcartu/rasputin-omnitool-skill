@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "rasputin-omnitool tool manifest",
+  "type": "object",
+  "required": ["name", "version", "description", "inputs", "outputs", "errors"],
+  "properties": {
+    "name": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.]+)?$"},
+    "description": {"type": "string", "minLength": 5},
+    "inputs": {"type": "object"},
+    "outputs": {"type": "object"},
+    "errors": {"type": "array", "items": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*$"}},
+    "backends": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "health_url"],
+        "properties": {
+          "name": {"type": "string"},
+          "health_url": {"type": "string", "format": "uri"},
+          "health_timeout_s": {"type": "integer", "minimum": 1, "maximum": 30, "default": 3},
+          "required": {"type": "boolean", "default": true}
+        }
+      }
+    },
+    "requires_compose_profile": {"type": "string", "enum": ["cpu", "gpu-single", "gpu-multi"]},
+    "permissions": {"type": "object"},
+    "max_runtime_s": {"type": "integer", "minimum": 1},
+    "tags": {"type": "array", "items": {"type": "string"}},
+    "status": {"type": "string", "enum": ["available", "deferred"]},
+    "deferred_reason": {"type": "string"}
+  }
+}
