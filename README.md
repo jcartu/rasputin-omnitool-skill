@@ -1,9 +1,14 @@
-# rasputin-omnitool-skill
+<p align="center">
+<img src=".github/assets/logo-mark.png" alt="rasputin-omnitool-skill" width="80"/>
+</p>
+
+<p align="center">
+<img src=".github/assets/hero.png" alt="rasputin-omnitool-skill hero" width="100%"/>
+</p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Tests](https://github.com/jcartu/rasputin-omnitool-skill/actions/workflows/tests.yml/badge.svg)](https://github.com/jcartu/rasputin-omnitool-skill/actions/workflows/tests.yml)
-
 OpenClaw skill bundle providing agent workflows: research, browse, parse, sandbox-execute, generate multimedia (image / video / audio / music), and deliver multi-format reports.
 
 Built on top of [rasputin-omnitool](https://github.com/jcartu/rasputin-omnitool) for catalog, library-smoke, and deliverable primitives.
