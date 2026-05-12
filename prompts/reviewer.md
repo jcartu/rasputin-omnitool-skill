@@ -18,10 +18,11 @@ Evaluate the trace against every category below:
    - Partial completion is identified rather than overstated.
 
 2. **Artifacts coherent**
-   - Artifact paths, names, formats, and contents agree with the stated outputs.
+   - Artifact IDs, paths, names, formats, kinds, and contents agree with the stated outputs.
+   - Artifact lineage (derived_from chains) is consistent — a deliverable that claims to consume crawl data should list the crawl artifact ID in its derived_from.
    - Artifacts are readable, relevant, and not contradictory.
    - Missing, empty, or impossible-to-open artifacts are called out.
-
+   - Content hashes can be used to verify deduplication; identical bytes should map to a single artifact ID.
 3. **Plan-execution alignment**
    - Executed steps match the plan or explain justified deviations.
    - Dependencies are respected and checkpoint decisions are consistent.

@@ -1,0 +1,37 @@
+{
+  "verdict": "REVISE",
+  "notes": "The artifact registry implementation appears solid and the 15 unit tests cover the brief's 10 required scenarios. However, the evidence has several gaps that prevent APPROVE: (a) the phase brief explicitly requires the SQLite `.schema` output and a 'migrate count' for tools updated, but the file-touched list omits several tools the brief named (slides, sandbox, crawl4ai, docling) with no justification for deferral; (b) the diff_stat and key_logs in the payload are empty, so claims cannot be independently verified; (c) the reviewer prompt change to `prompts/reviewer.md` is listed in the brief but not in the Files Changed section; (d) the lineage acceptance criterion (executor auto-wires `derived_from` from input chain) has no test or evidence demonstrating automatic wiring — only manual `link_lineage` is tested.",
+  "findings": [
+    "Phase brief Files-to-change lists tools/slides/index.py, tools/sandbox/index.py, tools/crawl4ai/index.py, tools/docling/index.py — none of these appear in your Files Changed section. Either update them and include in evidence, or explicitly document in Out-of-Spec why they are deferred and confirm the legacy auto-wrap path covers them (with a test demonstrating it for at least one).",
+    "Phase brief Files-to-change includes `M prompts/reviewer.md` and `M agent/__init__.py` (initialize registry at goal start). Neither appears in your Files Changed list. Confirm whether reviewer.md was updated to mention artifact IDs and lineage in the rubric — if so, list it; if not, this is a missing acceptance criterion.",
+    "Acceptance criterion 5 states: 'Lineage: a deliverables call that consumes a crawl4ai output records derived_from=[crawl_artifact_id] (the executor wires this automatically based on the tool input chain).' Your evidence cites `test_link_lineage_enforces_existence` and `test_lineage_chain` but these test the registry API, not the executor's automatic wiring. Add a test in test_react_executor.py (or equivalent) that runs two mocked tool calls where the second consumes the first's artifact path, and assert the second artifact's `derived_from` contains the first's ID without explicit `link_lineage` call. If automatic wiring is not implemented, mark AC#5 as FAIL.",
+    "Phase brief 'Phase evidence' section requires: 'DB schema (paste `.schema` from sqlite3).' This is missing from evidence. Run `sqlite3 ~/.rasputin/artifacts/registry.db .schema` (or against the test DB) and paste output.",
+    "Phase brief 'Phase evidence' requires: 'Migrate count: how many existing tools were updated to emit artifact_id.' You state 6 tools updated but the brief lists 11 tools to modify. Reconcile with explicit count (X of Y updated, remaining deferred because...).",
+    "The payload's `diff_stat` and `key_logs` are empty, meaning the reviewer cannot cross-check pytest/ruff output against claims. Re-run review with diff_stat and key_logs populated, or paste the literal `git diff --stat sprint/v0.5..HEAD` output and full pytest tail into evidence.",
+    "Evidence states 'Mypy is not configured in this project. Skipped.' — prior phases also did not run mypy, so this is consistent, but the rubric template asks for explicit disposition. Acceptable as written; flagging only for the open question of whether it should be installed for v0.5.",
+    "ExecutionTrace.artifacts type change from list[str] of paths to list[str] of IDs is a breaking change. The brief calls for `trace.artifact_paths()` helper — confirm with a test that existing trace consumers (reviewer, resume) handle the ID semantics, and that legacy traces from Phase 5 (containing paths) are auto-wrapped on read (brief scenario 10). `test_legacy_path_wrapped` is listed but the evidence does not show what it asserts."
+  ],
+  "dimension_scores": {
+    "1_goal_completion": "PARTIAL",
+    "2_code_quality": "PASS",
+    "3_test_quality": "PARTIAL",
+    "4_evidence_honesty": "PARTIAL",
+    "5_scope_discipline": "PASS",
+    "6_reversibility": "PARTIAL"
+  },
+  "evidence_pointers": {
+    "missing tool updates": "phase-6-evidence.md 'Files Changed' — only 6 tools listed vs 11 in phase brief Files-to-change",
+    "missing reviewer.md update": "phase-6-evidence.md 'Files Changed' — prompts/reviewer.md not listed but required by brief",
+    "missing automatic lineage test": "phase-6-evidence.md AC#5 cites registry-API tests, not executor-wired lineage",
+    "missing .schema paste": "phase-6-evidence.md — no sqlite3 .schema output present",
+    "missing migrate count": "phase-6-evidence.md — '6 tools updated' but no X-of-Y reconciliation against brief's 11-tool list",
+    "empty diff_stat / key_logs": "payload diff_stat='', key_logs={} — cannot independently verify",
+    "commit field empty": "state.json phase_status.6.commit='' — no commit recorded yet for this phase"
+  },
+  "_cost_usd": 0.3928,
+  "_tokens_in": 16900,
+  "_tokens_out": 1857,
+  "_model": "claude-opus-4-7",
+  "_scope": "phase",
+  "_phase": 6
+}

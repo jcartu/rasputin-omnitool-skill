@@ -105,8 +105,28 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
             fd, local_path = tempfile.mkstemp(suffix=Path(file_path).suffix)
             os.close(fd)
             Path(local_path).write_bytes(resp.content)
+            # Register downloaded file as artifact
+            goal_id = inputs.get("goal_id")
+            try:
+                from agent.artifact_registry import get_registry
+                art = get_registry().add(Path(local_path), produced_by="sandbox/file_download", goal_id=goal_id or "ad-hoc")
+                artifact_data = {
+                    "name": Path(file_path).name,
+                    "path": str(local_path),
+                    "artifact_id": art.id,
+                    "artifact": {
+                        "id": art.id,
+                        "path": art.path,
+                        "kind": art.kind,
+                        "media_type": art.media_type,
+                        "size_bytes": art.size_bytes,
+                        "content_hash": art.content_hash,
+                    },
+                }
+            except Exception:
+                artifact_data = {"name": Path(file_path).name, "path": str(local_path)}
             return _with_session_id(
-                {"result": {"artifacts": [{"name": Path(file_path).name, "path": str(local_path)}]}},
+                {"result": {"artifacts": [artifact_data]}},
                 session,
             )
 
