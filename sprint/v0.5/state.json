@@ -6,7 +6,7 @@
     "0": {
       "status": "approved",
       "review_count": 1,
-      "commit": "599b303"
+      "commit": "38182a3"
     },
     "1": {
       "status": "approved",
@@ -20,7 +20,7 @@
     },
     "3": {
       "status": "approved",
-      "review_count": 3,
+      "review_count": 4,
       "commit": "ab56e95"
     },
     "4": {
@@ -31,16 +31,16 @@
     "5": {
       "status": "approved",
       "review_count": 3,
-      "commit": "26f2f38"
+      "commit": "98c3e3e"
     },
     "6": {
-      "status": "in_progress",
-      "review_count": 0,
-      "commit": ""
+      "status": "approved",
+      "review_count": 3,
+      "commit": "28bac5f"
     }
   },
   "halt_reason": null,
-  "total_cost_usd": 6.6227,
+  "total_cost_usd": 7.4391,
   "budget_usd": 25.0,
   "branches": {
     "0": "sprint/v0.5-phase0",

@@ -1,6 +1,6 @@
 {
   "verdict": "APPROVE",
-  "notes": "Round 3 resolves the prior REVISE blocker: the live two-call demo now executes against a real sandbox and proves cross-call filesystem persistence (call 1 writes, call 2 reads back 'phase3_live' from stdout). All 14 unit tests pass, full suite 155 passed / 6 skipped, ruff clean. Acceptance criteria are all PASS with both mock and live evidence. The implementation (SandboxSessionManager with ULID, TTL/LRU eviction, SESSION_DEAD detection, session-scoped cwd) matches the phase brief.",
+  "notes": "Phase 3 round-4 evidence holds up under re-review: live two-call demo proves cross-call filesystem persistence ('phase3_live' returned in CALL 2 stdout), all 14 unit tests pass covering the 10 required brief scenarios plus 4 helpers, full suite is 155 passed / 6 skipped, ruff clean. SandboxSessionManager implements ULID generation, TTL/LRU eviction, SESSION_DEAD detection, and session-scoped cwd as specified. Out-of-spec changes (manifest.json regen, react_executor goal_id pass-through, test_sandbox.py opt-out, config additions) are enumerated with justifications matching prior-phase patterns.",
   "findings": [],
   "dimension_scores": {
     "1_goal_completion": "PASS",
@@ -12,17 +12,17 @@
   },
   "evidence_pointers": {
     "live demo passes": "key_logs.live_demo — CALL 2 stdout contains 'phase3_live' and 'SUCCESS: Cross-call filesystem persistence verified'",
-    "14 unit tests pass": "key_logs.pytest — tests/test_sandbox_sessions.py 14 PASSED including ttl_eviction, lru_eviction, session_dead, filesystem_isolation, react_integration",
+    "14 unit tests pass": "key_logs.pytest — tests/test_sandbox_sessions.py 14 PASSED including ttl_eviction, lru_eviction, attach_fails_session_dead, filesystem_isolation, react_integration",
     "full suite green": "key_logs.pytest — 155 passed, 6 skipped in 3.85s",
     "ruff clean": "key_logs.ruff — All checks passed!",
-    "ReAct integration": "tests/test_sandbox_sessions.py::test_react_integration_two_sandbox_calls PASSED — second call inherits session_id from first",
+    "ReAct session threading": "tests/test_sandbox_sessions.py::test_react_integration_two_sandbox_calls PASSED — second call inherits session_id from first",
     "config additions": "phase-3-evidence.md 'Config additions' — TTL_MIN, MAX_SESSIONS, SESSION_ROOT plumbed via agent/config.py",
-    "out-of-spec disclosed": "phase-3-evidence.md 'Out-of-spec changes' — manifest.json regeneration, react_executor goal_id pass-through, test_sandbox.py opt-out, config additions all enumerated",
-    "commit recorded": "state.json phase 3 commit 511e71e"
+    "out-of-spec disclosed": "phase-3-evidence.md 'Out-of-spec changes' — manifest.json regeneration, react_executor goal_id pass-through, test_sandbox.py opt-out, config additions all enumerated with justifications",
+    "commit recorded": "state.json phase 3 commit ab56e95"
   },
-  "_cost_usd": 0.4105,
-  "_tokens_in": 23384,
-  "_tokens_out": 796,
+  "_cost_usd": 0.4558,
+  "_tokens_in": 26132,
+  "_tokens_out": 851,
   "_model": "claude-opus-4-7",
   "_scope": "phase",
   "_phase": 3
