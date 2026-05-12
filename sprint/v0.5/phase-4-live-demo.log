@@ -1,0 +1,4 @@
+session: 1778577416351-b56235f19792a4e8
+navigate: {'result': {'final_url': 'https://httpbin.org/cookies', 'title': '', 'status': 200, 'session_id': '1778577416351-b56235f19792a4e8'}}
+cookie: {'result': {'result': 'demo=v05', 'session_id': '1778577416351-b56235f19792a4e8'}}
+OK - cookies survive across browser tool calls

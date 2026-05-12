@@ -1,29 +1,28 @@
 {
-  "verdict": "REVISE",
-  "notes": "Round 2 addresses most prior findings (config additions documented, manifest.json regeneration justified, wall-clock explained, eviction outputs described, e2e substitute documented). However, the central blocker from round 1 remains: there is no live two-call demo proving real sandbox state survives. The phase brief explicitly requires this artifact. The live-demo.log now exists but shows the demo FAILED with a 404 — and evidence acknowledges the local sandbox container is the wrong image. Acceptance criterion #2 is annotated 'PASS (mocked)' which is an honest downgrade, but the brief requires PASS via real backend, not mocks. Since the only blocker to a real demo is pulling the correct image (`ghcr.io/agent-infra/sandbox:latest`, which Phase 0 evidence confirmed is pullable), this is addressable. Per rubric: two consecutive REVISE on the same phase escalates to ABORT, so this must resolve in the next round.",
-  "findings": [
-    "Pull and run the correct agent-infra/sandbox image. Phase 0 evidence (referenced in prior reviews) confirmed `ghcr.io/agent-infra/sandbox:latest` is pullable. Stop the current AIO Sandbox container on port 8080, run the correct image (e.g. `docker compose --profile cpu up -d sandbox` from the project's compose file, or pull and run directly), verify `/v1/health` returns 200, then execute the live two-call demo from the phase brief's self-verification block. Tee output to `sprint/v0.5/phase-3-live-demo.log` showing the actual 'hi' string round-tripping through two separate sandbox calls.",
-    "Once the live demo passes, update acceptance criterion #2 from 'PASS (mocked)' to 'PASS' with the live-demo.log path as evidence. The brief's wording ('the first call writes /workspace/sess-X/foo.txt; the second call's code_execute can read it') is specifically about real cross-call persistence, not mock-level verification.",
-    "If the agent-infra/sandbox image genuinely cannot be brought up in this environment (network restrictions, image unavailable, etc.), this is a Phase 3 halt condition per the brief's 'Halt conditions' section — not a 'verified through mocks' situation. In that case, write `sprint/v0.5/HALT-phase-3.md` documenting the blocker and proposed remediation, and set state to halted. Do not mark the phase complete with mock-only evidence for a state-persistence acceptance criterion."
-  ],
+  "verdict": "APPROVE",
+  "notes": "Round 3 resolves the prior REVISE blocker: the live two-call demo now executes against a real sandbox and proves cross-call filesystem persistence (call 1 writes, call 2 reads back 'phase3_live' from stdout). All 14 unit tests pass, full suite 155 passed / 6 skipped, ruff clean. Acceptance criteria are all PASS with both mock and live evidence. The implementation (SandboxSessionManager with ULID, TTL/LRU eviction, SESSION_DEAD detection, session-scoped cwd) matches the phase brief.",
+  "findings": [],
   "dimension_scores": {
-    "1_goal_completion": "PARTIAL",
+    "1_goal_completion": "PASS",
     "2_code_quality": "PASS",
-    "3_test_quality": "PARTIAL",
+    "3_test_quality": "PASS",
     "4_evidence_honesty": "PASS",
     "5_scope_discipline": "PASS",
     "6_reversibility": "PASS"
   },
   "evidence_pointers": {
-    "live demo failed": "key_logs.live_demo — SessionError: sandbox not reachable at http://localhost:8080, /v1/health returns 404",
-    "AC#2 still mock-only": "phase-3-evidence.md 'Acceptance criteria status' row 2 — 'PASS (mocked)' for shared workspace claim",
-    "wrong image acknowledged": "phase-3-evidence.md 'Live demo' section — 'AIO Sandbox web UI (HTML), NOT the agent-infra/sandbox API'",
-    "halt condition applicable": "phase brief 'Halt conditions specific to Phase 3' — sandbox API contract mismatch warrants halt + Joshua intervention, not mock substitution",
-    "phase 0 confirmed image pullable": "prior_reviews[0] evidence_pointers — 'sandbox disposition: kept, ghcr.io/agent-infra/sandbox:latest verified pullable'"
+    "live demo passes": "key_logs.live_demo — CALL 2 stdout contains 'phase3_live' and 'SUCCESS: Cross-call filesystem persistence verified'",
+    "14 unit tests pass": "key_logs.pytest — tests/test_sandbox_sessions.py 14 PASSED including ttl_eviction, lru_eviction, session_dead, filesystem_isolation, react_integration",
+    "full suite green": "key_logs.pytest — 155 passed, 6 skipped in 3.85s",
+    "ruff clean": "key_logs.ruff — All checks passed!",
+    "ReAct integration": "tests/test_sandbox_sessions.py::test_react_integration_two_sandbox_calls PASSED — second call inherits session_id from first",
+    "config additions": "phase-3-evidence.md 'Config additions' — TTL_MIN, MAX_SESSIONS, SESSION_ROOT plumbed via agent/config.py",
+    "out-of-spec disclosed": "phase-3-evidence.md 'Out-of-spec changes' — manifest.json regeneration, react_executor goal_id pass-through, test_sandbox.py opt-out, config additions all enumerated",
+    "commit recorded": "state.json phase 3 commit 511e71e"
   },
-  "_cost_usd": 0.4615,
-  "_tokens_in": 24076,
-  "_tokens_out": 1338,
+  "_cost_usd": 0.4105,
+  "_tokens_in": 23384,
+  "_tokens_out": 796,
   "_model": "claude-opus-4-7",
   "_scope": "phase",
   "_phase": 3
