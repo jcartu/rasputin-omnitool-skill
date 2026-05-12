@@ -16,7 +16,7 @@ import asyncio
 import logging
 import re
 import threading
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, AsyncIterator, Callable, Optional
 
@@ -73,7 +73,7 @@ class EventBus:
         return sub_id
 
     async def subscribe(self) -> AsyncIterator[StreamEvent]:
-        loop = asyncio.get_event_loop()
+        asyncio.get_event_loop()
         q: asyncio.Queue = asyncio.Queue(maxsize=self.max_queue)
         with self._lock:
             sub_id = self._next_id

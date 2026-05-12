@@ -11,7 +11,7 @@ Configuration via Valves:
 - max_cost_usd: per-goal cost ceiling (default 0.50)
 - show_steps: stream executor steps to chat (default True)
 - outputs_base_url: where outputs/ is mounted; used to make artifact links
-- rasputin_repo_path: path to the skill repo on disk (for sys.path)
+- rasputin_repo_path: path to the skill repo on disk (for sys.path); users must set this via the Valves UI.
 """
 from __future__ import annotations
 
@@ -37,8 +37,8 @@ class Tools:
             description="Where outputs/ is mounted; used to make artifact links",
         )
         rasputin_repo_path: str = Field(
-            default="/home/josh/workspace/rasputin-omnitool-skill",
-            description="Path to the skill repo on disk (for sys.path)",
+            default="",
+            description="Path to the skill repo on disk (for sys.path); set via Valves UI",
         )
 
     def __init__(self):

@@ -1,5 +1,4 @@
 """Unit tests for browser tool."""
-import pytest
 from unittest.mock import patch, MagicMock
 from tools.browser.index import run
 

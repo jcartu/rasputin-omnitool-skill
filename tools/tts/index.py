@@ -44,7 +44,8 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
         from kokoro_onnx import Kokoro
         kokoro = Kokoro()
         samples, sample_rate = kokoro.create(text, voice=voice)
-        import wave, struct
+        import wave
+        import struct
         with wave.open(str(path), "w") as wf:
             wf.setnchannels(1)
             wf.setsampwidth(2)
@@ -58,6 +59,7 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
 
 
 if __name__ == "__main__":
-    import json, sys
+    import json
+    import sys
     payload = json.loads(sys.stdin.read())
     print(json.dumps(run(payload)))

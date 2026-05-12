@@ -4,6 +4,7 @@ set -euo pipefail
 
 NAME="rasputin-omnitool-sandbox"
 PORT="${1:-8080}"
+export RASPUTIN_OMNITOOL_SEARXNG_URL=http://localhost:8889
 
 # Stop existing container if running
 docker rm -f "$NAME" 2>/dev/null || true

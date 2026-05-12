@@ -3,9 +3,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from agent.planner import plan, Plan
-from agent.executor import execute, ExecutionTrace
-from agent.reviewer import review, Review
+from agent.planner import Plan as Plan, plan
+from agent.executor import ExecutionTrace as ExecutionTrace, execute
+from agent.reviewer import Review as Review, review
 from agent.tool_registry import load_tools, load_tool_metadata
 from agent.observability import goal_trace, CostCeilingExceeded
 

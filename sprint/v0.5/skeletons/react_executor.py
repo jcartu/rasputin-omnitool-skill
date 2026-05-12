@@ -41,7 +41,6 @@ import json
 import logging
 import os
 import time
-from dataclasses import dataclass, field
 from typing import Any, Callable
 
 from openai import OpenAI

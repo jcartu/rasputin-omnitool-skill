@@ -34,6 +34,7 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
 
 
 if __name__ == "__main__":
-    import json, sys
+    import json
+    import sys
     payload = json.loads(sys.stdin.read())
     print(json.dumps(run(payload)))

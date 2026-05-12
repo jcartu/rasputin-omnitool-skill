@@ -7,9 +7,16 @@
       "type": "string",
       "required": true
     },
-    "repo_path": {
+    "cwd": {
       "type": "string",
-      "required": false
+      "required": false,
+      "description": "working directory for the aider subprocess"
+    },
+    "files": {
+      "type": "array",
+      "items": {"type": "string"},
+      "required": false,
+      "description": "list of file paths to pass to aider"
     },
     "model": {
       "type": "string",

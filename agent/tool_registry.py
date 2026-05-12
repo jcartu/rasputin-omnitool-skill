@@ -6,7 +6,7 @@ import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Callable, Optional
 
 from jsonschema import validate, ValidationError
 
@@ -166,7 +166,7 @@ def load_tool_definitions() -> dict[str, ToolDefinition]:
 
 def load_tool_metadata() -> list[dict]:
     """Load tool metadata for the planner (name + description)."""
-    tools = discover_tools()
+    discover_tools()
     return [
     ]
 

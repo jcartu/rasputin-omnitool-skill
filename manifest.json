@@ -86,9 +86,18 @@
           "type": "string",
           "required": true
         },
-        "repo_path": {
+        "cwd": {
           "type": "string",
-          "required": false
+          "required": false,
+          "description": "working directory for the aider subprocess"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "required": false,
+          "description": "list of file paths to pass to aider"
         },
         "model": {
           "type": "string",
@@ -668,82 +677,6 @@
       "errors": [
         "SEARXNG_UNREACHABLE",
         "TIMEOUT",
-        "INVALID_INPUT"
-      ],
-      "status": "available"
-    },
-    {
-      "name": "webapp_builder",
-      "version": "0.4.0",
-      "description": "Build web applications from natural language prompts via bolt.diy subprocess. Generates full-stack web apps in the specified output directory.",
-      "inputs": {
-        "prompt": {
-          "type": "string",
-          "required": true
-        },
-        "output_dir": {
-          "type": "string",
-          "required": false
-        }
-      },
-      "outputs": {
-        "path": {
-          "type": "string"
-        },
-        "output": {
-          "type": "string"
-        }
-      },
-      "errors": [
-        "BOLT_FAILED",
-        "BOLT_NOT_INSTALLED",
-        "TIMEOUT",
-        "INVALID_INPUT"
-      ],
-      "status": "available"
-    },
-    {
-      "name": "wide_research",
-      "version": "0.4.0",
-      "description": "Conduct parallel multi-source research on a topic. Decomposes into sub-queries, executes searches, and synthesizes a comprehensive markdown report.",
-      "inputs": {
-        "topic": {
-          "type": "string",
-          "required": true
-        },
-        "max_sub_queries": {
-          "type": "integer",
-          "required": false,
-          "default": 5
-        },
-        "depth": {
-          "type": "string",
-          "required": false,
-          "enum": [
-            "shallow",
-            "standard",
-            "deep"
-          ],
-          "default": "standard"
-        }
-      },
-      "outputs": {
-        "topic": {
-          "type": "string"
-        },
-        "sub_queries": {
-          "type": "array"
-        },
-        "report": {
-          "type": "string"
-        },
-        "path": {
-          "type": "string"
-        }
-      },
-      "errors": [
-        "DECOMPOSITION_FAILED",
-        "SUB_QUERY_FAILED",
         "INVALID_INPUT"
       ],
       "status": "available"

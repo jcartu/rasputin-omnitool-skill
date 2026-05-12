@@ -4,7 +4,6 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
-import pytest
 
 PLUGIN_PATH = Path(__file__).parent.parent / "surfaces/open-webui/rasputin_function.py"
 

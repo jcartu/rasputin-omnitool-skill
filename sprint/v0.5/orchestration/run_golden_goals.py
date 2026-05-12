@@ -6,11 +6,9 @@ checks per-goal acceptance criteria, writes a results table.
 from __future__ import annotations
 
 import json
-import os
 import sys
 import time
 from pathlib import Path
-from typing import Any
 
 try:
     import yaml

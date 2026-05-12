@@ -6,14 +6,12 @@ import os
 import time
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 
 from agent import run_goal
 from agent.executor import ExecutionTrace
-from agent.planner import Plan, PlanTask
-from agent.reviewer import Review
 
 
 # ── 4-7 — Full loop with mocked tools ────────────────────────────────────

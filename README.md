@@ -25,7 +25,7 @@ Given a user goal, the skill:
 
 A REVISE verdict triggers exactly one re-plan cycle. ABORT halts cleanly with a summary.
 
-## Tools (18)
+## Tools (16)
 
 | Tool | Status | Backend |
 |---|---|---|
@@ -37,16 +37,14 @@ A REVISE verdict triggers exactly one re-plan cycle. ABORT halts cleanly with a 
 | deliverables | available | Parameterized rasputin_omnitool.deliverables |
 | tts | available | Voxtral TTS, Kokoro fallback |
 | stt | available | Whisper-large-v3-turbo |
-| image-gen | available | ComfyUI + FLUX.2 [dev] |
-| video-gen | deferred | Wan 2.1 (requires 96GB VRAM GPU) |
-| music-gen | deferred | MusicGen-Melody (requires audiocraft venv) |
+| image_gen | available | ComfyUI + FLUX.2 [dev] |
+| video_gen | deferred | Wan 2.1 (requires 96GB VRAM GPU) |
+| music_gen | deferred | MusicGen-Melody (requires audiocraft venv) |
 | memory | available | RASPUTIN MCP @ 8808 |
 | web_search | available | SearXNG |
 | slides | available | Marp CLI (PDF/HTML/PPTX) |
 | mail | available | Himalaya CLI (IMAP/SMTP) |
-| wide_research | available | LLM decomposition + web_search |
 | coding_agent | available | aider subprocess |
-| webapp_builder | available | bolt.diy subprocess |
 
 ## Models
 
@@ -104,7 +102,7 @@ See [docs/OPEN_WEBUI_SETUP.md](docs/OPEN_WEBUI_SETUP.md).
 
 ## Compose Stack
 
-Docker Compose with 3 profiles (cpu, gpu-single, gpu-multi). Bundles sandbox, SearXNG, Langfuse, and more.
+Docker Compose with 3 profiles (cpu, gpu-single, gpu-multi). Bundles sandbox, SearXNG, and ComfyUI.
 
 See [docs/COMPOSE.md](docs/COMPOSE.md).
 

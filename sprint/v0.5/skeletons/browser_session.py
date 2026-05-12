@@ -17,7 +17,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from threading import Lock
-from typing import Callable, Optional, TypeVar
+from typing import Optional, TypeVar
 
 SCHEMA_VERSION = 1
 

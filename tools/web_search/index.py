@@ -11,7 +11,7 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
     if not query:
         return {"error": {"code": "INVALID_INPUT", "message": "Missing 'query' parameter"}}
 
-    base_url = os.environ.get("RASPUTIN_OMNITOOL_SEARXNG_URL", "http://localhost:8080")
+    base_url = os.environ.get("RASPUTIN_OMNITOOL_SEARXNG_URL", "http://localhost:8889")
     max_results = int(inputs.get("max_results", 10))
     categories = inputs.get("categories", "general")
     time_range = inputs.get("time_range", "")
@@ -58,6 +58,8 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
 
 
 if __name__ == "__main__":
-    import json, sys
+    import json
+    import sys
+
     payload = json.loads(sys.stdin.read())
     print(json.dumps(run(payload)))

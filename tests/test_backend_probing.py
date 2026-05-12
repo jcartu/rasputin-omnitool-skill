@@ -1,13 +1,11 @@
 """Tests for tool backend health probing."""
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from unittest.mock import patch, Mock
 
-import pytest
 
-from agent.tool_registry import probe_backends, ToolDefinition, BackendStatus
+from agent.tool_registry import probe_backends, ToolDefinition
 
 
 def _make_tool(name: str, schema: dict) -> ToolDefinition:

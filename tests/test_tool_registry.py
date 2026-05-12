@@ -2,11 +2,10 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import pytest
 
-from agent.tool_registry import discover_tools, load_tools, load_tool_definitions, ToolDefinition
+from agent.tool_registry import ToolDefinition, discover_tools, load_tool_definitions, load_tools
 
 
 def test_all_existing_tools_discoverable():
@@ -38,7 +37,7 @@ def test_load_tools_returns_callable_dict():
     """Backward compat: load_tools() returns dict[str, Callable]."""
     tools = load_tools()
     assert isinstance(tools, dict)
-    assert len(tools) == 18
+    assert len(tools) == 16
     for name, run in tools.items():
         assert callable(run)
 

@@ -1,5 +1,4 @@
 """Unit tests for sandbox tool."""
-import pytest
 from unittest.mock import patch, MagicMock
 from tools.sandbox.index import run
 

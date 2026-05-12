@@ -9,10 +9,8 @@ is actually exercised when the key is present.
 """
 from __future__ import annotations
 
-import json
 import os
 import time
-from pathlib import Path
 
 import pytest
 
@@ -96,6 +94,7 @@ def test_browser_session_cookies(tmp_path):
     """Cookies survive across browser actions in one session."""
     try:
         from playwright.sync_api import sync_playwright
+        _ = sync_playwright
     except ImportError:
         pytest.skip("playwright not installed")
     try:

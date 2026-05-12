@@ -26,7 +26,7 @@ except ImportError:
     sys.exit(78)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from state_helpers import read_state, write_state, set_phase_status, add_cost  # noqa: E402
+from state_helpers import read_state, add_cost  # noqa: E402
 
 
 REVIEW_MODEL = os.environ.get("RASPUTIN_OMNITOOL_REVIEWER_MODEL", "claude-opus-4-7")
@@ -46,7 +46,7 @@ def estimate_cost(tokens_in: int, tokens_out: int, model: str = REVIEW_MODEL) ->
 
 def collect_logs(phase: int) -> dict[str, str]:
     """Best-effort gather of log files written by Sisyphus during the phase."""
-    root = Path(f"sprint/v0.5")
+    root = Path("sprint/v0.5")
     candidates = {
         "pytest": f"phase-{phase}-pytest.log",
         "ruff": f"phase-{phase}-ruff.log",

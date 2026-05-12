@@ -12,7 +12,7 @@ import os
 import secrets
 import sqlite3
 import time
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from threading import Lock

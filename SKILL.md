@@ -7,7 +7,6 @@ OSS-stitched Manus-equivalent agent skill. Research, browse, parse documents, ru
 Use this skill for goals that require:
 - Multi-step research with citation extraction (Crawl4AI + Docling + sandbox).
 - Multimedia output: PDFs, slides, illustrative images, narrated audio, short video.
-- Web app or static-site generation.
 - Long-running goals where memory across sub-tasks matters.
 
 Do NOT use this skill for:
@@ -35,7 +34,7 @@ result = run_goal("Research quantum computing and generate a PDF report")
 | `ANTHROPIC_API_KEY` | API key for reviewer (Claude Opus) |
 | `RASPUTIN_OMNITOOL_EXECUTOR_ENDPOINT` | OpenAI-compatible endpoint (default: `http://localhost:11434/v1`) |
 
-## Tools
+## Tools (16)
 
 | Tool | Capability | Status |
 |---|---|---|
@@ -51,6 +50,10 @@ result = run_goal("Research quantum computing and generate a PDF report")
 | video_gen | Generate short video via Wan 2.1 | available |
 | music_gen | Generate music via MusicGen-Melody | available |
 | memory | Persist and retrieve episodic memory via RASPUTIN MCP | available |
+| web_search | Search the web via SearXNG | available |
+| slides | Generate presentation slides from Markdown | available |
+| mail | Send, list, and read email via Himalaya CLI | available |
+| coding_agent | Execute coding tasks via aider subprocess | available |
 
 ## Models
 

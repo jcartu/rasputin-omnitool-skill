@@ -1,6 +1,5 @@
 """Unit tests for executor."""
-import pytest
-from agent.executor import execute, ExecutionTrace, _substitute_placeholders
+from agent.executor import execute, _substitute_placeholders
 from agent.planner import Plan, PlanTask
 
 

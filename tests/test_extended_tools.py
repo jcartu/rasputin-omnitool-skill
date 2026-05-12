@@ -1,6 +1,4 @@
 """Unit tests for PHASE-5 extended tools."""
-import pytest
-from pathlib import Path
 
 from tools.tts.index import run as tts_run
 from tools.stt.index import run as stt_run
@@ -133,7 +131,8 @@ class TestSTTLogging:
             return original_import(name, *args, **kwargs)
         monkeypatch.setattr(builtins, "__import__", fail_import)
         # Create a minimal WAV to pass the exists() check
-        import wave, struct
+        import wave
+        import struct
         wav_path = tmp_path / "test.wav"
         with wave.open(str(wav_path), "w") as wf:
             wf.setnchannels(1)

@@ -1,10 +1,8 @@
 """Integration: a goal that would blow past the ceiling halts cleanly."""
 from __future__ import annotations
 
-import os
 from unittest.mock import patch, Mock
 
-import pytest
 
 from agent import run_goal
 

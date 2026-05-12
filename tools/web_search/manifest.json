@@ -46,7 +46,7 @@
   "backends": [
     {
       "name": "searxng",
-      "health_url": "http://localhost:8080/health",
+      "health_url": "http://localhost:8889/health",
       "required": true
     }
   ]

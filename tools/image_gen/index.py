@@ -1,5 +1,6 @@
 """tools/image_gen/index.py — Generate images via ComfyUI."""
 from __future__ import annotations
+import time
 import uuid
 from pathlib import Path
 from typing import Any
@@ -148,7 +149,6 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
                 if images and images[0].get("filename"):
                     filename = images[0]["filename"]
                     subfolder = images[0].get("subfolder", "")
-                    full_path = f"{subfolder}/{filename}" if subfolder else filename
                     # Download image with timeout
                     download_resp = httpx.get(
                         f"{comfy_url}/view?filename={filename}&subfolder={subfolder}&type=output",
@@ -168,7 +168,8 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
 
 
 if __name__ == "__main__":
-    import json, sys
+    import json
+    import sys
 
     payload = json.loads(sys.stdin.read())
     print(json.dumps(run(payload)))

@@ -1,10 +1,7 @@
-"""Tests for the 6 new PHASE-5 capability tools."""
+"""Tests for the remaining PHASE-5 capability tools."""
 from __future__ import annotations
 
 from unittest.mock import patch, Mock
-from pathlib import Path
-
-import pytest
 
 
 # ---- web_search ----
@@ -84,16 +81,6 @@ class TestMail:
         assert result["error"]["code"] == "HIMALAYA_NOT_INSTALLED"
 
 
-# ---- wide_research ----
-
-class TestWideResearch:
-    def test_missing_topic_returns_error(self):
-        from tools.wide_research.index import run
-        result = run({})
-        assert "error" in result
-        assert result["error"]["code"] == "INVALID_INPUT"
-
-
 # ---- coding_agent ----
 
 class TestCodingAgent:
@@ -110,21 +97,3 @@ class TestCodingAgent:
             result = run({"task": "fix bug"})
         assert "error" in result
         assert result["error"]["code"] == "AIDER_NOT_INSTALLED"
-
-
-# ---- webapp_builder ----
-
-class TestWebappBuilder:
-    def test_missing_prompt_returns_error(self):
-        from tools.webapp_builder.index import run
-        result = run({})
-        assert "error" in result
-        assert result["error"]["code"] == "INVALID_INPUT"
-
-    def test_bolt_not_installed_returns_error(self):
-        from tools.webapp_builder.index import run
-        with patch("tools.webapp_builder.index.subprocess") as mock_sub:
-            mock_sub.run.side_effect = FileNotFoundError()
-            result = run({"prompt": "Build a todo app"})
-        assert "error" in result
-        assert result["error"]["code"] == "BOLT_NOT_INSTALLED"

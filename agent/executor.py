@@ -5,7 +5,6 @@ import re
 import json
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from typing import Any, Callable
 
 from agent.planner import Plan
@@ -34,7 +33,7 @@ def execute(
     from agent.config import CONFIG
     from agent.observability import set_goal_id
 
-    goal_id = set_goal_id()
+    set_goal_id()
     trace = ExecutionTrace(plan=plan)
     previous_results: dict[str, Any] = {}
     step_count = 0

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from tools.catalog.index import run
-from tools.catalog.index import run
 
 
 def test_no_filter_returns_all() -> None:

@@ -147,5 +147,6 @@ def _extract_summary(result: dict) -> str | None:
 
 
 if __name__ == "__main__":
-    import json, sys
+    import json
+    import sys
     print(json.dumps(run(json.loads(sys.stdin.read()))))
