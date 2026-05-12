@@ -45,7 +45,7 @@ def react_execute(
     plan_hint: Plan | None = None,
     max_steps: int = 30,
     budget_usd: float = 0.50,
-    max_wallclock_min: int = 20,
+    max_wallclock_min: int | float = 20,
     soft_cap_tokens: int = 18_000,
     max_observation_chars: int = 8_000,
     goal_id: str | None = None,

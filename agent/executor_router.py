@@ -19,6 +19,8 @@ def execute(
     plan: Plan,
     tools: dict[str, Callable],
     context: dict[str, Any] | None = None,
+    budget_usd: float | None = None,
+    max_wallclock_min: int | float | None = None,
 ) -> ExecutionTrace:
     """Execute a plan using the configured executor mode."""
     if current_mode() == "static":
@@ -34,7 +36,12 @@ def execute(
         tool_metadata,
         plan_hint=plan,
         max_steps=CONFIG.max_steps_per_goal,
-        budget_usd=CONFIG.max_goal_cost_usd,
-        max_wallclock_min=CONFIG.max_wallclock_per_goal_min,
+        budget_usd=budget_usd if budget_usd is not None else CONFIG.max_goal_cost_usd,
+        max_wallclock_min=(
+            max_wallclock_min
+            if max_wallclock_min is not None
+            else CONFIG.max_wallclock_per_goal_min
+        ),
         soft_cap_tokens=CONFIG.soft_cap_tokens,
+        goal_id=str((context or {}).get("goal_id") or "") or None,
     )

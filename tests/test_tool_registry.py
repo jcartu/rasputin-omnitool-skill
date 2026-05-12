@@ -47,7 +47,7 @@ def test_load_tools_returns_callable_dict():
     """Backward compat: load_tools() returns dict[str, Callable]."""
     tools = load_tools()
     assert isinstance(tools, dict)
-    assert len(tools) == 16
+    assert len(tools) == 17
     for name, run in tools.items():
         assert callable(run)
 

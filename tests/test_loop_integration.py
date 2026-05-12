@@ -81,7 +81,7 @@ def test_run_goal_with_mocked_tools(monkeypatch: pytest.MonkeyPatch, tmp_path) -
     monkeypatch.setattr("agent.tool_registry.probe_backends", lambda tools: tools)
 
     # Mock tool registry (patch at the import site used by agent/__init__.py).
-    def mock_load_tools():
+    def mock_load_tools(**kwargs):
         return {
             "crawl4ai": lambda inp: {
                 "result": {"markdown": "Example Domain\n\nThis domain is for use in documentation.", "url": "http://example.com"}

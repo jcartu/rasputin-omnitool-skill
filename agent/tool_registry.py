@@ -152,18 +152,55 @@ def probe_backends(tools: dict[str, ToolDefinition]) -> dict[str, ToolDefinition
     return tools
 
 
-def load_tools() -> dict[str, Callable]:
+def load_tools(
+    allowlist: list[str] | None = None,
+    denylist: list[str] | None = None,
+) -> dict[str, Callable]:
     """One-shot: discover + probe + return callable dict (backward compat).
 
     Returns dict[str, Callable] for the executor's tool dispatch.
     """
     # Mock mode for evals: return canned successful outputs
     if os.environ.get("RASPUTIN_OMNITOOL_MOCK_TOOLS") == "true":
-        return _load_mock_tools()
+        return _apply_tool_restrictions(_load_mock_tools(), allowlist, denylist)
 
     discovered = probe_backends(discover_tools())
     # Backward compat: return dict[str, Callable] as executor expects
-    return {name: tool.run for name, tool in discovered.items()}
+    return _apply_tool_restrictions(
+        {name: tool.run for name, tool in discovered.items()},
+        allowlist,
+        denylist,
+    )
+
+
+def _tool_not_allowed_runner(tool_name: str, reason: str):
+    def _runner(_inputs: dict) -> dict:
+        return {
+            "error": {
+                "code": "TOOL_NOT_ALLOWED",
+                "message": f"Tool '{tool_name}' is not allowed: {reason}",
+            }
+        }
+
+    return _runner
+
+
+def _apply_tool_restrictions(
+    tools: dict[str, Callable],
+    allowlist: list[str] | None = None,
+    denylist: list[str] | None = None,
+) -> dict[str, Callable]:
+    allowed = set(allowlist) if allowlist is not None else None
+    denied = set(denylist or [])
+    restricted: dict[str, Callable] = {}
+    for name, runner in tools.items():
+        if name in denied:
+            restricted[name] = _tool_not_allowed_runner(name, "present in tool_denylist")
+        elif allowed is not None and name not in allowed:
+            restricted[name] = _tool_not_allowed_runner(name, "not present in tool_allowlist")
+        else:
+            restricted[name] = runner
+    return restricted
 
 
 def load_tool_definitions() -> dict[str, ToolDefinition]:

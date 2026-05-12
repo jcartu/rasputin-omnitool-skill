@@ -612,6 +612,83 @@
       "status": "available"
     },
     {
+      "name": "sub_agent",
+      "version": "1.0.0",
+      "description": "Spawn parallel sub-agents to run independent sub-goals, then return aggregated results to the parent. Each sub-goal runs as a full ReAct loop with isolated message history, inherited artifact registry, and optional tool restrictions.",
+      "inputs": {
+        "sub_goals": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of self-contained sub-goal strings",
+          "required": true
+        },
+        "max_concurrent": {
+          "type": "integer",
+          "description": "Max parallel sub-agents (1-8)",
+          "default": 4
+        },
+        "max_depth": {
+          "type": "integer",
+          "description": "Max recursion depth ceiling",
+          "default": 2
+        },
+        "budget_usd_per_sub": {
+          "type": "number",
+          "description": "Budget per sub-agent in USD",
+          "default": 0.1
+        },
+        "timeout_min_per_sub": {
+          "type": "integer",
+          "description": "Timeout per sub-agent in minutes",
+          "default": 5
+        },
+        "tool_allowlist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tools sub-agents may use (null = no restriction)"
+        },
+        "tool_denylist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tools sub-agents may NOT use",
+          "default": [
+            "sub_agent"
+          ]
+        }
+      },
+      "outputs": {
+        "results": {
+          "type": "array",
+          "description": "List of {sub_goal, status, summary, artifact_ids, cost_usd, halted_for}"
+        },
+        "aggregate_cost_usd": {
+          "type": "number",
+          "description": "Sum of all sub-agent costs"
+        },
+        "successful_count": {
+          "type": "integer",
+          "description": "Number of successful sub-agents"
+        },
+        "failed_count": {
+          "type": "integer",
+          "description": "Number of failed sub-agents"
+        }
+      },
+      "errors": [
+        "INVALID_INPUT",
+        "MAX_DEPTH_EXCEEDED",
+        "INSUFFICIENT_BUDGET",
+        "WALLCLOCK"
+      ],
+      "status": "available"
+    },
+    {
       "name": "tts",
       "version": "0.4.0",
       "description": "Synthesize speech from text.",

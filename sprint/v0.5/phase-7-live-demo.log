@@ -1,0 +1,37 @@
+Traceback (most recent call last):
+  File "<string>", line 3, in <module>
+    r = run_goal('''
+    Run three parallel research sub-goals via the sub_agent tool:
+    ...<3 lines>...
+    Synthesize the three results into one 500-word executive summary saved as outputs/exec_summary.md.
+    ''')
+  File "/home/josh/workspace/rasputin-omnitool-skill/agent/__init__.py", line 32, in run_goal
+    plan_obj = plan(goal, tools_meta)
+  File "/home/josh/workspace/rasputin-omnitool-skill/agent/observability.py", line 194, in wrapper
+    return func(*args, **kwargs)
+  File "/home/josh/workspace/rasputin-omnitool-skill/agent/planner.py", line 173, in plan
+    content = _completion(client, messages, str(last_error) if last_error else None)
+  File "/home/josh/workspace/rasputin-omnitool-skill/agent/planner.py", line 147, in _completion
+    response = client.chat.completions.create(
+        model=CONFIG.planner_model,
+    ...<2 lines>...
+        response_format={"type": "json_object"},
+    )
+  File "/home/josh/.local/lib/python3.14/site-packages/openai/_utils/_utils.py", line 286, in wrapper
+    return func(*args, **kwargs)
+  File "/home/josh/.local/lib/python3.14/site-packages/openai/resources/chat/completions/completions.py", line 1192, in create
+    return self._post(
+           ~~~~~~~~~~^
+        "/chat/completions",
+        ^^^^^^^^^^^^^^^^^^^^
+    ...<47 lines>...
+        stream_cls=Stream[ChatCompletionChunk],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/josh/.local/lib/python3.14/site-packages/openai/_base_client.py", line 1297, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/josh/.local/lib/python3.14/site-packages/openai/_base_client.py", line 1070, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.NotFoundError: Error code: 404 - {'error': {'message': "model 'gpt-oss-120b' not found", 'type': 'not_found_error', 'param': None, 'code': None}}
