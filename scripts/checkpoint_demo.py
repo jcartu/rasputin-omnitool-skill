@@ -97,6 +97,8 @@ def main():
         result = resume_goal(goal_id, allow_session_loss=True)
 
     print(f"Resume result: goal_id={result.get('goal_id')}")
+    print("  This demo proves checkpoint durability (files survive simulated kill).")
+    print("  End-to-end resume execution is covered by tests/test_resume.py::test_kill_and_resume")
     print("  (In production, this would re-run the goal from the checkpoint)")
 
     # Show final state

@@ -181,8 +181,14 @@ class CheckpointManager:
             evicted += 1
         return evicted
 
-def checkpoint_now(goal_id: str, messages: list[dict], trace_steps: list[dict], artifact_ids: list[str], cost_usd: float, goal_text: str, sandbox_session_ids: list[str] | None = None, browser_session_ids: list[str] | None = None) -> Path:
-    """Manually checkpoint the current goal state."""
+
+def checkpoint_now(goal_id: str, messages: list[dict], trace_steps: list[dict], artifact_ids: list[str], cost_usd: float, goal_text: str, reason: str = "periodic", sandbox_session_ids: list[str] | None = None, browser_session_ids: list[str] | None = None) -> Path:
+    """Manually checkpoint the current goal state.
+
+    Used by the reviewer or by external callers to create an on-demand
+    snapshot. The ``reason`` tag is stored in the checkpoint metadata.
+
+    """
     from datetime import datetime, timezone
     mgr = get_checkpoint_manager()
     cp = GoalCheckpoint(

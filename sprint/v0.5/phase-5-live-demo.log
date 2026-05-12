@@ -1,4 +1,4 @@
-Checkpoint root: /tmp/ckpt_demo_jerxiw_o/checkpoints
+Checkpoint root: /tmp/ckpt_demo_mvk2tmhq/checkpoints
 Goal ID: demo-goal-1
 
 === Phase 1: Simulating partial execution ===
@@ -19,6 +19,8 @@ Latest checkpoint: step 3, 8 messages
 
 === Phase 2: Resuming from checkpoint ===
 Resume result: goal_id=demo-goal-1
+  This demo proves checkpoint durability (files survive simulated kill).
+  End-to-end resume execution is covered by tests/test_resume.py::test_kill_and_resume
   (In production, this would re-run the goal from the checkpoint)
 
 Final checkpoint directory:

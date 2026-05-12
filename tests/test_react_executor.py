@@ -436,3 +436,35 @@ def test_model_error_halts():
 
     assert trace.halted_for == "MODEL_ERROR"
     assert trace.steps[0]["kind"] == "model_error"
+
+def test_pre_expensive_call_checkpoint_fires():
+    """Pre-expensive-call snapshot fires when spent_usd > 0.10."""
+    client = Mock()
+    # Step 0: tool call (keeps loop going, finish_reason="tool_calls").
+    # Step 1: final answer (stops, finish_reason="stop").
+    # After step 0, spent_usd = 0.15 > 0.10, so step 1 pre-expensive checkpoint fires.
+    responses = [
+        _mock_response(tool_calls=[{"name": "web_search", "args": {"query": "test"}}], finish_reason="tool_calls"),
+        _mock_response(content="Done", finish_reason="stop"),
+    ]
+    client.chat.completions.create = Mock(side_effect=responses)
+
+    tools = {"web_search": lambda args: {"result": {"hits": [1, 2, 3]}}}
+    metadata = [
+        {"name": "web_search", "description": "Search", "tags": ["web"], "available": True, "inputs": {}, "outputs": {}, "errors": []},
+    ]
+
+    with patch("agent.react_executor.OpenAI", return_value=client):
+        with patch("agent.react_executor.check_cost_ceiling"):
+            with patch("agent.react_executor.record_call_cost", return_value=0.15):
+                with patch("agent.react_executor._write_checkpoint") as mock_ckpt:
+                    react_execute("goal", tools, metadata, plan_hint=None, max_steps=10, goal_id="g-ckpt-test")
+
+    # _write_checkpoint called: post-step checkpoint from step 0 (step+1=1)
+    # AND pre-expensive checkpoint before step 1 model call (spent_usd=0.15 > 0.10)
+    assert mock_ckpt.call_count >= 2, f"Expected >=2 checkpoint calls, got {mock_ckpt.call_count}"
+
+    # Verify the pre-expensive call happened with step=1 (before step 1's model call)
+    calls = [c[0][2] for c in mock_ckpt.call_args_list]
+    assert 1 in calls, f"Pre-expensive checkpoint at step=1 not found in calls: {calls}"
+

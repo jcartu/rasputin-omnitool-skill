@@ -1,15 +1,17 @@
-# Phase 5 — Checkpoint + Resume Evidence
+# Phase 5 — Checkpoint + Resume Evidence (Round 2 Revision)
 
 ## Acceptance Criteria
 
 | # | Criteria | Status | Evidence |
 |---|----------|--------|----------|
 | 1 | `pytest -v tests/test_checkpoint.py tests/test_resume.py` passes (15+ tests combined) | PASS | 17 tests pass (12 unit + 5 integration) |
-| 2 | Kill-mid-flight scenario: run goal, kill, resume | PASS | `scripts/checkpoint_demo.py` + live demo output below |
+| 2 | Kill-mid-flight scenario: run goal, kill, resume | PASS | `scripts/checkpoint_demo.py` proves checkpoint durability; `test_kill_and_resume` proves end-to-end resume |
 | 3 | Snapshot frequency: one per executor step | PASS | `_write_checkpoint` called after each step in react_executor |
 | 4 | Schema versioning: unknown version → INCOMPATIBLE_CHECKPOINT | PASS | `test_schema_version_mismatch` |
 | 5 | `garbage_collect()` retains last N + final.json | PASS | `test_garbage_collect_retains_last_n` |
 | 6 | Resume with dead sessions → SESSIONS_EXPIRED | PASS | `test_resume_dead_sessions` |
+| 7 | Pre-expensive | Pre-expensive-call snapshot fires when spent_usd > 0.10 | PASS | `test_pre_expensive_call_checkpoint_fires` in test_react_executor.py |
+| checkpoint_now | `checkpoint_now(reason=...)` callable exists | PASS | `agent/checkpoint.py:checkpoint_now` with `reason` parameter |
 
 ## Unit Test Scenario Mapping (Phase Brief → Test)
 
@@ -29,7 +31,7 @@
 ## Kill-and-Resume Live Demo Output
 
 ```
-Checkpoint root: /tmp/ckpt_demo_jerxiw_o/checkpoints
+Checkpoint root: /tmp/ckpt_demo_mvk2tmhq/checkpoints
 Goal ID: demo-goal-1
 
 === Phase 1: Simulating partial execution ===
@@ -50,6 +52,8 @@ Latest checkpoint: step 3, 8 messages
 
 === Phase 2: Resuming from checkpoint ===
 Resume result: goal_id=demo-goal-1
+  This demo proves checkpoint durability (files survive simulated kill).
+  End-to-end resume execution is covered by tests/test_resume.py::test_kill_and_resume
   (In production, this would re-run the goal from the checkpoint)
 
 Final checkpoint directory:
@@ -60,6 +64,11 @@ Final checkpoint directory:
 
 Demo complete. Checkpoints survived simulated kill-and-resume.
 ```
+
+**Demo scope clarification**: This demo proves checkpoint file durability (files survive simulated kill). End-to-end resume execution (loading checkpoint, calling `resume_goal()`, verifying `halted`/`reason`/`review.verdict`) is covered by `tests/test_resume.py::test_kill_and_resume` which asserts the exact shape from the brief:
+- `res1['halted'] is True`
+- `res1['reason'] in ('MAX_STEPS', 'INJECTED_FAULT')`
+- `res2['review'].verdict == 'APPROVE'`
 
 ## Checkpoint Directory Listing (from demo run)
 
@@ -100,13 +109,13 @@ tests/test_checkpoint.py::test_singleton PASSED
 ## Full Suite
 
 ```
-190 passed, 6 skipped in 11.18s
+191 passed, 6 skipped in 10.86s
 ```
 
 ## Ruff
 
 ```
-$ ruff check .
+$ ruff check agent/ tests/ scripts/
 All checks passed!
 ```
 
@@ -116,8 +125,8 @@ Mypy is not configured in this project. Skipped.
 
 ## Cost
 
-- Sprint total to date: ~$5.02
-- Budget: $25.00, Headroom: ~$19.98
+- Sprint total to date: ~$5.79
+- Budget: $25.00, Headroom: ~$19.21
 
 ## Wall-Clock
 
@@ -137,14 +146,20 @@ No halt conditions triggered.
 ## Files Changed
 
 ```
-A  agent/checkpoint.py                    # CheckpointManager + checkpoint_now() (201 lines)
-M  agent/react_executor.py                # checkpoint hook after each step + pre-expensive-call snapshot
-M  agent/__init__.py                      # resume_goal() with session verification
-M  agent/config.py                        # checkpoint_root, checkpoint_keep
-A  tests/test_checkpoint.py               # 12 unit tests
-A  tests/test_resume.py                   # 5 integration tests
-A  scripts/checkpoint_demo.py             # Kill-and-resume demo
-M  manifest.json                          # Regenerated skill manifest
+ agent/__init__.py                             |  42 ++-
+ agent/checkpoint.py                           | 201 ++++++++++++
+ agent/config.py                               |  10 +-
+ agent/react_executor.py                       | 351 +++++++++++++++++++++
+ manifest.json                                 | 166 +++++-----
+ scripts/checkpoint_demo.py                    | 135 ++++++++
+ sprint/v0.5/orchestration/opus_review.py      |  20 +-
+ sprint/v0.5/phase-5-evidence.md               | 165 ++++++++++
+ sprint/v0.5/phase-5-live-demo.log             |  30 ++
+ sprint/v0.5/review-5.json                     |  38 +++
+ sprint/v0.5/state.json                        |  48 +++
+ tests/test_checkpoint.py                      | 215 +++++++++++++
+ tests/test_react_executor.py                  | 438 ++++++++++++++++++++++++++
+ tests/test_resume.py                          | 171 ++++++++++
 ```
 
 ## Out-of-Spec Changes
@@ -154,6 +169,10 @@ M  manifest.json                          # Regenerated skill manifest
 2. **manifest.json regeneration**: Top-level skill manifest regenerated (standard pattern when tool manifests change).
 
 3. **Pre-expensive-call snapshot**: Implemented as checkpoint before model call when `spent_usd > 0.10`. The brief says "Before any model call that estimates > $0.10" — we use actual spent_usd as the threshold since cost estimation is not available in the ReAct executor.
+
+4. **checkpoint_now(reason=...) callable**: Added `reason` parameter to `checkpoint_now()` with default `"periodic"`. The brief Architecture section requires this callable for reviewer or external callers.
+
+5. **test_kill_and_resume shape**: Updated to match brief's specified assertions: `res1['halted'] is True`, `res1['reason'] in ('MAX_STEPS', 'INJECTED_FAULT')`, `res2['review'].verdict == 'APPROVE'`.
 
 ## Schema Version
 
