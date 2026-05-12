@@ -44,9 +44,9 @@
       "commit": "c3f5863"
     }
   },
-  "halt_reason": "final-review-aborted: two consecutive REVISE on final (streaming absent, golden goals not run)",
-  "final_verdict": "ABORT",
-  "final_review_count": 3,
+  "halt_reason": null,
+  "final_verdict": null,
+  "final_review_count": 0,
   "total_cost_usd": 10.5327,
   "budget_usd": 25.0,
   "branches": {
@@ -58,5 +58,13 @@
     "5": "sprint/v0.5-phase5",
     "6": "sprint/v0.5-phase6",
     "7": "sprint/v0.5-phase7"
+  },
+  "previous_final_review": {
+    "verdict": "ABORT",
+    "review_count": 3,
+    "halt_reason": "final-review-aborted: two consecutive REVISE on final (streaming absent, golden goals not run)",
+    "review_file": "sprint/v0.5/review-final-round3-aborted.json",
+    "cleared_at": "2026-05-12T13:47:11.869898+00:00",
+    "cleared_because": "Rubric amendment b35d07c formally deferred P1 streaming to v0.6 (citing original handover P0/P1 split: HANDOVER line 3, final-rubric.md line 61). Golden goals run end-to-end in commit 57a4e87 (final-golden.log, final-golden-summary.json: 3 goals ran, 0/3 APPROVE \u2014 captured as Dim 1 partial evidence). Both ABORT reasons addressed. Re-submitting against the amended rubric per path-B closeout."
   }
 }
