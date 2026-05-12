@@ -1,18 +1,24 @@
 {
   "sprint": "v0.5",
   "started_at": "2026-05-12T08:25:00Z",
-  "current_phase": 0,
+  "current_phase": 1,
   "phase_status": {
     "0": {
       "status": "approved",
       "review_count": 1,
       "commit": "599b303"
+    },
+    "1": {
+      "status": "awaiting_review",
+      "review_count": 0,
+      "commit": "e1514e6"
     }
   },
   "halt_reason": null,
   "total_cost_usd": 0.7744,
   "budget_usd": 25.0,
   "branches": {
-    "0": "sprint/v0.5-phase0"
+    "0": "sprint/v0.5-phase0",
+    "1": "sprint/v0.5-phase1"
   }
 }
