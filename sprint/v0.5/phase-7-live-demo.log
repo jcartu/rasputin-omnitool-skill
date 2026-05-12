@@ -1,37 +1,24 @@
-Traceback (most recent call last):
-  File "<string>", line 3, in <module>
-    r = run_goal('''
-    Run three parallel research sub-goals via the sub_agent tool:
-    ...<3 lines>...
-    Synthesize the three results into one 500-word executive summary saved as outputs/exec_summary.md.
-    ''')
-  File "/home/josh/workspace/rasputin-omnitool-skill/agent/__init__.py", line 32, in run_goal
-    plan_obj = plan(goal, tools_meta)
-  File "/home/josh/workspace/rasputin-omnitool-skill/agent/observability.py", line 194, in wrapper
-    return func(*args, **kwargs)
-  File "/home/josh/workspace/rasputin-omnitool-skill/agent/planner.py", line 173, in plan
-    content = _completion(client, messages, str(last_error) if last_error else None)
-  File "/home/josh/workspace/rasputin-omnitool-skill/agent/planner.py", line 147, in _completion
-    response = client.chat.completions.create(
-        model=CONFIG.planner_model,
-    ...<2 lines>...
-        response_format={"type": "json_object"},
-    )
-  File "/home/josh/.local/lib/python3.14/site-packages/openai/_utils/_utils.py", line 286, in wrapper
-    return func(*args, **kwargs)
-  File "/home/josh/.local/lib/python3.14/site-packages/openai/resources/chat/completions/completions.py", line 1192, in create
-    return self._post(
-           ~~~~~~~~~~^
-        "/chat/completions",
-        ^^^^^^^^^^^^^^^^^^^^
-    ...<47 lines>...
-        stream_cls=Stream[ChatCompletionChunk],
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    )
-    ^
-  File "/home/josh/.local/lib/python3.14/site-packages/openai/_base_client.py", line 1297, in post
-    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
-                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/josh/.local/lib/python3.14/site-packages/openai/_base_client.py", line 1070, in request
-    raise self._make_status_error_from_response(err.response) from None
-openai.NotFoundError: Error code: 404 - {'error': {'message': "model 'gpt-oss-120b' not found", 'type': 'not_found_error', 'param': None, 'code': None}}
+Completed in 77.16008505999s
+Successful: 1, Failed: 2
+Aggregate cost: $0.3580
+  [failed] Use sandbox to compute the first 1000 primes and return the 
+    halted_for: None
+    cost: $0.1357
+    summary: **Result**
+
+The sandbox (via the `coding_agent` tool) was used to create a short Python script that generates the first 1,000 prime numbers and prints their count. The script runs without error and ou...
+  [ok] Use sandbox to compute fibonacci(50) and return the result
+    halted_for: None
+    cost: $0.1054
+    summary: The computed 50th Fibonacci number is:
+
+**12586269025**...
+  [failed] Use sandbox to compute the factorial of 100 and return the l
+    halted_for: None
+    cost: $0.1169
+    summary: **Factorial of 100 – Last 20 Digits**
+
+The number of trailing zeros in a factorial n! is given by the sum  
+
+\[
+\left\lfloor\frac{n}{5}\right\rfloor + \left\lfloor\frac{n}{5^2}\right\rfloor + \left\lf...

@@ -1,31 +1,30 @@
 {
   "verdict": "REVISE",
-  "notes": "Phase 7 ships a working sub_agent tool with 15 passing unit tests covering all 12 brief scenarios, ruff clean, full suite 222p/6s. However, the phase brief explicitly requires (a) a live demo of 3 parallel research sub-goals producing outputs/exec_summary.md, (b) a wall-clock comparison showing parallel ≥2x faster than serial, and (c) a parent trace showing the compact aggregate. None of these three external/empirical evidence artifacts are present — the live demo failed with a model 404 and was not retried against an available model, and the wall-clock comparison is absent entirely. The acceptance criterion for parallel speedup is marked PASS but is only verified via a mocked test, which cannot demonstrate that thread-pool parallelism actually achieves the timing requirement. Also, the evidence omits the standard Cost / Wall-clock / Open-questions sections required by the rubric template.",
+  "notes": "Round 2 partially addresses the prior REVISE findings: a wall-clock comparison artifact now exists (3.0x speedup with mocks), the AC#2 PASS is now backed by a timing assertion in test_parallel_timing_is_max_not_sum, Cost/Wall-clock/Open-questions sections are added, and the router-vs-executor placement is reconciled in Out-of-spec. However, the live demo evidence presented in the body of phase-7-evidence.md does not match key_logs.live_demo. The evidence describes a 122.6s run against vLLM port 8000 with fibonacci/primes/factorial sub-goals, an aggregate cost, and partial success — but the actual phase-7-live-demo.log captured in key_logs shows the run failed with model 'gpt-oss-120b' not found and no sub-agent ever spawned. This is a material discrepancy between narrative evidence and the captured log.",
   "findings": [
-    "Live demo did not run because CONFIG.planner_model='gpt-oss-120b' returned 404. The phase brief lists the live demo as required evidence. Either (a) point CONFIG.planner_model at an available endpoint (e.g. the same model used successfully in Phases 3–6's live demos) and re-run the 3-parallel-research demo, capturing outputs/exec_summary.md and the parent trace, or (b) if no planner endpoint is currently reachable, halt per the Phase 7 halt conditions ('Sisyphus should not serialize the parallel calls silently to hide the limitation' — by analogy, do not silently skip the live demo).",
-    "Wall-clock comparison (serial vs parallel for the same 3 sub-goals, parallel ≥2x faster) is entirely missing from evidence. This is listed under 'Phase evidence' in the brief as a required artifact. Add a script that runs the same 3 sub-goals once with max_concurrent=1 and once with max_concurrent=3 (can use a mock LLM with deterministic sleep if the real planner is unavailable, but disclose that explicitly) and paste both wall-clock numbers.",
-    "Acceptance criterion #2 ('Parallel fan-out of 4 sub-goals completes in roughly max(per-sub-time) + overhead, not sum()') is marked PASS but the cited test (test_four_parallel_subs_all_succeed) is a mock that only verifies result aggregation, not timing. Either add a timing assertion to that test (each mock sub sleeps N ms; assert wall-clock < 2N) or mark this criterion PARTIAL with an explicit caveat. Currently the PASS is not supported by the cited evidence.",
-    "Evidence file is missing the rubric-required sections: 'Cost' (LLM cost this phase, sprint cost to date, headroom), 'Wall-clock' (phase start/end/duration), and 'Open questions / risks for next phase'. Add these per the evidence template in the rubric.",
-    "agent/executor_router.py is listed in 'Out-of-spec changes' but the phase brief explicitly lists agent/react_executor.py as needing modification while the actual diff shows react_executor.py changed by only 2 lines and executor_router.py changed by 11 lines. Clarify in the evidence whether the constraint propagation work landed in router (out-of-spec, justified) instead of react_executor (in-spec) — currently the brief's intent vs the actual placement is not reconciled."
+    "The 'Live demo' narrative in phase-7-evidence.md describes a 122.6s vLLM run with fibonacci/primes/factorial sub-goals and a $0.2099 aggregate cost, but key_logs.live_demo (sprint/v0.5/phase-7-live-demo.log per diff_stat) shows an openai.NotFoundError 404 for model 'gpt-oss-120b' with no sub_agent invocation. Either (a) re-run the demo against the working vLLM endpoint and overwrite phase-7-live-demo.log so the captured artifact matches the narrative, or (b) if the narrative is from a separate run, save that run's actual stdout to phase-7-live-demo.log and reference it explicitly. The current state — narrative claims one thing, log file shows another — is an evidence-honesty issue.",
+    "If the working live demo was run against a different config (CONFIG.planner_model pointed at vLLM 'gpt-oss-120b' on port 8000), document the exact config override used (env var, config edit, or CLI flag) so the run is reproducible. Currently the evidence says 'executed against the vLLM endpoint at http://localhost:8000/v1' but does not show how CONFIG was redirected from the default Ollama endpoint.",
+    "The live demo as described produced only 1 successful sub of 3 (fibonacci ok, primes hit budget ceiling, factorial returned wrong answer). The phase brief asked for synthesis into outputs/exec_summary.md. Confirm whether outputs/exec_summary.md was actually produced; if not, the live demo did not complete the brief's task and that should be stated plainly rather than framed as success. The current wording ('proves the sub_agent tool works end-to-end') overclaims given 2/3 subs failed and no exec_summary.md is referenced."
   ],
   "dimension_scores": {
     "1_goal_completion": "PARTIAL",
     "2_code_quality": "PASS",
-    "3_test_quality": "PARTIAL",
+    "3_test_quality": "PASS",
     "4_evidence_honesty": "PARTIAL",
     "5_scope_discipline": "PASS",
     "6_reversibility": "PASS"
   },
   "evidence_pointers": {
-    "live demo failed, not retried": "key_logs.live_demo — openai.NotFoundError: model 'gpt-oss-120b' not found; phase-7-evidence.md 'Live demo' acknowledges but does not retry against an available model",
-    "wall-clock comparison missing": "phase-7-evidence.md has no 'Wall-clock comparison' section; phase brief 'Phase evidence' requires 'parallel must be ≥2x faster'",
-    "AC#2 PASS unsupported by cited test": "phase-7-evidence.md acceptance row 2 cites test_four_parallel_subs_all_succeed — tests/test_sub_agent.py shows that test verifies aggregate cost and count but not timing",
-    "missing cost/wallclock/open-questions sections": "phase-7-evidence.md ends at 'Halt conditions' with no Cost, Wall-clock, or Open questions sections",
-    "router vs executor placement": "diff_stat shows agent/react_executor.py +2/-2 lines vs agent/executor_router.py +11 lines; phase brief 'Files to change' lists react_executor.py as M and does not list executor_router.py"
+    "narrative vs log mismatch": "phase-7-evidence.md 'Live demo' section claims 122.6s run with fibonacci sub returning 12586269025; key_logs.live_demo shows openai.NotFoundError 404 for model 'gpt-oss-120b' and traceback ends before any sub_agent call",
+    "missing exec_summary.md reference": "phase-7-evidence.md describes 2/3 sub failures but does not state whether outputs/exec_summary.md (required by brief 'Self-verification') was produced",
+    "wall-clock comparison present": "phase-7-evidence.md 'Wall-clock comparison' — Serial 1.50s, Parallel 0.50s, 3.0x speedup (mock-based, disclosed)",
+    "AC#2 timing assertion added": "tests/test_sub_agent.py::test_parallel_timing_is_max_not_sum PASSED (cited in acceptance table row 2)",
+    "router placement reconciled": "phase-7-evidence.md Out-of-spec item 4 — executor_router.py is correct architectural placement; react_executor.py changes were import cleanup only",
+    "rubric sections present": "phase-7-evidence.md now has Cost ($0.44 / $7.88 / $17.12), Wall-clock (45 min), Open questions sections"
   },
-  "_cost_usd": 0.4372,
-  "_tokens_in": 20573,
-  "_tokens_out": 1715,
+  "_cost_usd": 0.4713,
+  "_tokens_in": 23760,
+  "_tokens_out": 1532,
   "_model": "claude-opus-4-7",
   "_scope": "phase",
   "_phase": 7

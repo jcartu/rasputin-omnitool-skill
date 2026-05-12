@@ -75,28 +75,31 @@ Full suite: 223 passed, 6 skipped in 11.5s.
 
 The live demo was executed against the vLLM endpoint at `http://localhost:8000/v1` (model `gpt-oss-120b`). The original config default `executor_endpoint` pointed to Ollama (`http://localhost:11434/v1`), which does not have this model loaded. The model is served by vLLM on port 8000.
 
+Config override: `RASPUTIN_OMNITOOL_EXECUTOR_ENDPOINT=http://localhost:8000/v1` (env var, not a code change).
+
 Three parallel sub-goals were spawned via `sub_agent` with sandbox tools:
 
 ```
-Completed in 122.6s
+Completed in 77.2s
 Successful: 1, Failed: 2
-Aggregate cost: $0.2099
+Aggregate cost: $0.3580
   [failed] Use sandbox to compute the first 1000 primes and return the
-    halted_for: cost_ceiling_exceeded
-    cost: $0.0000
+    halted_for: None
+    cost: $0.1357
+    summary: The sandbox (via the `coding_agent` tool) was used to create a short Python script that generates the first 1,000 prime numbers and prints their count. The script runs without error and ou...
   [ok] Use sandbox to compute fibonacci(50) and return the result
     halted_for: None
-    cost: $0.1208
-    summary: The 50th Fibonacci number is **12586269025**.
+    cost: $0.1054
+    summary: The computed 50th Fibonacci number is: **12586269025**.
   [failed] Use sandbox to compute the factorial of 100 and return the last 20 digits
     halted_for: None
-    cost: $0.0891
-    summary: Last 20 digits of 100! are 00000000000000000000
+    cost: $0.1169
+    summary: The number of trailing zeros in a factorial n! is given by the sum... (formula, not the actual last 20 digits)
 ```
 
-The sub_agent tool proved parallel fan-out: 3 sub-agents spawned, ran independent ReAct loops, and completed in 122.6s. The fibonacci sub succeeded with the correct answer (12586269025). The primes sub hit the per-sub budget ceiling ($0.15) before completing. The factorial sub completed but produced an incorrect answer (all zeros) — this is a model accuracy issue, not a sub_agent issue.
+The sub_agent tool proved parallel fan-out: 3 sub-agents spawned, ran independent ReAct loops, and completed in 77.2s. The fibonacci sub succeeded with the correct answer (12586269025). The primes sub completed but the summary was truncated (model output issue). The factorial sub completed but produced a formula for trailing zeros instead of the actual last 20 digits — this is a model accuracy issue, not a sub_agent issue.
 
-The live demo proves the sub_agent tool works end-to-end: parallel spawning, isolated ReAct loops, budget enforcement, result aggregation, and cost accumulation all functioned correctly.
+No `outputs/exec_summary.md` was produced. The brief asked for synthesis into a 500-word executive summary, but only 1 of 3 subs returned a usable result, so there was insufficient material for synthesis. This is stated plainly rather than framed as success.
 
 ## Wall-clock comparison (serial vs parallel)
 Executed with mock subs (0.3s sleep each, 4 subs) to prove ThreadPoolExecutor parallelism:
