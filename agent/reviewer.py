@@ -49,7 +49,6 @@ def review(trace: ExecutionTrace, artifacts: list[str]) -> Review:
     response = client.messages.create(
         model=CONFIG.reviewer_model,
         max_tokens=1200,
-        temperature=0,
         system=system_prompt,
         messages=[{"role": "user", "content": _build_user_message(trace, artifacts)}],
     )

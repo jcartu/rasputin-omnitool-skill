@@ -29,6 +29,7 @@ class Config:
     session_root: str = os.getenv("RASPUTIN_OMNITOOL_SESSION_ROOT", "~/.rasputin/sessions/sandbox")
     browser_session_ttl_min: int = int(os.getenv("RASPUTIN_OMNITOOL_BROWSER_SESSION_TTL_MIN", "60"))
     browser_max_sessions: int = int(os.getenv("RASPUTIN_OMNITOOL_BROWSER_MAX_SESSIONS", "10"))
+    browser_session_root: str = os.getenv("RASPUTIN_OMNITOOL_BROWSER_SESSION_ROOT", "~/.rasputin/sessions/browser")
     checkpoint_root: str = os.getenv("RASPUTIN_OMNITOOL_CHECKPOINT_ROOT", "~/.rasputin/checkpoints")
     checkpoint_keep: int = int(os.getenv("RASPUTIN_OMNITOOL_CHECKPOINT_KEEP", "5"))
 
