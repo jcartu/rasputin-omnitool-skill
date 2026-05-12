@@ -1,7 +1,7 @@
 {
   "sprint": "v0.5",
   "started_at": "2026-05-12T08:25:00Z",
-  "current_phase": 6,
+  "current_phase": 7,
   "phase_status": {
     "0": {
       "status": "approved",
