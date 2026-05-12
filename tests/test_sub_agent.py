@@ -104,6 +104,35 @@ class TestParallelSuccess:
         assert r["failed_count"] == 0
         assert r["aggregate_cost_usd"] == pytest.approx(0.1)
 
+    @patch("agent.run_goal")
+    def test_parallel_timing_is_max_not_sum(self, mock_run_goal):
+        import time
+        from tools.sub_agent.index import run
+
+        def slow_side_effect(goal, **kwargs):
+            time.sleep(0.3)  # each sub takes 300ms
+            return {
+                "goal_id": kwargs.get("goal_id"),
+                "plan": MagicMock(),
+                "trace": MagicMock(final_answer=goal, halted_for=None),
+                "artifacts": [],
+                "review": MagicMock(verdict="APPROVE", notes="ok"),
+                "revised": False,
+                "cost_usd": 0.01,
+            }
+
+        mock_run_goal.side_effect = slow_side_effect
+        goals = [f"goal-{i}" for i in range(4)]
+        t0 = time.monotonic()
+        with patch.dict(os.environ, {"RASPUTIN_OMNITOOL_MAX_COST_USD": "999"}):
+            result = run({"sub_goals": goals, "max_concurrent": 4, "_goal_id": "timing"})
+        elapsed = time.monotonic() - t0
+        # 4 subs x 0.3s serial = 1.2s. Parallel should be ~0.3s + overhead.
+        # Assert elapsed < 0.9s (well under serial sum of 1.2s)
+        assert elapsed < 0.9, f"parallel took {elapsed:.2f}s, expected < 0.9s (serial would be ~1.2s)"
+        r = result["result"]
+        assert r["successful_count"] == 4
+
 
 class TestPartialFailure:
     @patch("agent.run_goal")

@@ -1,0 +1,32 @@
+{
+  "verdict": "REVISE",
+  "notes": "Phase 7 ships a working sub_agent tool with 15 passing unit tests covering all 12 brief scenarios, ruff clean, full suite 222p/6s. However, the phase brief explicitly requires (a) a live demo of 3 parallel research sub-goals producing outputs/exec_summary.md, (b) a wall-clock comparison showing parallel ≥2x faster than serial, and (c) a parent trace showing the compact aggregate. None of these three external/empirical evidence artifacts are present — the live demo failed with a model 404 and was not retried against an available model, and the wall-clock comparison is absent entirely. The acceptance criterion for parallel speedup is marked PASS but is only verified via a mocked test, which cannot demonstrate that thread-pool parallelism actually achieves the timing requirement. Also, the evidence omits the standard Cost / Wall-clock / Open-questions sections required by the rubric template.",
+  "findings": [
+    "Live demo did not run because CONFIG.planner_model='gpt-oss-120b' returned 404. The phase brief lists the live demo as required evidence. Either (a) point CONFIG.planner_model at an available endpoint (e.g. the same model used successfully in Phases 3–6's live demos) and re-run the 3-parallel-research demo, capturing outputs/exec_summary.md and the parent trace, or (b) if no planner endpoint is currently reachable, halt per the Phase 7 halt conditions ('Sisyphus should not serialize the parallel calls silently to hide the limitation' — by analogy, do not silently skip the live demo).",
+    "Wall-clock comparison (serial vs parallel for the same 3 sub-goals, parallel ≥2x faster) is entirely missing from evidence. This is listed under 'Phase evidence' in the brief as a required artifact. Add a script that runs the same 3 sub-goals once with max_concurrent=1 and once with max_concurrent=3 (can use a mock LLM with deterministic sleep if the real planner is unavailable, but disclose that explicitly) and paste both wall-clock numbers.",
+    "Acceptance criterion #2 ('Parallel fan-out of 4 sub-goals completes in roughly max(per-sub-time) + overhead, not sum()') is marked PASS but the cited test (test_four_parallel_subs_all_succeed) is a mock that only verifies result aggregation, not timing. Either add a timing assertion to that test (each mock sub sleeps N ms; assert wall-clock < 2N) or mark this criterion PARTIAL with an explicit caveat. Currently the PASS is not supported by the cited evidence.",
+    "Evidence file is missing the rubric-required sections: 'Cost' (LLM cost this phase, sprint cost to date, headroom), 'Wall-clock' (phase start/end/duration), and 'Open questions / risks for next phase'. Add these per the evidence template in the rubric.",
+    "agent/executor_router.py is listed in 'Out-of-spec changes' but the phase brief explicitly lists agent/react_executor.py as needing modification while the actual diff shows react_executor.py changed by only 2 lines and executor_router.py changed by 11 lines. Clarify in the evidence whether the constraint propagation work landed in router (out-of-spec, justified) instead of react_executor (in-spec) — currently the brief's intent vs the actual placement is not reconciled."
+  ],
+  "dimension_scores": {
+    "1_goal_completion": "PARTIAL",
+    "2_code_quality": "PASS",
+    "3_test_quality": "PARTIAL",
+    "4_evidence_honesty": "PARTIAL",
+    "5_scope_discipline": "PASS",
+    "6_reversibility": "PASS"
+  },
+  "evidence_pointers": {
+    "live demo failed, not retried": "key_logs.live_demo — openai.NotFoundError: model 'gpt-oss-120b' not found; phase-7-evidence.md 'Live demo' acknowledges but does not retry against an available model",
+    "wall-clock comparison missing": "phase-7-evidence.md has no 'Wall-clock comparison' section; phase brief 'Phase evidence' requires 'parallel must be ≥2x faster'",
+    "AC#2 PASS unsupported by cited test": "phase-7-evidence.md acceptance row 2 cites test_four_parallel_subs_all_succeed — tests/test_sub_agent.py shows that test verifies aggregate cost and count but not timing",
+    "missing cost/wallclock/open-questions sections": "phase-7-evidence.md ends at 'Halt conditions' with no Cost, Wall-clock, or Open questions sections",
+    "router vs executor placement": "diff_stat shows agent/react_executor.py +2/-2 lines vs agent/executor_router.py +11 lines; phase brief 'Files to change' lists react_executor.py as M and does not list executor_router.py"
+  },
+  "_cost_usd": 0.4372,
+  "_tokens_in": 20573,
+  "_tokens_out": 1715,
+  "_model": "claude-opus-4-7",
+  "_scope": "phase",
+  "_phase": 7
+}

@@ -37,10 +37,15 @@
       "status": "approved",
       "review_count": 3,
       "commit": "28bac5f"
+    },
+    "7": {
+      "status": "in_progress",
+      "review_count": 0,
+      "commit": null
     }
   },
   "halt_reason": null,
-  "total_cost_usd": 7.4391,
+  "total_cost_usd": 7.8763,
   "budget_usd": 25.0,
   "branches": {
     "0": "sprint/v0.5-phase0",
