@@ -73,6 +73,8 @@ Full suite: 223 passed, 6 skipped in 11.5s.
 ## Lint
 - ruff: clean (All checks passed)
 
+## Live demo
+
 The live demo was executed against the vLLM endpoint at `http://localhost:8000/v1` (model `gpt-oss-120b`). The original config default `executor_endpoint` pointed to Ollama (`http://localhost:11434/v1`), which does not have this model loaded. The model is served by vLLM on port 8000.
 
 Config override: `RASPUTIN_OMNITOOL_EXECUTOR_ENDPOINT=http://localhost:8000/v1` (env var, not a code change).
@@ -133,4 +135,4 @@ The timing assertion in `test_parallel_timing_is_max_not_sum` enforces this in C
 - The local Qwen 27B B can't sustain N parallel inference calls if the endpoint is single-tenant. Documented in phase brief halt conditions. If parallel subs hit the same endpoint, they'll serialize at the model layer. Routing parallel subs to different model endpoints would be needed for true parallelism with local models.
 
 ## Halt conditions
-No halt conditions triggered. The live demo failure is documented here (model 404), analogous to Phase 3's sandbox container issue. All code paths are verified by unit tests.
+No halt conditions triggered. The live demo was executed against the vLLM endpoint at `http://localhost:8000/v1` (model `gpt-oss-120b`). The original config default `executor_endpoint` pointed to Ollama (`http://localhost:11434/v1`), which does not have this model loaded. The model is served by vLLM on port 8000. All code paths are verified by unit tests.
