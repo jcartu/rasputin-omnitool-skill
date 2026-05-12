@@ -1,34 +1,29 @@
 {
-  "verdict": "REVISE",
-  "notes": "Round 2 addresses most prior findings: tests/test_resume.py now exists with 5 integration tests bringing total to 17 (>15), scripts/checkpoint_demo.py is created and its output captured, evidence includes checkpoint directory listing and pytest tail for both suites. However, two prior findings remain partially unaddressed: (1) the snapshot-before-expensive-call hook is mentioned in evidence text but has no test verifying it triggers, and (2) the integration test in test_resume.py simulates a checkpoint+resume rather than implementing the brief's exact MAX_STEPS_THIS_RUN fault-injection pattern with halted=True/reason assertions. Additionally, the live demo is a simulation that does not actually exercise resume_goal() end-to-end with a real LLM call replacement — it only verifies checkpoints survive a simulated kill, not that resume reconstructs and continues execution.",
-  "findings": [
-    "Add a unit test in tests/test_checkpoint.py (or test_react_executor.py) that verifies the pre-expensive-call snapshot hook fires: set spent_usd > 0.10, invoke the executor step path, and assert a checkpoint was written before the model call. The evidence claims this is implemented (+42 lines in react_executor.py) but no test demonstrates the threshold gate works. Cite the test in the acceptance table.",
-    "The live demo in scripts/checkpoint_demo.py only verifies checkpoint files survive a simulated kill; it does not actually call resume_goal() and observe continued execution. Either (a) extend the demo to invoke resume_goal() with a fake LLM that produces a final answer, and show the resumed run completing, or (b) point to test_resume.py::test_kill_and_resume as the end-to-end proof and update the demo's printed output to clarify it only proves checkpoint durability, not resume execution.",
-    "test_resume.py::test_kill_and_resume does not match the brief's specified shape: the brief requires asserting `res1['halted'] is True`, `res1['reason'] in ('MAX_STEPS', 'INJECTED_FAULT')`, and `res2['review'].verdict == 'APPROVE'` after resume. Either implement these assertions against a real run_goal() with monkeypatched MAX_STEPS_THIS_RUN and call_model, or document in 'Out-of-spec changes' why the test was adapted and what the adaptation still proves.",
-    "Expose or document checkpoint_now(reason=...) per the brief's Architecture section ('Manually via checkpoint_now(reason=\"...\") callable, used by the reviewer or by external callers'). It is not visible in agent/checkpoint.py per the diff. Add the callable and a test, or add it to 'Out-of-spec changes' with justification.",
-    "The 'Files touched' section should be the literal `git diff --stat sprint/v0.5..HEAD` output (diff_stat shows 12 files including review-4.json, review-5.json, state.json, phase-5-live-demo.log). The evidence's 'Files Changed' section lists 8 hand-summarized rows and omits review-5.json, phase-5-live-demo.log, and state.json. Replace with the literal git output."
-  ],
+  "verdict": "APPROVE",
+  "notes": "Round-3 evidence resolves the prior REVISE findings: pre-expensive-call snapshot now has a dedicated test (test_pre_expensive_call_checkpoint_fires), checkpoint_now(reason=...) is implemented and documented in out-of-spec, test_kill_and_resume asserts the brief's exact shape (halted=True, reason in MAX_STEPS/INJECTED_FAULT, review.verdict==APPROVE), and the demo's scope limitation is now explicitly disclosed with a pointer to the end-to-end test. Files-touched section now reflects the actual diff_stat. 17 unit+integration tests pass, full suite 191p/6s, ruff clean. Schema v1 shipped with migration plan.",
+  "findings": [],
   "dimension_scores": {
-    "1_goal_completion": "PARTIAL",
+    "1_goal_completion": "PASS",
     "2_code_quality": "PASS",
-    "3_test_quality": "PARTIAL",
-    "4_evidence_honesty": "PARTIAL",
+    "3_test_quality": "PASS",
+    "4_evidence_honesty": "PASS",
     "5_scope_discipline": "PASS",
     "6_reversibility": "PASS"
   },
   "evidence_pointers": {
-    "snapshot pre-expensive-call untested": "agent/react_executor.py diff (+42 lines) per diff_stat; no test in test_checkpoint.py or test_resume.py covering the spent_usd > 0.10 branch",
-    "live demo does not exercise resume": "key_logs.live_demo — 'Resume result: goal_id=demo-goal-1' followed by '(In production, this would re-run the goal from the checkpoint)' — demo does not actually call resume_goal()",
-    "test_kill_and_resume shape mismatch": "tests/test_resume.py per diff_stat (171 lines); brief's example asserts halted/reason/review.verdict patterns",
-    "checkpoint_now missing": "agent/checkpoint.py (201 lines per diff) — brief Architecture section requires checkpoint_now(reason=...) callable",
-    "files touched not literal": "phase-5-evidence.md 'Files Changed' section vs payload diff_stat — review-5.json, phase-5-live-demo.log, state.json present in diff but absent from evidence list",
-    "tests count": "key_logs.pytest tail — 17 passed (12 unit + 5 integration), exceeds 15+ requirement",
-    "checkpoint dir listing": "phase-5-evidence.md 'Checkpoint Directory Listing' — present with 4 files",
-    "schema version doc": "phase-5-evidence.md 'Schema Version' — v1 with migration plan covering load() rejection, migrate() function plan, halted-goal retention"
+    "pre-expensive-call test added": "phase-5-evidence.md acceptance table row 7 — test_pre_expensive_call_checkpoint_fires in tests/test_react_executor.py (diff_stat shows +32 lines)",
+    "checkpoint_now exposed": "phase-5-evidence.md Out-of-Spec item 4 — agent/checkpoint.py:checkpoint_now with reason parameter",
+    "test_kill_and_resume shape": "phase-5-evidence.md demo-scope-clarification — asserts res1['halted'] is True, res1['reason'] in ('MAX_STEPS','INJECTED_FAULT'), res2['review'].verdict == 'APPROVE'",
+    "demo scope disclosure": "key_logs.live_demo — explicit text 'This demo proves checkpoint durability... End-to-end resume execution is covered by tests/test_resume.py::test_kill_and_resume'",
+    "17 tests pass": "phase-5-evidence.md pytest tail — 17 passed in 0.86s (12 unit + 5 integration)",
+    "files touched reflects diff_stat": "phase-5-evidence.md 'Files Changed' now lists review-5.json, state.json, phase-5-live-demo.log, test_react_executor.py matching payload diff_stat",
+    "schema version doc": "phase-5-evidence.md 'Schema Version' — v1 with migration plan",
+    "ruff clean": "phase-5-evidence.md Ruff — All checks passed!",
+    "commit recorded": "state.json phase 5 commit 7dbe6a6e6a6"
   },
-  "_cost_usd": 0.4227,
-  "_tokens_in": 19367,
-  "_tokens_out": 1762,
+  "_cost_usd": 0.3741,
+  "_tokens_in": 20137,
+  "_tokens_out": 960,
   "_model": "claude-opus-4-7",
   "_scope": "phase",
   "_phase": 5
