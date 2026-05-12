@@ -38,6 +38,11 @@
       "type": "integer",
       "required": false,
       "default": 60
+    },
+    "session_id": {
+      "type": "string",
+      "required": false,
+      "description": "Optional persistent sandbox session ID. Omit to create or reuse a goal-scoped session; pass null from tests to opt out."
     }
   },
   "outputs": {
@@ -52,13 +57,19 @@
     },
     "artifacts": {
       "type": "array"
+    },
+    "session_id": {
+      "type": "string"
     }
   },
   "tags": ["compute", "code", "execution"],
   "errors": [
     "SANDBOX_UNREACHABLE",
     "TIMEOUT",
-    "INVALID_OPERATION"
+    "INVALID_OPERATION",
+    "SESSION_NOT_FOUND",
+    "SESSION_DEAD",
+    "SESSION_ERROR"
   ],
   "backends": [
     {

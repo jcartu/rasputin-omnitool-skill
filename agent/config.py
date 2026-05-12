@@ -24,6 +24,9 @@ class Config:
     langfuse_host: str = os.getenv("LANGFUSE_HOST", "http://localhost:3000")
     outputs_dir: str = os.getenv("RASPUTIN_OMNITOOL_OUTPUTS_DIR", "outputs")
     sandbox_url: str = os.getenv("RASPUTIN_OMNITOOL_SANDBOX_URL", "http://localhost:8080")
+    sandbox_session_ttl_min: int = int(os.getenv("RASPUTIN_OMNITOOL_SANDBOX_SESSION_TTL_MIN", "60"))
+    sandbox_max_sessions: int = int(os.getenv("RASPUTIN_OMNITOOL_SANDBOX_MAX_SESSIONS", "10"))
+    session_root: str = os.getenv("RASPUTIN_OMNITOOL_SESSION_ROOT", "~/.rasputin/sessions/sandbox")
 
 
 CONFIG = Config()

@@ -46,7 +46,6 @@ def react_execute(
 ) -> ExecutionTrace:
     """Run a ReAct agent loop until the goal is satisfied or a halt fires."""
 
-    del goal_id
     started_at = time.time()
     trace = ExecutionTrace(plan=plan_hint or Plan(goal=goal, tasks=[]))
     trace.final_answer = None
@@ -67,6 +66,7 @@ def react_execute(
     )
     model = CONFIG.executor_model
     recent_calls: list[tuple[str, str]] = []
+    sandbox_session_id: str | None = None
     spent_usd = 0.0
 
     for step in range(max_steps):
@@ -132,6 +132,12 @@ def react_execute(
             except json.JSONDecodeError:
                 args = {}
 
+            if tool_name == "sandbox" and "session_id" not in args:
+                if sandbox_session_id:
+                    args["session_id"] = sandbox_session_id
+                elif goal_id:
+                    args["goal_id"] = goal_id
+
             args_hash = _hash_args(args)
             obs: dict[str, Any]
 
@@ -156,6 +162,8 @@ def react_execute(
                 try:
                     obs = tools[tool_name](args)
                     if "result" in obs:
+                        if tool_name == "sandbox" and obs["result"].get("session_id"):
+                            sandbox_session_id = obs["result"]["session_id"]
                         any_useful_progress = True
                         _collect_artifacts(obs["result"], trace)
                 except Exception as exc:
