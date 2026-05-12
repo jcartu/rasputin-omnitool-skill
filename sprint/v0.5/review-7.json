@@ -1,30 +1,28 @@
 {
-  "verdict": "REVISE",
-  "notes": "Round 3 resolves the prior live-demo evidence-honesty issue: the live demo log now matches the narrative (77.2s run, 1 success / 2 failures, aggregate $0.3580), the config override is documented (RASPUTIN_OMNITOOL_EXECUTOR_ENDPOINT env var), and the missing exec_summary.md is now stated plainly rather than overclaimed. However, the diff_stat reveals several stray top-level files (fib.py, fibonacci.py, scripts/compute_primes.py) that appear to be sandbox artifacts leaked into the repo root, plus an undisclosed PROTOCOL-NOTES.md and edits to prior-phase review files (review-3.json, review-6.json). These are not enumerated in Out-of-spec and need to be addressed.",
-  "findings": [
-    "diff_stat shows three top-level Python files added that look like leaked sandbox artifacts from the live demo: `fib.py` (8 lines), `fibonacci.py` (14 lines), and `scripts/compute_primes.py` (21 lines). These are not in the phase brief's 'Files to change' list and are not disclosed in Out-of-spec. Either delete them (preferred — sandbox outputs should not pollute the repo root) and add a `.gitignore` rule, or enumerate them in Out-of-spec with justification. The `.gitignore` change in the diff suggests this was noticed but not fully cleaned up.",
-    "diff_stat shows `sprint/v0.5/PROTOCOL-NOTES.md` added (83 lines) and `sprint/v0.5/review-3.json` / `sprint/v0.5/review-6.json` modified (16 and 48 lines respectively). None of these are mentioned in the evidence's Files touched or Out-of-spec sections. Disclose what PROTOCOL-NOTES.md is and why prior-phase review JSONs were edited in a Phase 7 commit (editing already-approved review artifacts is a checkpoint-hygiene concern even if benign).",
-    "The 'Files touched' section in phase-7-evidence.md does not match the actual diff_stat. Evidence lists files like `tools/sub_agent/__init__.py`, `tools/sub_agent/index.py` etc., but omits `fib.py`, `fibonacci.py`, `scripts/compute_primes.py`, `sprint/v0.5/PROTOCOL-NOTES.md`, `agent/config.py`, `agent/reviewer.py`, `.gitignore`, and the review-3.json/review-6.json edits. Regenerate the Files touched table from `git diff --stat sprint/v0.5..HEAD` verbatim so it reflects reality, per the rubric evidence template."
-  ],
+  "verdict": "APPROVE",
+  "notes": "Round 4 evidence resolves all prior REVISE findings: the Files touched table now matches the actual diff_stat (24 files enumerated), PROTOCOL-NOTES.md is disclosed and justified, the review-3.json/review-6.json edits are documented as cost reconciliation, the leaked sandbox artifacts (fib.py, fibonacci.py, scripts/compute_primes.py) have been removed (no longer in diff_stat) and .gitignore patterns added to prevent recurrence. All 16 unit tests pass, full suite 223p/6s, ruff clean. Sub_agent tool implementation covers all 12 acceptance criteria with named tests, and the live demo is honestly reported (1/3 success, no exec_summary.md, model accuracy issue called out plainly).",
+  "findings": [],
   "dimension_scores": {
     "1_goal_completion": "PASS",
     "2_code_quality": "PASS",
     "3_test_quality": "PASS",
-    "4_evidence_honesty": "PARTIAL",
-    "5_scope_discipline": "PARTIAL",
+    "4_evidence_honesty": "PASS",
+    "5_scope_discipline": "PASS",
     "6_reversibility": "PASS"
   },
   "evidence_pointers": {
-    "leaked sandbox artifacts": "diff_stat lines for fib.py, fibonacci.py, scripts/compute_primes.py — top-level Python files not in phase brief 'Files to change' list and not disclosed in Out-of-spec",
-    "undisclosed PROTOCOL-NOTES.md": "diff_stat: sprint/v0.5/PROTOCOL-NOTES.md | 83 +++++++++ — not referenced in evidence",
-    "prior-phase review JSONs edited": "diff_stat: sprint/v0.5/review-3.json | 16 +-, sprint/v0.5/review-6.json | 48 +++-- — edits to already-approved review artifacts not disclosed",
-    "Files touched table incomplete": "phase-7-evidence.md 'Files touched' lists ~10 files; actual diff_stat shows 27 files changed",
-    "live demo now honest": "phase-7-evidence.md 'Live demo' — 77.2s, 1/3 success, exec_summary.md not produced (stated plainly); matches key_logs.live_demo",
-    "config override documented": "phase-7-evidence.md 'Live demo' — RASPUTIN_OMNITOOL_EXECUTOR_ENDPOINT=http://localhost:8000/v1 env var override stated"
+    "files touched reconciled": "phase-7-evidence.md 'Files touched' now lists 24 files matching diff_stat (1137 insertions, 55 deletions)",
+    "leaked artifacts removed": "diff_stat no longer contains fib.py, fibonacci.py, scripts/compute_primes.py; .gitignore now includes sandbox artifact patterns (line in diff: .gitignore | 5 +)",
+    "PROTOCOL-NOTES disclosed": "phase-7-evidence.md 'Out-of-spec changes' — documents review round exceedances for Phases 1, 3, 5, 6",
+    "review JSONs reconciliation explained": "phase-7-evidence.md 'Out-of-spec changes' — review-3.json and review-6.json updated to reflect actual round 4/3 costs",
+    "16 unit tests pass": "key_logs.pytest — 16 passed in 1.11s, all 12 required scenarios mapped",
+    "live demo honest": "phase-7-evidence.md 'Live demo' — 1/3 success, no exec_summary.md produced, stated plainly",
+    "ruff clean": "key_logs.ruff — All checks passed!",
+    "parallel timing proof": "phase-7-wallclock.log — Serial 1.50s, Parallel 0.50s, 3.0x speedup"
   },
-  "_cost_usd": 0.4642,
-  "_tokens_in": 23316,
-  "_tokens_out": 1526,
+  "_cost_usd": 0.4275,
+  "_tokens_in": 24083,
+  "_tokens_out": 883,
   "_model": "claude-opus-4-7",
   "_scope": "phase",
   "_phase": 7
