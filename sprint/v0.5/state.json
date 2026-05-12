@@ -16,7 +16,12 @@
     "2": {
       "status": "approved",
       "review_count": 1,
-      "commit": "4503e56"
+      "commit": "536d7c1"
+    },
+    "3": {
+      "status": "awaiting_review",
+      "review_count": 0,
+      "commit": "511e71e"
     }
   },
   "halt_reason": null,
@@ -25,6 +30,7 @@
   "branches": {
     "0": "sprint/v0.5-phase0",
     "1": "sprint/v0.5-phase1",
-    "2": "sprint/v0.5-phase2"
+    "2": "sprint/v0.5-phase2",
+    "3": "sprint/v0.5-phase3"
   }
 }
