@@ -25,7 +25,7 @@
     }
   },
   "halt_reason": null,
-  "total_cost_usd": 2.2404,
+  "total_cost_usd": 2.6793,
   "budget_usd": 25.0,
   "branches": {
     "0": "sprint/v0.5-phase0",
