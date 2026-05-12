@@ -16,6 +16,7 @@ except ModuleNotFoundError:
 from agent.config import CONFIG
 from agent.executor import ExecutionTrace
 from agent.observability import observe, check_cost_ceiling, record_call_cost, extract_usage
+from agent.artifact_registry import ArtifactNotFound, RegistryError, get_registry
 
 Verdict = Literal["APPROVE", "REVISE", "ABORT"]
 
@@ -60,9 +61,10 @@ def review(trace: ExecutionTrace, artifacts: list[str]) -> Review:
 
 
 def _build_user_message(trace: ExecutionTrace, artifacts: list[str]) -> str:
+    artifact_refs = trace.artifacts or artifacts
     payload = {
         "trace": _dataclass_to_dict(trace),
-        "artifacts_for_review": artifacts,
+        "artifacts_for_review": _artifact_summaries(artifact_refs),
     }
     serialized = json.dumps(payload, ensure_ascii=False, indent=2, default=str)
     if len(serialized) > _MAX_TRACE_CHARS:
@@ -74,6 +76,29 @@ def _dataclass_to_dict(value: Any) -> Any:
     if is_dataclass(value):
         return asdict(value)
     return value
+
+
+def _artifact_summaries(artifact_refs: list[str]) -> list[dict[str, Any]]:
+    registry = get_registry()
+    summaries: list[dict[str, Any]] = []
+    for ref in artifact_refs:
+        try:
+            artifact = registry.get(ref)
+        except (ArtifactNotFound, RegistryError):
+            summaries.append({"id": ref, "path": ref, "unresolved": True})
+            continue
+        summaries.append({
+            "id": artifact.id,
+            "path": artifact.path,
+            "kind": artifact.kind,
+            "media_type": artifact.media_type,
+            "size_bytes": artifact.size_bytes,
+            "content_hash": artifact.content_hash,
+            "produced_by": artifact.produced_by,
+            "goal_id": artifact.goal_id,
+            "derived_from": list(artifact.derived_from),
+        })
+    return summaries
 
 
 def _response_text(response: Any) -> str:

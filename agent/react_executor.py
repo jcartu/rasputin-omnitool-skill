@@ -11,6 +11,7 @@ from typing import Any, Callable
 
 from openai import OpenAI
 
+from agent.artifact_registry import RegistryError, get_registry
 from agent.config import CONFIG
 from agent.executor import ExecutionTrace
 from agent.observability import (
@@ -174,7 +175,13 @@ def react_execute(
                         if tool_name == "sandbox" and obs["result"].get("session_id"):
                             sandbox_session_id = obs["result"]["session_id"]
                         any_useful_progress = True
-                        _collect_artifacts(obs["result"], trace)
+                        _collect_artifacts(
+                            obs["result"],
+                            trace,
+                            tool_name=tool_name,
+                            step_id=str(step),
+                            goal_id=str(args.get("goal_id") or args.get("_goal_id") or goal_id or "ad-hoc"),
+                        )
                 except Exception as exc:
                     obs = {
                         "error": {
@@ -273,23 +280,82 @@ def _preview(obs: dict, max_chars: int) -> str:
     return text[:max_chars] + ("..." if len(text) > max_chars else "")
 
 
-def _collect_artifacts(result: dict, trace: ExecutionTrace) -> None:
+def _collect_artifacts(
+    result: dict,
+    trace: ExecutionTrace,
+    *,
+    tool_name: str = "tool",
+    step_id: str = "step",
+    goal_id: str = "ad-hoc",
+) -> None:
     artifact_id = result.get("artifact_id")
     if artifact_id:
-        trace.artifacts.append(artifact_id)
-        return
+        _append_artifact_id(trace, artifact_id)
+
+    artifact = result.get("artifact")
+    if isinstance(artifact, dict):
+        _append_artifact_id(trace, artifact.get("id") or artifact.get("artifact_id"))
+
     for key in ("path", "audio_path", "image_path", "video_path"):
         value = result.get(key)
         if value:
-            trace.artifacts.append(value)
+            _register_path_artifact(
+                value,
+                trace,
+                produced_by=f"{tool_name}/{step_id}",
+                goal_id=goal_id,
+            )
     for artifact in result.get("artifacts", []):
         if isinstance(artifact, dict):
-            if artifact.get("artifact_id"):
-                trace.artifacts.append(artifact["artifact_id"])
-            elif artifact.get("path"):
-                trace.artifacts.append(artifact["path"])
+            if _append_artifact_id(trace, artifact.get("artifact_id") or artifact.get("id")):
+                continue
+            nested = artifact.get("artifact")
+            if isinstance(nested, dict) and _append_artifact_id(
+                trace,
+                nested.get("id") or nested.get("artifact_id"),
+            ):
+                continue
+            if artifact.get("path"):
+                _register_path_artifact(
+                    artifact["path"],
+                    trace,
+                    produced_by=f"{tool_name}/{step_id}",
+                    goal_id=goal_id,
+                )
         elif isinstance(artifact, str):
-            trace.artifacts.append(artifact)
+            _register_path_artifact(
+                artifact,
+                trace,
+                produced_by=f"{tool_name}/{step_id}",
+                goal_id=goal_id,
+            )
+
+
+def _append_artifact_id(trace: ExecutionTrace, artifact_id: Any) -> bool:
+    if not artifact_id:
+        return False
+    artifact_id = str(artifact_id)
+    if artifact_id not in trace.artifacts:
+        trace.artifacts.append(artifact_id)
+    return True
+
+
+def _register_path_artifact(
+    path: Any,
+    trace: ExecutionTrace,
+    *,
+    produced_by: str,
+    goal_id: str,
+) -> None:
+    if not path:
+        return
+    path = str(path)
+    try:
+        art = get_registry().add(Path(path), produced_by=produced_by, goal_id=goal_id)
+    except RegistryError:
+        _append_artifact_id(trace, path)
+    else:
+        _append_artifact_id(trace, art.id)
 
 
 def _compact_if_oversize(messages: list[dict], soft_cap_tokens: int) -> list[dict]:

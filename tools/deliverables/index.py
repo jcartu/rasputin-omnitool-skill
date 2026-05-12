@@ -12,6 +12,8 @@ from pathlib import Path
 import uuid
 from typing import Any
 
+from agent.artifact_registry import get_registry
+
 
 ALLOWED_FORMATS = {"md", "pdf", "xlsx", "pptx", "csv", "html", "png"}
 
@@ -71,7 +73,7 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
         if "md" in formats:
             p = output_dir / f"{prefix}.md"
             p.write_text(md_content)
-            artifacts.append({"name": f"{prefix}.md", "path": str(p), "size_bytes": p.stat().st_size, "format": "md"})
+            artifacts.append(_artifact_result(p, f"{prefix}.md", "md", goal_id))
 
         if "csv" in formats and table_data:
             import csv
@@ -79,7 +81,7 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
             with p.open("w", newline="") as f:
                 w = csv.writer(f)
                 w.writerows(table_data)
-            artifacts.append({"name": f"{prefix}.csv", "path": str(p), "size_bytes": p.stat().st_size, "format": "csv"})
+            artifacts.append(_artifact_result(p, f"{prefix}.csv", "csv", goal_id))
 
         if "html" in formats:
             import html as html_mod
@@ -94,7 +96,7 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
             html_content = f"""<!doctype html><html><head><meta charset='utf-8'><title>{html_mod.escape(str(title))}</title><style>body{{font-family:Inter,Arial,sans-serif;margin:40px}}table{{border-collapse:collapse;width:100%}}td,th{{border:1px solid #ddd;padding:8px}}</style></head><body><h1>{html_mod.escape(str(title))}</h1>{html_rows}</body></html>"""
             p = output_dir / f"{prefix}.html"
             p.write_text(html_content)
-            artifacts.append({"name": f"{prefix}.html", "path": str(p), "size_bytes": p.stat().st_size, "format": "html"})
+            artifacts.append(_artifact_result(p, f"{prefix}.html", "html", goal_id))
 
         if "pdf" in formats:
             try:
@@ -107,7 +109,7 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
             except Exception:
                 p = output_dir / f"{prefix}.pdf"
                 p.write_bytes(b"%PDF-1.4\n% Become Manus fallback PDF\n1 0 obj <<>> endobj\ntrailer <<>>\n%%EOF\n")
-            artifacts.append({"name": f"{prefix}.pdf", "path": str(p), "size_bytes": p.stat().st_size, "format": "pdf"})
+            artifacts.append(_artifact_result(p, f"{prefix}.pdf", "pdf", goal_id))
 
         if "xlsx" in formats:
             rows = [["Section", "Content"]] + [[s.get("heading", ""), s.get("body", "")] for s in sections]
@@ -115,21 +117,25 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
                 rows = table_data
             p = output_dir / f"{prefix}.xlsx"
             _write_minimal_xlsx(p, rows)
-            artifacts.append({"name": f"{prefix}.xlsx", "path": str(p), "size_bytes": p.stat().st_size, "format": "xlsx"})
+            artifacts.append(_artifact_result(p, f"{prefix}.xlsx", "xlsx", goal_id))
 
         if "pptx" in formats:
             bullets = [s.get("heading", "") + ": " + s.get("body", "") for s in sections]
             p = output_dir / f"{prefix}.pptx"
             _write_minimal_pptx(p, title, bullets)
-            artifacts.append({"name": f"{prefix}.pptx", "path": str(p), "size_bytes": p.stat().st_size, "format": "pptx"})
+            artifacts.append(_artifact_result(p, f"{prefix}.pptx", "pptx", goal_id))
 
         if "png" in formats and chart_spec:
             chart_rows = [{"capability": str(k), "score": float(v)} for k, v in chart_spec.items()]
             p = output_dir / f"{prefix}_chart.png"
             _write_fallback_chart_png(p, chart_rows)
-            artifacts.append({"name": f"{prefix}_chart.png", "path": str(p), "size_bytes": p.stat().st_size, "format": "png"})
+            artifacts.append(_artifact_result(p, f"{prefix}_chart.png", "png", goal_id))
 
-        return {"result": {"artifacts": artifacts}}
+        result: dict[str, Any] = {"artifacts": artifacts}
+        if artifacts:
+            result["artifact_id"] = artifacts[0]["artifact_id"]
+            result["artifact"] = artifacts[0]["artifact"]
+        return {"result": result}
 
     except Exception as e:
         return {
@@ -138,6 +144,25 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
                 "message": str(e),
             }
         }
+
+
+def _artifact_result(path: Path, name: str, fmt: str, goal_id: str) -> dict[str, Any]:
+    art = get_registry().add(path, produced_by="deliverables/run", goal_id=goal_id or "ad-hoc")
+    return {
+        "name": name,
+        "path": str(path),
+        "size_bytes": path.stat().st_size,
+        "format": fmt,
+        "artifact_id": art.id,
+        "artifact": {
+            "id": art.id,
+            "path": art.path,
+            "kind": art.kind,
+            "media_type": art.media_type,
+            "size_bytes": art.size_bytes,
+            "content_hash": art.content_hash,
+        },
+    }
 
 
 if __name__ == "__main__":

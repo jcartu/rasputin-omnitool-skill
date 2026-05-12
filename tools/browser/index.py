@@ -11,6 +11,7 @@ from typing import Any
 
 from agent.browser_session import BrowserSession, get_browser_session_manager
 from agent.config import CONFIG
+from agent.artifact_registry import RegistryError, get_registry
 
 
 def run(inputs: dict[str, Any]) -> dict[str, Any]:
@@ -101,7 +102,8 @@ def _action_screenshot(page: Any, inputs: dict[str, Any]) -> dict[str, Any]:
     from uuid import uuid4
     path = screenshots_dir / f"screenshot_{uuid4().hex}.png"
     page.screenshot(path=str(path))
-    return {"path": str(path), "title": page.title()}
+    result = {"path": str(path), "title": page.title()}
+    return _with_artifact(result, path, inputs.get("goal_id") or inputs.get("_goal_id"))
 
 
 def _action_extract_text(page: Any, inputs: dict[str, Any]) -> dict[str, Any]:
@@ -205,6 +207,23 @@ def _classify_error(e: Exception, action: str) -> dict[str, Any]:
     if "session" in err_str and ("not_found" in err_str or "missing" in err_str):
         return {"error": {"code": "SESSION_NOT_FOUND", "message": str(e)}}
     return {"error": {"code": "NAVIGATION_FAILED", "message": str(e)}}
+
+
+def _with_artifact(result: dict[str, Any], path: Path, goal_id: str | None) -> dict[str, Any]:
+    try:
+        art = get_registry().add(path, produced_by="browser/run", goal_id=goal_id or "ad-hoc")
+    except RegistryError:
+        return result
+    result["artifact_id"] = art.id
+    result["artifact"] = {
+        "id": art.id,
+        "path": art.path,
+        "kind": art.kind,
+        "media_type": art.media_type,
+        "size_bytes": art.size_bytes,
+        "content_hash": art.content_hash,
+    }
+    return result
 
 
 if __name__ == "__main__":
