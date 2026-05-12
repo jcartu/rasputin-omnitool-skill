@@ -34,12 +34,32 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
         if result.returncode != 0:
             return {"error": {"code": "MARP_FAILED", "message": f"Marp failed: {result.stderr.strip()}"}}
 
-        return {
+        # Register artifact
+        goal_id = inputs.get("goal_id")
+        try:
+            from agent.artifact_registry import get_registry
+            art = get_registry().add(out_path, produced_by="slides/run", goal_id=goal_id or "ad-hoc")
+            artifact_data = {
+                "id": art.id,
+                "path": art.path,
+                "kind": art.kind,
+                "media_type": art.media_type,
+                "size_bytes": art.size_bytes,
+                "content_hash": art.content_hash,
+            }
+        except Exception:
+            artifact_data = None
+
+        result = {
             "result": {
                 "path": str(out_path),
                 "format": output_format,
             }
         }
+        if artifact_data:
+            result["result"]["artifact_id"] = artifact_data["id"]
+            result["result"]["artifact"] = artifact_data
+        return result
 
     except FileNotFoundError:
         return {"error": {"code": "MARP_NOT_INSTALLED", "message": "Marp CLI not found. Install: npm install -g @marp-team/marp-cli"}}
@@ -52,8 +72,8 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
         if md_path.exists():
             md_path.unlink()
 
-
 if __name__ == "__main__":
-    import json, sys
+    import json
+    import sys
     payload = json.loads(sys.stdin.read())
     print(json.dumps(run(payload)))

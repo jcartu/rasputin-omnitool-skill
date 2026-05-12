@@ -6,20 +6,21 @@ import os
 import time
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 
 from agent import run_goal
 from agent.executor import ExecutionTrace
-from agent.planner import Plan, PlanTask
-from agent.reviewer import Review
+from agent.tool_registry import invalidate_metadata_cache, load_tool_metadata
 
 
 # ── 4-7 — Full loop with mocked tools ────────────────────────────────────
 
 
 def test_run_goal_with_mocked_tools(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    # Force static executor mode for this test (it was written for the static executor).
+    monkeypatch.setenv("RASPUTIN_OMNITOOL_EXECUTOR_MODE", "static")
     """Full plan → execute → review loop completes with mocked tools in ≤2 minutes."""
     monkeypatch.chdir(tmp_path)
 
@@ -75,17 +76,12 @@ def test_run_goal_with_mocked_tools(monkeypatch: pytest.MonkeyPatch, tmp_path) -
     fake_anthropic_cls = Mock(return_value=fake_review_client)
     monkeypatch.setattr("agent.reviewer.anthropic.Anthropic", fake_anthropic_cls)
 
-    # Mock tool metadata loader (patch at the import site used by agent/__init__.py).
-    monkeypatch.setattr(
-        "agent.load_tool_metadata",
-        lambda: [
-            {"name": "crawl4ai", "description": "Web crawler"},
-            {"name": "deliverables", "description": "File generator"},
-        ],
-    )
+    # Use the real metadata loader while mocking backend probes to keep the loop deterministic.
+    invalidate_metadata_cache()
+    monkeypatch.setattr("agent.tool_registry.probe_backends", lambda tools: tools)
 
     # Mock tool registry (patch at the import site used by agent/__init__.py).
-    def mock_load_tools():
+    def mock_load_tools(**kwargs):
         return {
             "crawl4ai": lambda inp: {
                 "result": {"markdown": "Example Domain\n\nThis domain is for use in documentation.", "url": "http://example.com"}
@@ -107,6 +103,13 @@ def test_run_goal_with_mocked_tools(monkeypatch: pytest.MonkeyPatch, tmp_path) -
     assert len(result["trace"].steps) == 2
     assert result["review"].verdict == "APPROVE"
     assert result["revised"] is False
+    metadata = load_tool_metadata()
+    metadata_by_name = {tool["name"]: tool for tool in metadata}
+    assert {"crawl4ai", "deliverables"} <= set(metadata_by_name)
+    assert metadata_by_name["crawl4ai"]["tags"] == ["web", "fetch", "markdown"]
+    planner_payload = json.loads(fake_plan_completions.create.call_args.kwargs["messages"][1]["content"])
+    payload_by_name = {tool["name"]: tool for tool in planner_payload["tool_catalog"]}
+    assert payload_by_name["crawl4ai"]["tags"] == ["web", "fetch", "markdown"]
     # Completed within 2 minutes.
     assert elapsed < 120, f"Loop took {elapsed:.1f}s, expected <120s"
 

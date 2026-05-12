@@ -1,10 +1,12 @@
 """tools/image_gen/index.py — Generate images via ComfyUI."""
 from __future__ import annotations
+import time
 import uuid
 from pathlib import Path
 from typing import Any
 
 from agent.config import CONFIG
+from agent.artifact_registry import get_registry
 
 
 def _build_workflow(prompt: str, style: str, aspect_ratio: str) -> dict:
@@ -148,7 +150,6 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
                 if images and images[0].get("filename"):
                     filename = images[0]["filename"]
                     subfolder = images[0].get("subfolder", "")
-                    full_path = f"{subfolder}/{filename}" if subfolder else filename
                     # Download image with timeout
                     download_resp = httpx.get(
                         f"{comfy_url}/view?filename={filename}&subfolder={subfolder}&type=output",
@@ -156,7 +157,11 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
                     )
                     if download_resp.status_code == 200:
                         path.write_bytes(download_resp.content)
-                        return {"result": {"image_path": str(path), "metadata": {"prompt": prompt, "style": style}}}
+                        result = {
+                            "image_path": str(path),
+                            "metadata": {"prompt": prompt, "style": style},
+                        }
+                        return {"result": _with_artifact(result, path, goal_id)}
                 break
 
         return {"error": {"code": "WORKFLOW_FAILED", "message": "Generation timed out"}}
@@ -167,8 +172,23 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
         return {"error": {"code": "WORKFLOW_FAILED", "message": str(e)}}
 
 
+def _with_artifact(result: dict[str, Any], path: Path, goal_id: str | None) -> dict[str, Any]:
+    art = get_registry().add(path, produced_by="image_gen/run", goal_id=goal_id or "ad-hoc")
+    result["artifact_id"] = art.id
+    result["artifact"] = {
+        "id": art.id,
+        "path": art.path,
+        "kind": art.kind,
+        "media_type": art.media_type,
+        "size_bytes": art.size_bytes,
+        "content_hash": art.content_hash,
+    }
+    return result
+
+
 if __name__ == "__main__":
-    import json, sys
+    import json
+    import sys
 
     payload = json.loads(sys.stdin.read())
     print(json.dumps(run(payload)))

@@ -1,0 +1,87 @@
+{
+  "sprint": "v0.5",
+  "started_at": "2026-05-12T08:25:00Z",
+  "current_phase": 10,
+  "phase_status": {
+    "0": {
+      "status": "approved",
+      "review_count": 1,
+      "commit": "38182a3"
+    },
+    "1": {
+      "status": "approved",
+      "review_count": 3,
+      "commit": "6c876cb"
+    },
+    "2": {
+      "status": "approved",
+      "review_count": 1,
+      "commit": "536d7c1"
+    },
+    "3": {
+      "status": "approved",
+      "review_count": 4,
+      "commit": "ab56e95"
+    },
+    "4": {
+      "status": "approved",
+      "review_count": 2,
+      "commit": "be59cb3"
+    },
+    "5": {
+      "status": "approved",
+      "review_count": 3,
+      "commit": "98c3e3e"
+    },
+    "6": {
+      "status": "approved",
+      "review_count": 3,
+      "commit": "28bac5f"
+    },
+    "7": {
+      "status": "approved",
+      "review_count": 5,
+      "commit": "c3f5863"
+    },
+    "8": {
+      "status": "deferred",
+      "review_count": 0,
+      "commit": null,
+      "deferred_to": "v0.6",
+      "deferred_at": "2026-05-12T13:47:54.412774+00:00",
+      "deferred_because": "P1 streaming formally deferred to v0.6 via signed rubric amendment b35d07c (citing original handover P0/P1 split: HANDOVER line 3, final-rubric.md line 61). Phase 8 was scoped at 3-4h in the brief and ran over; per the amendment, streaming is documented as v0.6 backlog item 1 in sprint/v0.5/final-evidence.md."
+    },
+    "9": {
+      "status": "approved",
+      "review_count": 1,
+      "commit": "fe04e47",
+      "approved_at": "2026-05-12T14:28:50.174960+00:00"
+    }
+  },
+  "halt_reason": null,
+  "final_verdict": "APPROVE",
+  "final_review_count": 1,
+  "total_cost_usd": 11.0363,
+  "budget_usd": 25.0,
+  "branches": {
+    "0": "sprint/v0.5-phase0",
+    "1": "sprint/v0.5-phase1",
+    "2": "sprint/v0.5-phase2",
+    "3": "sprint/v0.5-phase3",
+    "4": "sprint/v0.5-phase4",
+    "5": "sprint/v0.5-phase5",
+    "6": "sprint/v0.5-phase6",
+    "7": "sprint/v0.5-phase7"
+  },
+  "previous_final_review": {
+    "verdict": "ABORT",
+    "review_count": 3,
+    "halt_reason": "final-review-aborted: two consecutive REVISE on final (streaming absent, golden goals not run)",
+    "review_file": "sprint/v0.5/review-final-round3-aborted.json",
+    "cleared_at": "2026-05-12T13:47:11.869898+00:00",
+    "cleared_because": "Rubric amendment b35d07c formally deferred P1 streaming to v0.6 (citing original handover P0/P1 split: HANDOVER line 3, final-rubric.md line 61). Golden goals run end-to-end in commit 57a4e87 (final-golden.log, final-golden-summary.json: 3 goals ran, 0/3 APPROVE \u2014 captured as Dim 1 partial evidence). Both ABORT reasons addressed. Re-submitting against the amended rubric per path-B closeout."
+  },
+  "sprint_complete": true,
+  "completed_at": "2026-05-12T14:28:50.174960+00:00",
+  "released_tag": "v0.5.0"
+}

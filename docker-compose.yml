@@ -16,66 +16,15 @@ services:
     profiles: ["cpu", "gpu-single", "gpu-multi"]
     restart: unless-stopped
 
-  langfuse-postgres:
-    image: postgres:15
-    container_name: rasputin-langfuse-pg
-    environment:
-      POSTGRES_USER: langfuse
-      POSTGRES_PASSWORD: langfuse
-      POSTGRES_DB: langfuse
-    volumes:
-      - langfuse-pg:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "langfuse"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-    profiles: ["cpu", "gpu-single", "gpu-multi"]
-
-  langfuse-clickhouse:
-    image: clickhouse/clickhouse-server:24
-    container_name: rasputin-langfuse-ch
-    volumes:
-      - langfuse-ch:/var/lib/clickhouse
-    healthcheck:
-      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-    profiles: ["cpu", "gpu-single", "gpu-multi"]
-
-  langfuse-web:
-    image: langfuse/langfuse:2
-    container_name: rasputin-langfuse-web
-    ports:
-      - "3000:3000"
-    environment:
-      DATABASE_URL: postgresql://langfuse:langfuse@langfuse-postgres:5432/langfuse
-      CLICKHOUSE_URL: http://langfuse-clickhouse:8123
-      NEXTAUTH_URL: http://localhost:3000
-      NEXTAUTH_SECRET: ${LANGFUSE_NEXTAUTH_SECRET:-default-dev-secret-change-me}
-      SALT: ${LANGFUSE_SALT:-default-salt-change-me}
-    depends_on:
-      langfuse-postgres:
-        condition: service_healthy
-      langfuse-clickhouse:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:3000/api/public/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
-    profiles: ["cpu", "gpu-single", "gpu-multi"]
-
   searxng:
     image: searxng/searxng:latest
     container_name: rasputin-searxng
     ports:
-      - "8888:8080"
+      - "8889:8080"
     volumes:
       - ./searxng-config:/etc/searxng:rw
     environment:
-      SEARXNG_BASE_URL: http://localhost:8888/
+      SEARXNG_BASE_URL: http://localhost:8889/
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz"]
       interval: 10s
@@ -103,37 +52,3 @@ services:
       timeout: 5s
       retries: 5
     profiles: ["gpu-single", "gpu-multi"]
-
-  wan-worker:
-    image: ${WAN_IMAGE:-ghcr.io/wan-video/wan-2.1-server:latest}
-    container_name: rasputin-wan
-    ports:
-      - "8810:8810"
-    volumes:
-      - ${WAN_MODELS_DIR:-~/wan-models}:/models
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    profiles: ["gpu-multi"]
-
-  musicgen-worker:
-    image: ${MUSICGEN_IMAGE:-ghcr.io/musicgen/musicgen-server:latest}
-    container_name: rasputin-musicgen
-    ports:
-      - "8811:8811"
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    profiles: ["gpu-multi"]
-
-volumes:
-  langfuse-pg:
-  langfuse-ch:

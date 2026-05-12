@@ -10,7 +10,7 @@ import pytest
 
 from agent.executor import execute, ExecutionTrace
 from agent.planner import Plan, PlanTask, PlannerOutputError, plan
-from agent.reviewer import ReviewParseError, review
+from agent.reviewer import review
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────

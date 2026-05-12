@@ -5,9 +5,10 @@ import re
 import json
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Callable
 
+from agent.artifact_registry import ArtifactNotFound, RegistryError, get_registry
 from agent.planner import Plan
 from agent.observability import observe
 
@@ -19,6 +20,18 @@ class ExecutionTrace:
     steps: list[dict[str, Any]] = field(default_factory=list)
     artifacts: list[str] = field(default_factory=list)
     halted_for: str | None = None
+    final_answer: str | None = None
+
+    def artifact_paths(self) -> list[str]:
+        """Return artifact file paths, resolving registry IDs when possible."""
+        registry = get_registry()
+        paths: list[str] = []
+        for artifact_id in self.artifacts:
+            try:
+                paths.append(registry.get(artifact_id).path)
+            except (ArtifactNotFound, RegistryError):
+                paths.append(artifact_id)
+        return paths
 
 
 @observe("executor.execute")
@@ -34,8 +47,9 @@ def execute(
     from agent.config import CONFIG
     from agent.observability import set_goal_id
 
-    goal_id = set_goal_id()
+    set_goal_id()
     trace = ExecutionTrace(plan=plan)
+    goal_id = str((context or {}).get("goal_id") or (context or {}).get("_goal_id") or "ad-hoc")
     previous_results: dict[str, Any] = {}
     step_count = 0
     failure_count = 0
@@ -83,16 +97,16 @@ def execute(
 
             if "result" in result:
                 previous_results[task.id] = result["result"]
-                # Collect artifact paths
-                for key in ("path", "audio_path", "image_path", "video_path"):
-                    if key in result["result"] and result["result"][key]:
-                        trace.artifacts.append(result["result"][key])
-                if "artifacts" in result["result"]:
-                    for a in result["result"]["artifacts"]:
-                        if isinstance(a, dict) and "path" in a:
-                            trace.artifacts.append(a["path"])
-                        elif isinstance(a, str):
-                            trace.artifacts.append(a)
+                # Collect artifacts with automatic lineage wiring
+                derived_from = _resolve_lineage(task.inputs, previous_results, trace)
+                _collect_artifacts(
+                    result["result"],
+                    trace,
+                    tool_name=tool_name,
+                    task_id=task.id,
+                    goal_id=goal_id,
+                    derived_from=derived_from,
+                )
             else:
                 failure_count += 1
                 previous_results[task.id] = None
@@ -109,6 +123,138 @@ def execute(
 
     return trace
 
+
+def _collect_artifacts(
+    result: dict[str, Any],
+    trace: ExecutionTrace,
+    *,
+    tool_name: str,
+    task_id: str,
+    goal_id: str,
+    derived_from: list[str] | None = None,
+) -> None:
+    """Collect artifact IDs from a tool result, registering legacy path outputs."""
+    _append_artifact_id(trace, result.get("artifact_id"))
+
+    artifact = result.get("artifact")
+    if isinstance(artifact, dict):
+        _append_artifact_id(trace, artifact.get("id") or artifact.get("artifact_id"))
+
+    for key in ("path", "audio_path", "image_path", "video_path"):
+        _register_path_artifact(
+            result.get(key),
+            trace,
+            produced_by=f"{tool_name}/{task_id}",
+            goal_id=goal_id,
+            derived_from=derived_from,
+        )
+
+    for item in result.get("artifacts", []):
+        if isinstance(item, dict):
+            if _append_artifact_id(trace, item.get("artifact_id") or item.get("id")):
+                continue
+            nested = item.get("artifact")
+            if isinstance(nested, dict) and _append_artifact_id(
+                trace,
+                nested.get("id") or nested.get("artifact_id"),
+            ):
+                continue
+            _register_path_artifact(
+                item.get("path"),
+                trace,
+                produced_by=f"{tool_name}/{task_id}",
+                goal_id=goal_id,
+                derived_from=derived_from,
+            )
+        elif isinstance(item, str):
+            _register_path_artifact(
+                item,
+                trace,
+                produced_by=f"{tool_name}/{task_id}",
+                goal_id=goal_id,
+                derived_from=derived_from,
+            )
+
+
+def _append_artifact_id(trace: ExecutionTrace, artifact_id: Any) -> bool:
+    if not artifact_id:
+        return False
+    artifact_id = str(artifact_id)
+    if artifact_id not in trace.artifacts:
+        trace.artifacts.append(artifact_id)
+    return True
+
+
+def _register_path_artifact(
+    path: Any,
+    trace: ExecutionTrace,
+    *,
+    produced_by: str,
+    goal_id: str,
+    derived_from: list[str] | None = None,
+) -> None:
+    if not path:
+        return
+    path = str(path)
+    try:
+        art = get_registry().add(Path(path), produced_by=produced_by, goal_id=goal_id, derived_from=derived_from)
+    except RegistryError:
+        # Preserve legacy behavior for path-only tools that report non-local paths.
+        _append_artifact_id(trace, path)
+    else:
+        _append_artifact_id(trace, art.id)
+
+def _resolve_lineage(
+    inputs: dict[str, Any],
+    previous_results: dict[str, Any],
+    trace: ExecutionTrace,
+) -> list[str]:
+    """Resolve artifact IDs from input references to build derived_from lineage."""
+    lineage: list[str] = []
+    for ref_id, result in previous_results.items():
+        if not isinstance(result, dict):
+            continue
+        # Check if this task's inputs reference the previous task's output
+        input_str = json.dumps(inputs)
+        ref_prefix = "${" + ref_id
+        if ref_prefix in input_str:
+            # Previous task produced artifacts that this task consumes
+            for key in ("artifact_id", "path", "audio_path", "image_path", "video_path"):
+                val = result.get(key)
+                if val:
+                    lineage.append(str(val))
+                    break
+            for item in result.get("artifacts", []):
+                if isinstance(item, dict):
+                    aid = item.get("artifact_id") or item.get("id")
+                    if aid:
+                        lineage.append(str(aid))
+                elif isinstance(item, str):
+                    lineage.append(item)
+    # Resolve any raw paths to artifact IDs via the registry
+    resolved: list[str] = []
+    registry = get_registry()
+    for val in lineage:
+        # If it looks like an artifact ID (ULID: digits-dash-hex), use directly
+        if len(val) == 28 and val[13] == "-" and not val.startswith("/"):
+            resolved.append(val)
+        else:
+            # Try to resolve path to artifact ID via hash lookup
+            try:
+                p = Path(val)
+                if p.exists():
+                    from agent.artifact_registry import _sha256_of
+                    h = _sha256_of(p)
+                    matches = registry.find_by_hash(h)
+                    if matches:
+                        resolved.append(matches[0].id)
+                    else:
+                        resolved.append(val)  # keep path as fallback
+                else:
+                    resolved.append(val)
+            except Exception:
+                resolved.append(val)
+    return list(dict.fromkeys(resolved))  # dedupe, preserve order
 
 def _substitute_placeholders(
     obj: Any,

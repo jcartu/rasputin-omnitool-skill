@@ -1,7 +1,7 @@
 {
   "name": "browser",
-  "version": "0.4.0",
-  "description": "Operate a browser via Playwright MCP.",
+  "version": "0.5.0",
+  "description": "Operate a browser via Playwright with persistent sessions.",
   "inputs": {
     "action": {
       "type": "string",
@@ -11,7 +11,9 @@
         "screenshot",
         "extract_text",
         "fill_form",
-        "click"
+        "click",
+        "wait_for_selector",
+        "evaluate"
       ]
     },
     "url": {
@@ -25,16 +27,64 @@
     "value": {
       "type": "string",
       "required": false
+    },
+    "session_id": {
+      "type": "string",
+      "required": false
+    },
+    "goal_id": {
+      "type": "string",
+      "required": false
+    },
+    "headless": {
+      "type": "boolean",
+      "required": false,
+      "default": true
+    },
+    "state": {
+      "type": "string",
+      "required": false,
+      "enum": ["attached", "visible", "hidden", "detached"]
+    },
+    "timeout_ms": {
+      "type": "integer",
+      "required": false
+    },
+    "expression": {
+      "type": "string",
+      "required": false
+    },
+    "wait_for_selector": {
+      "type": "string",
+      "required": false
+    },
+    "wait_for_navigation": {
+      "type": "boolean",
+      "required": false,
+      "default": true
     }
   },
   "outputs": {
     "result": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "session_id": "string (when session-based)",
+        "final_url": "string (navigate, click)",
+        "title": "string (navigate, screenshot)",
+        "status": "integer (navigate)",
+        "path": "string (screenshot)",
+        "text": "string (extract_text)",
+        "result": "any (evaluate)",
+        "found": "boolean (wait_for_selector)"
+      }
     }
   },
+  "tags": ["web", "automation", "interactive", "session-aware"],
   "errors": [
     "NAVIGATION_FAILED",
     "SELECTOR_NOT_FOUND",
-    "TIMEOUT"
+    "TIMEOUT",
+    "SESSION_NOT_FOUND",
+    "SESSION_DEAD"
   ]
 }

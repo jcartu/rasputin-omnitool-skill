@@ -1,10 +1,7 @@
 """tools/mail/index.py — Send/receive email via Himalaya CLI."""
 from __future__ import annotations
 
-import os
 import subprocess
-import uuid
-from pathlib import Path
 from typing import Any
 
 
@@ -44,28 +41,11 @@ def _send(inputs: dict[str, Any]) -> dict[str, Any]:
     if not to:
         return {"error": {"code": "INVALID_INPUT", "message": "Missing 'to' parameter"}}
 
-    # Write body to temp file
-    outputs_dir = Path(os.environ.get("RASPUTIN_OMNITOOL_OUTPUTS_DIR", "outputs"))
-    outputs_dir.mkdir(parents=True, exist_ok=True)
-    body_path = outputs_dir / f"mail-body-{uuid.uuid4().hex[:8]}.txt"
-    body_path.write_text(body, encoding="utf-8")
-
-    try:
-        cmd = [
-            "himalaya", "send",
-            "--to", to,
-            "--subject", subject,
-        ]
-        result = subprocess.run(
-            cmd, input=body, capture_output=True, text=True, timeout=60
-        )
-        if result.returncode != 0:
-            return {"error": {"code": "HIMALAYA_FAILED", "message": f"Himalaya send failed: {result.stderr.strip()}"}}
-
-        return {"result": {"status": "sent", "to": to, "subject": subject}}
-    finally:
-        if body_path.exists():
-            body_path.unlink()
+    cmd = ["himalaya", "send", "--to", to, "--subject", subject]
+    result = subprocess.run(cmd, input=body, capture_output=True, text=True, timeout=60)
+    if result.returncode != 0:
+        return {"error": {"code": "HIMALAYA_FAILED", "message": f"Himalaya send failed: {result.stderr.strip()}"}}
+    return {"result": {"status": "sent", "to": to, "subject": subject}}
 
 
 def _list(inputs: dict[str, Any]) -> dict[str, Any]:
@@ -94,6 +74,8 @@ def _read(inputs: dict[str, Any]) -> dict[str, Any]:
 
 
 if __name__ == "__main__":
-    import json, sys
+    import json
+    import sys
+
     payload = json.loads(sys.stdin.read())
     print(json.dumps(run(payload)))

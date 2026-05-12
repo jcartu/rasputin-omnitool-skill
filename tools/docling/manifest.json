@@ -22,6 +22,7 @@
       "type": "object"
     }
   },
+  "tags": ["document", "parse", "files"],
   "errors": [
     "FILE_NOT_FOUND",
     "OUTSIDE_ALLOWED_PATH",

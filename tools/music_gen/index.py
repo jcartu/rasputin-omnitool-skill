@@ -5,6 +5,7 @@ import uuid
 from typing import Any
 
 from agent.config import CONFIG
+from agent.artifact_registry import get_registry
 
 
 def run(inputs: dict[str, Any]) -> dict[str, Any]:
@@ -26,14 +27,29 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
         model = MusicGen.get_pretrained("facebook/musicgen-melody")
         waves = model.generate([prompt], duration=duration_s)
         torchaudio.save(str(path), waves[0].cpu(), model.sample_rate)
-        return {"result": {"audio_path": str(path)}}
+        return {"result": _with_artifact({"audio_path": str(path)}, path, goal_id)}
     except ImportError:
         return {"error": {"code": "MODEL_UNAVAILABLE", "message": "MusicGen (audiocraft) not installed"}}
     except Exception as e:
         return {"error": {"code": "GENERATION_FAILED", "message": f"MusicGen generation failed: {e}"}}
 
 
+def _with_artifact(result: dict[str, Any], path: Path, goal_id: str | None) -> dict[str, Any]:
+    art = get_registry().add(path, produced_by="music_gen/run", goal_id=goal_id or "ad-hoc")
+    result["artifact_id"] = art.id
+    result["artifact"] = {
+        "id": art.id,
+        "path": art.path,
+        "kind": art.kind,
+        "media_type": art.media_type,
+        "size_bytes": art.size_bytes,
+        "content_hash": art.content_hash,
+    }
+    return result
+
+
 if __name__ == "__main__":
-    import json, sys
+    import json
+    import sys
     payload = json.loads(sys.stdin.read())
     print(json.dumps(run(payload)))

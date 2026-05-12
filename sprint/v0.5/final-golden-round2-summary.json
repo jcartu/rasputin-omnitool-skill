@@ -1,0 +1,41 @@
+{
+  "total": 3,
+  "passed": 0,
+  "failed": 3,
+  "results": [
+    {
+      "name": "build",
+      "status": "fail",
+      "verdict": null,
+      "artifacts_count": 0,
+      "cost_usd": 0.0,
+      "wallclock_s": 202.0,
+      "failures": [
+        "verdict=None != expected APPROVE"
+      ]
+    },
+    {
+      "name": "multimedia",
+      "status": "fail",
+      "verdict": "ABORT",
+      "artifacts_count": 4,
+      "cost_usd": 0.279705,
+      "wallclock_s": 56.3,
+      "failures": [
+        "verdict=ABORT != expected APPROVE",
+        "cost $0.2797 > $0.2000"
+      ]
+    },
+    {
+      "name": "login",
+      "status": "fail",
+      "verdict": "ABORT",
+      "artifacts_count": 0,
+      "cost_usd": 0.179955,
+      "wallclock_s": 130.5,
+      "failures": [
+        "verdict=ABORT != expected APPROVE"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+running 3 golden goals
+
+-- build --
+   status=fail  verdict=ABORT  cost=$0.1210  wallclock=55.7s
+     ! verdict=ABORT != expected APPROVE
+-- multimedia --
+   status=fail  verdict=ABORT  cost=$0.4471  wallclock=154.4s
+     ! verdict=ABORT != expected APPROVE
+     ! cost $0.4471 > $0.2000
+-- login --
+   status=fail  verdict=ABORT  cost=$0.2072  wallclock=150.5s
+     ! verdict=ABORT != expected APPROVE
+     ! cost $0.2072 > $0.2000
+
+wrote sprint/v0.5/final-golden-summary.json
+passed: 0/3

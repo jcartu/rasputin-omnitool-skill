@@ -29,6 +29,7 @@ def test_parses_fixture_docx(tmp_path):
 
     try:
         from docling.document_converter import DocumentConverter
+        _ = DocumentConverter
     except ImportError:
         pytest.skip("docling not installed")
 
@@ -51,6 +52,7 @@ def test_max_chars_truncation(tmp_path):
 
     try:
         from docling.document_converter import DocumentConverter
+        _ = DocumentConverter
     except ImportError:
         pytest.skip("docling not installed")
 

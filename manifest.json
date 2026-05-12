@@ -5,8 +5,8 @@
   "tools": [
     {
       "name": "browser",
-      "version": "0.4.0",
-      "description": "Operate a browser via Playwright MCP.",
+      "version": "0.5.0",
+      "description": "Operate a browser via Playwright with persistent sessions.",
       "inputs": {
         "action": {
           "type": "string",
@@ -16,7 +16,9 @@
             "screenshot",
             "extract_text",
             "fill_form",
-            "click"
+            "click",
+            "wait_for_selector",
+            "evaluate"
           ]
         },
         "url": {
@@ -30,17 +32,69 @@
         "value": {
           "type": "string",
           "required": false
+        },
+        "session_id": {
+          "type": "string",
+          "required": false
+        },
+        "goal_id": {
+          "type": "string",
+          "required": false
+        },
+        "headless": {
+          "type": "boolean",
+          "required": false,
+          "default": true
+        },
+        "state": {
+          "type": "string",
+          "required": false,
+          "enum": [
+            "attached",
+            "visible",
+            "hidden",
+            "detached"
+          ]
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "required": false
+        },
+        "expression": {
+          "type": "string",
+          "required": false
+        },
+        "wait_for_selector": {
+          "type": "string",
+          "required": false
+        },
+        "wait_for_navigation": {
+          "type": "boolean",
+          "required": false,
+          "default": true
         }
       },
       "outputs": {
         "result": {
-          "type": "object"
+          "type": "object",
+          "properties": {
+            "session_id": "string (when session-based)",
+            "final_url": "string (navigate, click)",
+            "title": "string (navigate, screenshot)",
+            "status": "integer (navigate)",
+            "path": "string (screenshot)",
+            "text": "string (extract_text)",
+            "result": "any (evaluate)",
+            "found": "boolean (wait_for_selector)"
+          }
         }
       },
       "errors": [
         "NAVIGATION_FAILED",
         "SELECTOR_NOT_FOUND",
-        "TIMEOUT"
+        "TIMEOUT",
+        "SESSION_NOT_FOUND",
+        "SESSION_DEAD"
       ],
       "status": "available"
     },
@@ -86,9 +140,18 @@
           "type": "string",
           "required": true
         },
-        "repo_path": {
+        "cwd": {
           "type": "string",
-          "required": false
+          "required": false,
+          "description": "working directory for the aider subprocess"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "required": false,
+          "description": "list of file paths to pass to aider"
         },
         "model": {
           "type": "string",
@@ -447,6 +510,11 @@
           "type": "integer",
           "required": false,
           "default": 60
+        },
+        "session_id": {
+          "type": "string",
+          "required": false,
+          "description": "Optional persistent sandbox session ID. Omit to create or reuse a goal-scoped session; pass null from tests to opt out."
         }
       },
       "outputs": {
@@ -461,12 +529,18 @@
         },
         "artifacts": {
           "type": "array"
+        },
+        "session_id": {
+          "type": "string"
         }
       },
       "errors": [
         "SANDBOX_UNREACHABLE",
         "TIMEOUT",
-        "INVALID_OPERATION"
+        "INVALID_OPERATION",
+        "SESSION_NOT_FOUND",
+        "SESSION_DEAD",
+        "SESSION_ERROR"
       ],
       "status": "available"
     },
@@ -534,6 +608,83 @@
         "FILE_NOT_FOUND",
         "MODEL_UNAVAILABLE",
         "TRANSCRIPTION_FAILED"
+      ],
+      "status": "available"
+    },
+    {
+      "name": "sub_agent",
+      "version": "1.0.0",
+      "description": "Spawn parallel sub-agents to run independent sub-goals, then return aggregated results to the parent. Each sub-goal runs as a full ReAct loop with isolated message history, inherited artifact registry, and optional tool restrictions.",
+      "inputs": {
+        "sub_goals": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of self-contained sub-goal strings",
+          "required": true
+        },
+        "max_concurrent": {
+          "type": "integer",
+          "description": "Max parallel sub-agents (1-8)",
+          "default": 4
+        },
+        "max_depth": {
+          "type": "integer",
+          "description": "Max recursion depth ceiling",
+          "default": 2
+        },
+        "budget_usd_per_sub": {
+          "type": "number",
+          "description": "Budget per sub-agent in USD",
+          "default": 0.1
+        },
+        "timeout_min_per_sub": {
+          "type": "integer",
+          "description": "Timeout per sub-agent in minutes",
+          "default": 5
+        },
+        "tool_allowlist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tools sub-agents may use (null = no restriction)"
+        },
+        "tool_denylist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tools sub-agents may NOT use",
+          "default": [
+            "sub_agent"
+          ]
+        }
+      },
+      "outputs": {
+        "results": {
+          "type": "array",
+          "description": "List of {sub_goal, status, summary, artifact_ids, cost_usd, halted_for}"
+        },
+        "aggregate_cost_usd": {
+          "type": "number",
+          "description": "Sum of all sub-agent costs"
+        },
+        "successful_count": {
+          "type": "integer",
+          "description": "Number of successful sub-agents"
+        },
+        "failed_count": {
+          "type": "integer",
+          "description": "Number of failed sub-agents"
+        }
+      },
+      "errors": [
+        "INVALID_INPUT",
+        "MAX_DEPTH_EXCEEDED",
+        "INSUFFICIENT_BUDGET",
+        "WALLCLOCK"
       ],
       "status": "available"
     },
@@ -668,82 +819,6 @@
       "errors": [
         "SEARXNG_UNREACHABLE",
         "TIMEOUT",
-        "INVALID_INPUT"
-      ],
-      "status": "available"
-    },
-    {
-      "name": "webapp_builder",
-      "version": "0.4.0",
-      "description": "Build web applications from natural language prompts via bolt.diy subprocess. Generates full-stack web apps in the specified output directory.",
-      "inputs": {
-        "prompt": {
-          "type": "string",
-          "required": true
-        },
-        "output_dir": {
-          "type": "string",
-          "required": false
-        }
-      },
-      "outputs": {
-        "path": {
-          "type": "string"
-        },
-        "output": {
-          "type": "string"
-        }
-      },
-      "errors": [
-        "BOLT_FAILED",
-        "BOLT_NOT_INSTALLED",
-        "TIMEOUT",
-        "INVALID_INPUT"
-      ],
-      "status": "available"
-    },
-    {
-      "name": "wide_research",
-      "version": "0.4.0",
-      "description": "Conduct parallel multi-source research on a topic. Decomposes into sub-queries, executes searches, and synthesizes a comprehensive markdown report.",
-      "inputs": {
-        "topic": {
-          "type": "string",
-          "required": true
-        },
-        "max_sub_queries": {
-          "type": "integer",
-          "required": false,
-          "default": 5
-        },
-        "depth": {
-          "type": "string",
-          "required": false,
-          "enum": [
-            "shallow",
-            "standard",
-            "deep"
-          ],
-          "default": "standard"
-        }
-      },
-      "outputs": {
-        "topic": {
-          "type": "string"
-        },
-        "sub_queries": {
-          "type": "array"
-        },
-        "report": {
-          "type": "string"
-        },
-        "path": {
-          "type": "string"
-        }
-      },
-      "errors": [
-        "DECOMPOSITION_FAILED",
-        "SUB_QUERY_FAILED",
         "INVALID_INPUT"
       ],
       "status": "available"

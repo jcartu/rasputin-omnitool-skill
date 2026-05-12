@@ -1,6 +1,5 @@
 """Unit tests for executor."""
-import pytest
-from agent.executor import execute, ExecutionTrace, _substitute_placeholders
+from agent.executor import execute, _substitute_placeholders
 from agent.planner import Plan, PlanTask
 
 
@@ -92,3 +91,39 @@ def test_executor_handles_unknown_tool():
     assert len(trace.steps) == 1
     assert trace.steps[0]["status"] == "error"
     assert "not found" in trace.steps[0]["error"]
+
+def test_automatic_lineage_wiring(tmp_path, monkeypatch):
+    """Executor wires derived_from when T2 consumes T1 output via ${T1}."""
+    db = tmp_path / "registry.db"
+    monkeypatch.setenv("RASPUTIN_OMNITOOL_ARTIFACT_DB", str(db))
+    # Reset singleton
+    import agent.artifact_registry as ar
+    ar._INSTANCE = None
+
+    from agent.artifact_registry import get_registry
+
+    # T1 produces a file, T2 consumes it via ${T1.path}
+    f1 = tmp_path / "source.md"
+    f1.write_text("# Source data")
+    f2 = tmp_path / "report.md"
+    f2.write_text("# Report based on source")
+
+    plan = _make_plan([
+        PlanTask(id="T1", goal="Crawl", tool="crawl", inputs={"url": "https://example.com"}),
+        PlanTask(id="T2", goal="Write report", tool="deliverables", inputs={"source": "${T1.path}"}),
+    ])
+    tools = {
+        "crawl": lambda inp: {"result": {"path": str(f1), "markdown": "# Source"}},
+        "deliverables": lambda inp: {"result": {"path": str(f2), "title": "Report"}},
+    }
+    execute(plan, tools, context={"goal_id": "g-lineage"})
+
+    # T2's artifact should have derived_from pointing to T1's artifact
+    reg = get_registry()
+    arts = reg.list(goal_id="g-lineage")
+    assert len(arts) == 2
+
+    # Find the deliverables artifact (T2)
+    t2_art = next(a for a in arts if "report" in a.path)
+    t1_art = next(a for a in arts if "source" in a.path)
+    assert t1_art.id in t2_art.derived_from

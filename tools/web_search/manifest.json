@@ -42,11 +42,12 @@
       }
     }
   },
+  "tags": ["web", "search"],
   "errors": ["SEARXNG_UNREACHABLE", "TIMEOUT", "INVALID_INPUT"],
   "backends": [
     {
       "name": "searxng",
-      "health_url": "http://localhost:8080/health",
+      "health_url": "http://localhost:8889/health",
       "required": true
     }
   ]

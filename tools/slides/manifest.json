@@ -18,5 +18,6 @@
     "path": {"type": "string"},
     "format": {"type": "string"}
   },
+  "tags": ["output", "presentation"],
   "errors": ["MARP_FAILED", "MARP_NOT_INSTALLED", "TIMEOUT", "INVALID_INPUT", "INVALID_FORMAT"]
 }

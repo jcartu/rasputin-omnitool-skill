@@ -1,7 +1,7 @@
 [project]
 name = "rasputin_omnitool_skill"
 version = "0.4.0"
-description = "Rasputin Omnitool agent skill: planner / executor / reviewer loop with 12 tools across research, sandbox, browser, and multimedia"
+description = "Rasputin Omnitool agent skill: planner / executor / reviewer loop with 16 tools across research, sandbox, browser, and multimedia"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 dependencies = [
@@ -20,12 +20,10 @@ dependencies = [
 # Aspirational integrations not yet wired into the runtime; install opt-in:
 #   pip install -e ".[integrations]"
 integrations = [
-    "openclaw-skill-sdk>=2026.4.0",  # not yet on PyPI; install from source when needed
-    "promptfoo>=0.100",
 ]
 
-dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "promptfoo>=0.100"]
-voice = ["voxtral-tts>=0.5", "kokoro-onnx>=0.4"]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
+voice = ["kokoro-onnx>=0.4"]
 image = ["comfy-cli>=2.0"]
 
 [build-system]
@@ -39,6 +37,10 @@ include = ["tools*", "agent*", "prompts*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+markers = [
+    "real_planner: tests that call the real planner and skip without API credentials",
+    "real_executor: tests that call the real ReAct executor and skip without API credentials",
+]
 filterwarnings = [
     "ignore:The pynvml package is deprecated:FutureWarning",
 ]

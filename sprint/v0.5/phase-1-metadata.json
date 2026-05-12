@@ -1,0 +1,142 @@
+[
+  {
+    "name": "browser",
+    "tags": [
+      "web",
+      "automation",
+      "interactive"
+    ],
+    "available": true
+  },
+  {
+    "name": "catalog",
+    "tags": [
+      "meta",
+      "discovery"
+    ],
+    "available": true
+  },
+  {
+    "name": "coding_agent",
+    "tags": [
+      "code",
+      "editing",
+      "files"
+    ],
+    "available": true
+  },
+  {
+    "name": "crawl4ai",
+    "tags": [
+      "web",
+      "fetch",
+      "markdown"
+    ],
+    "available": true
+  },
+  {
+    "name": "deliverables",
+    "tags": [
+      "output",
+      "file",
+      "report"
+    ],
+    "available": true
+  },
+  {
+    "name": "docling",
+    "tags": [
+      "document",
+      "parse",
+      "files"
+    ],
+    "available": true
+  },
+  {
+    "name": "image_gen",
+    "tags": [
+      "media",
+      "image",
+      "generation"
+    ],
+    "available": true
+  },
+  {
+    "name": "mail",
+    "tags": [
+      "communication",
+      "email"
+    ],
+    "available": true
+  },
+  {
+    "name": "memory",
+    "tags": [
+      "state",
+      "memory",
+      "retrieval"
+    ],
+    "available": false
+  },
+  {
+    "name": "music_gen",
+    "tags": [
+      "media",
+      "audio",
+      "generation"
+    ],
+    "available": false
+  },
+  {
+    "name": "sandbox",
+    "tags": [
+      "compute",
+      "code",
+      "execution"
+    ],
+    "available": false
+  },
+  {
+    "name": "slides",
+    "tags": [
+      "output",
+      "presentation"
+    ],
+    "available": true
+  },
+  {
+    "name": "stt",
+    "tags": [
+      "media",
+      "audio",
+      "transcription"
+    ],
+    "available": true
+  },
+  {
+    "name": "tts",
+    "tags": [
+      "media",
+      "audio",
+      "synthesis"
+    ],
+    "available": true
+  },
+  {
+    "name": "video_gen",
+    "tags": [
+      "media",
+      "video",
+      "generation"
+    ],
+    "available": false
+  },
+  {
+    "name": "web_search",
+    "tags": [
+      "web",
+      "search"
+    ],
+    "available": true
+  }
+]

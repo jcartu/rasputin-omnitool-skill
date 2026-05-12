@@ -42,7 +42,7 @@ Set `rasputin_repo_path` valve to `/host-rasputin-skill`.
 | `max_cost_usd` | 0.50 | Per-goal cost ceiling in USD |
 | `show_steps` | true | Stream executor steps to chat |
 | `outputs_base_url` | file:///app/backend/data/outputs | Where outputs/ is mounted |
-| `rasputin_repo_path` | /home/josh/workspace/rasputin-omnitool-skill | Path to skill repo |
+| `rasputin_repo_path` | empty | Path to skill repo; set this in the Valves UI |
 
 ## Usage
 

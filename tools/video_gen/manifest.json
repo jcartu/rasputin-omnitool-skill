@@ -23,6 +23,7 @@
       "type": "string"
     }
   },
+  "tags": ["media", "video", "generation"],
   "errors": [
     "GPU_OOM",
     "WAN_UNAVAILABLE",

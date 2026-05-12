@@ -1,0 +1,26 @@
+============================= test session starts ==============================
+platform linux -- Python 3.14.4, pytest-9.0.2, pluggy-1.6.0 -- /usr/bin/python
+cachedir: .pytest_cache
+rootdir: /home/josh/workspace/rasputin-omnitool-skill
+configfile: pyproject.toml
+plugins: anyio-4.12.1, cov-7.1.0, asyncio-1.3.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 15 items
+
+tests/test_tool_registry.py::test_all_existing_tools_discoverable PASSED [  6%]
+tests/test_tool_registry.py::test_each_discovered_tool_has_callable_run PASSED [ 13%]
+tests/test_tool_registry.py::test_discovered_tools_have_valid_manifests PASSED [ 20%]
+tests/test_tool_registry.py::test_load_tools_returns_callable_dict PASSED [ 26%]
+tests/test_tool_registry.py::test_load_tool_definitions_returns_definitions PASSED [ 33%]
+tests/test_tool_registry.py::test_load_tool_metadata_returns_non_empty_when_tools_exist PASSED [ 40%]
+tests/test_tool_registry.py::test_load_tool_metadata_ttl_cache_reuses_then_reprobes PASSED [ 46%]
+tests/test_tool_registry.py::test_load_tool_metadata_include_unavailable_returns_broken_tools PASSED [ 53%]
+tests/test_tool_registry.py::test_invalid_manifest_marked_invalid_not_crashed PASSED [ 60%]
+tests/test_tool_registry.py::test_missing_index_py_marked_invalid PASSED [ 66%]
+tests/test_tool_registry.py::test_name_mismatch_marked_invalid PASSED    [ 73%]
+tests/test_tool_registry.py::test_skill_manifest_in_sync PASSED          [ 80%]
+tests/test_loop_integration.py::test_run_goal_with_mocked_tools PASSED   [ 86%]
+tests/test_loop_integration.py::test_run_goal_research_simple SKIPPED    [ 93%]
+tests/test_real_e2e_phase1.py::test_planner_produces_valid_plan_with_real_metadata SKIPPED [100%]
+
+======================== 13 passed, 2 skipped in 1.60s =========================

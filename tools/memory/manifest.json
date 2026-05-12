@@ -35,6 +35,7 @@
       "type": "array"
     }
   },
+  "tags": ["state", "memory", "retrieval"],
   "errors": [
     "MCP_UNREACHABLE",
     "INVALID_OPERATION"

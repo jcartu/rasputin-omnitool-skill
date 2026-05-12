@@ -3,8 +3,6 @@ from __future__ import annotations
 
 import os
 import subprocess
-import uuid
-from pathlib import Path
 from typing import Any
 
 
@@ -13,7 +11,7 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
     if not task:
         return {"error": {"code": "INVALID_INPUT", "message": "Missing 'task' parameter"}}
 
-    repo_path = inputs.get("repo_path", "")
+    cwd = inputs.get("cwd", "")
     model = inputs.get("model", os.environ.get("RASPUTIN_OMNITOOL_PLANNER_MODEL", "gpt-oss-120b"))
     timeout_s = int(inputs.get("timeout_s", 300))
 
@@ -27,21 +25,22 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
     except subprocess.TimeoutExpired:
         return {"error": {"code": "TIMEOUT", "message": "aider version check timed out"}}
 
-    # Build command
     cmd = [
         "aider",
         "--no-auto-commits",
         "--yes-always",
         "--model", model,
+        "--message", task,
     ]
-    if repo_path:
-        cmd.extend(["--repo", repo_path])
-    cmd.extend(["--message", task])
+    files = inputs.get("files", [])
+    if not isinstance(files, list):
+        return {"error": {"code": "INVALID_INPUT", "message": "'files' must be a list of paths"}}
+    cmd.extend(files)
 
     try:
         result = subprocess.run(
             cmd, capture_output=True, text=True, timeout=timeout_s,
-            cwd=repo_path or os.getcwd()
+            cwd=cwd or os.getcwd()
         )
         if result.returncode != 0:
             return {"error": {"code": "AIDER_FAILED", "message": f"aider failed: {result.stderr.strip()}"}}
@@ -60,6 +59,8 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
 
 
 if __name__ == "__main__":
-    import json, sys
+    import json
+    import sys
+
     payload = json.loads(sys.stdin.read())
     print(json.dumps(run(payload)))

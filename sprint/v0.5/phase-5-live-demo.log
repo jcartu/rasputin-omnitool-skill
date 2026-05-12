@@ -1,0 +1,32 @@
+Checkpoint root: /tmp/ckpt_demo_mvk2tmhq/checkpoints
+Goal ID: demo-goal-1
+
+=== Phase 1: Simulating partial execution ===
+  Step 1: checkpoint written to checkpoint-1.json
+  Step 2: checkpoint written to checkpoint-2.json
+  Step 3: checkpoint written to checkpoint-3.json
+
+=== Simulating process kill (SIGKILL) ===
+  Process killed. Checkpoints on disk survive.
+
+Checkpoint directory contents:
+  checkpoint-1.json
+  checkpoint-2.json
+  checkpoint-3.json
+  latest.json
+
+Latest checkpoint: step 3, 8 messages
+
+=== Phase 2: Resuming from checkpoint ===
+Resume result: goal_id=demo-goal-1
+  This demo proves checkpoint durability (files survive simulated kill).
+  End-to-end resume execution is covered by tests/test_resume.py::test_kill_and_resume
+  (In production, this would re-run the goal from the checkpoint)
+
+Final checkpoint directory:
+  checkpoint-1.json
+  checkpoint-2.json
+  checkpoint-3.json
+  latest.json
+
+Demo complete. Checkpoints survived simulated kill-and-resume.

@@ -33,6 +33,7 @@
       "type": "object"
     }
   },
+  "tags": ["media", "image", "generation"],
   "errors": [
     "COMFY_UNREACHABLE",
     "WORKFLOW_FAILED"
