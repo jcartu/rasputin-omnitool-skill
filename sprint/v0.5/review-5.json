@@ -1,0 +1,38 @@
+{
+  "verdict": "REVISE",
+  "notes": "Phase 5 delivers a checkpoint module with 12 passing unit tests, ReAct integration, and resume_goal API, but multiple phase-brief requirements are missing or mismarked. The kill-and-resume live demo (scripts/checkpoint_demo.py) is required by the brief and was not produced — Sisyphus marked it N/A and deferred to Phase 9, which the brief does not permit. tests/test_resume.py is explicitly required and absent (the brief calls for two files and 15+ combined tests; only 12 in test_checkpoint.py). session_manager.py alive-check API was listed as a file to change but does not appear in the diff_stat. Several mandatory evidence items are also missing.",
+  "findings": [
+    "Create scripts/checkpoint_demo.py and run it; capture output to sprint/v0.5/phase-5-live-demo.log. The phase brief explicitly states 'Sisyphus must create scripts/checkpoint_demo.py as part of this phase' — this is not deferrable to Phase 9. AC#2 (kill-mid-flight) cannot be marked N/A; it is a required acceptance criterion.",
+    "Create tests/test_resume.py with the integration test scenario shown in the phase brief (test_kill_and_resume using monkeypatched LLM + MAX_STEPS_THIS_RUN fault injection). The brief lists this as a required file and requires 15+ combined tests; currently only 12 exist in test_checkpoint.py.",
+    "Modify agent/session_manager.py to expose the alive-check API used by the resume path, OR document in 'Out-of-spec changes' why session_manager.py was not touched and where the alive-check actually lives (the diff_stat shows no change to session_manager.py despite the brief listing it under 'Files to change').",
+    "Add the required Phase-5-specific evidence items to phase-5-evidence.md: (a) directory listing of ~/.rasputin/checkpoints/<goal_id>/ from a completed run, (b) explicit schema version number shipped and migration plan for future bumps (only one sentence currently — expand), (c) the kill-and-resume live demo output.",
+    "Provide the pytest -v tail for tests/test_resume.py once created, and update the 'Test results' line to reflect both suites (brief requires 'Test results for both unit and integration suites').",
+    "Reconcile acceptance criteria table: AC#2 is currently 'N/A' which is not a permitted status for a stated acceptance criterion. Either run the demo and mark PASS, or halt per the phase's halt conditions.",
+    "Include 'Files touched' as the literal `git diff --stat sprint/v0.5..HEAD` output per the evidence template; the current 'Files Changed' section is hand-summarized and omits sprint/v0.5/* artifacts and review-4.json edit shown in diff_stat.",
+    "Confirm and document the snapshot-before-expensive-call hook (brief: 'Before any model call that estimates > $0.10') and the checkpoint_now(reason=...) callable — neither appears in the evidence or in agent/checkpoint.py per the diff. If out of scope, justify; if implemented, add a test."
+  ],
+  "dimension_scores": {
+    "1_goal_completion": "FAIL",
+    "2_code_quality": "PASS",
+    "3_test_quality": "PARTIAL",
+    "4_evidence_honesty": "PARTIAL",
+    "5_scope_discipline": "PARTIAL",
+    "6_reversibility": "PASS"
+  },
+  "evidence_pointers": {
+    "missing live demo": "phase-5-evidence.md AC#2 marked N/A; phase brief 'Self-verification' section mandates scripts/checkpoint_demo.py",
+    "missing test_resume.py": "diff_stat shows only tests/test_checkpoint.py (215 lines); phase brief 'Files to change' lists 'A tests/test_resume.py' and acceptance criterion #1 requires 15+ combined tests across both files",
+    "session_manager untouched": "diff_stat has no agent/session_manager.py entry; phase brief 'Files to change' lists 'M agent/session_manager.py # alive-check API for the resume path'",
+    "missing checkpoint dir listing": "phase-5-evidence.md has no `ls ~/.rasputin/checkpoints/<goal_id>/` output; phase brief 'Phase evidence' requires it",
+    "thin schema version doc": "phase-5-evidence.md 'Schema Version' is one line; brief requires 'exact schema version shipped (number) and the migration plan for future bumps'",
+    "AC#2 mislabeled N/A": "phase-5-evidence.md acceptance table row 2 — 'N/A' is not in the template's allowed PASS/FAIL/N/A semantics for a stated acceptance criterion of this phase",
+    "diff stat vs evidence mismatch": "diff_stat lists 8 files including sprint/v0.5/review-4.json and state.json; evidence 'Files Changed' lists only 5 and omits these",
+    "missing snapshot-pre-expensive-call": "agent/react_executor.py diff is +38 lines (snapshot after step only); no evidence of pre-expensive-call snapshot or checkpoint_now() API documented in brief Architecture section"
+  },
+  "_cost_usd": 0.371,
+  "_tokens_in": 15565,
+  "_tokens_out": 1833,
+  "_model": "claude-opus-4-7",
+  "_scope": "phase",
+  "_phase": 5
+}

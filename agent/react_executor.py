@@ -86,6 +86,10 @@ def react_execute(
             trace.halted_for = "BUDGET"
             break
 
+        # Pre-expensive-call snapshot: checkpoint before model call
+        if goal_id and spent_usd > 0.10:
+            _write_checkpoint(goal_id, goal, step, spent_usd, messages, trace, sandbox_session_id)
+
         try:
             response = client.chat.completions.create(
                 model=model,

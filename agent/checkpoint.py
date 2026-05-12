@@ -180,3 +180,22 @@ class CheckpointManager:
             checkpoints.pop(0).unlink()
             evicted += 1
         return evicted
+
+def checkpoint_now(goal_id: str, messages: list[dict], trace_steps: list[dict], artifact_ids: list[str], cost_usd: float, goal_text: str, sandbox_session_ids: list[str] | None = None, browser_session_ids: list[str] | None = None) -> Path:
+    """Manually checkpoint the current goal state."""
+    from datetime import datetime, timezone
+    mgr = get_checkpoint_manager()
+    cp = GoalCheckpoint(
+        goal_id=goal_id,
+        sprint_id=None,
+        goal_text=goal_text,
+        step_count=len(trace_steps),
+        cost_usd=cost_usd,
+        messages=list(messages),
+        trace_steps=list(trace_steps),
+        artifact_ids=list(artifact_ids),
+        sandbox_session_ids=list(sandbox_session_ids or []),
+        browser_session_ids=list(browser_session_ids or []),
+        created_at=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+    )
+    return mgr.write(cp)
