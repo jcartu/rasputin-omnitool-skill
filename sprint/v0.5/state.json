@@ -11,7 +11,12 @@
     "1": {
       "status": "approved",
       "review_count": 3,
-      "commit": "0491aca"
+      "commit": "6c876cb"
+    },
+    "2": {
+      "status": "awaiting_review",
+      "review_count": 0,
+      "commit": "e20d62b"
     }
   },
   "halt_reason": null,
@@ -19,6 +24,7 @@
   "budget_usd": 25.0,
   "branches": {
     "0": "sprint/v0.5-phase0",
-    "1": "sprint/v0.5-phase1"
+    "1": "sprint/v0.5-phase1",
+    "2": "sprint/v0.5-phase2"
   }
 }
