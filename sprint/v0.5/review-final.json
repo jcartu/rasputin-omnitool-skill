@@ -1,12 +1,12 @@
 {
-  "verdict": "REVISE",
-  "notes": "Round-2 final evidence addresses several prior findings (headline reframed, CHANGELOG added, cost delta explained, Phase 5 commit reconciled, recommendations relabeled, executor default flipped to react). However, two hard rubric requirements remain unmet: Phase 8 streaming is deferred (not built), and golden goals were never executed end-to-end. Per the verdict mapping, FAIL on dimension 2 (streaming absent — explicitly required as 'real, not stubbed') forces REVISE. Evidence honesty is intact (gaps explicitly disclosed), so this is REVISE rather than ABORT, but this is the second REVISE on final, which per the rubric maps to ABORT if not resolved.",
+  "verdict": "ABORT",
+  "notes": "This is the second REVISE on the final review. Per the rubric: 'Two consecutive REVISE on final → ABORT.' The prior round-2 review already issued REVISE with five specific findings; this round-3 evidence resolves some (table now lists Phases 8/9, tool count math reconciled, rc1 tag claim refined) but the two load-bearing failures remain: Phase 8 streaming is still entirely absent (FAIL on dimension 2 per rubric's explicit 'real, not stubbed' requirement), and golden goals were still never executed end-to-end (FAIL on dimension 1, with no attempt to run even the sandbox-only 'build' goal despite the Phase 7 live demo proving the executor works against vLLM). Evidence honesty is intact — gaps are disclosed plainly — so the ABORT is structural (rubric mapping), not a credibility failure. The sprint produced substantial value (7 phases approved, 229 tests, ReAct executor proven via live demo) but does not meet the v0.5.0 bar.",
   "findings": [
-    "Dimension 2 still FAILs: streaming is entirely absent. Rubric requires P1 streaming to be real, not behind a 'future work' flag. Either implement minimal streaming (even a single SSE endpoint emitting tool stdout chunks from the executor) to convert this to PASS/PARTIAL, or accept that v0.5.0 cannot ship under the current rubric and instead tag as v0.5.0-rc1 with streaming explicitly cut from scope and the rubric amendment recorded.",
-    "Dimension 1 remains unverified: golden goals still not run. The evidence pins this on crawl4ai (lxml 6.0.2 vs 5.3) and SearXNG 404. Both are addressable in <1h: (a) pin lxml<6 in pyproject.toml constraints and rebuild crawl4ai env, (b) check SearXNG container is running and the search endpoint path is /search not /. Run at minimum the 'build' goal (which uses sandbox only, no external web) to prove the executor end-to-end and convert this to PARTIAL with a documented narrow failure set.",
-    "Headline says 'Shipping v0.5.0-rc1' but no release branch, tag, or release notes file with that version string exists. Either actually create the rc1 tag (git tag -a v0.5.0-rc1 with the rc rationale in the annotation) and update state.json with released_tag='v0.5.0-rc1', or remove the shipping claim from the headline.",
-    "Phase-by-phase summary table is missing Phases 8 and 9 rows. Add them with status='deferred' and a one-line reason, so the table is complete rather than truncated at Phase 7.",
-    "Tool count claim '16 to 17' is asserted but the diff_stat for this final phase shows only sub_agent added (+1 tool, no webapp_builder/wide_research deletions). If those were deleted in earlier phases, state that explicitly: 'sub_agent added this phase; webapp_builder and wide_research removed in Phase 0.' Otherwise the count math doesn't reconcile."
+    "Per rubric verdict mapping, two consecutive REVISE on final → ABORT. This is that ABORT. The path forward is not another revise round on this sprint; it is to decide with Joshua whether to (a) open a short v0.5.1 sprint to add minimal streaming + run golden goals, or (b) formally amend the rubric to cut streaming from v0.5 scope and re-grade.",
+    "Dimension 2 FAIL persists: no streaming implementation exists. diff_stat shows no streaming module added in this final phase. Rubric requires P1 streaming to be 'real, not behind a future work flag.' The deferral is honestly disclosed but does not satisfy the criterion.",
+    "Dimension 1 FAIL persists: golden goals not executed. The round-2 review explicitly suggested running at minimum the sandbox-only 'build' goal to convert this to PARTIAL. The round-3 evidence does not show this was attempted. The Phase 7 live demo (fibonacci(50)) is functionally close to the 'build' goal and proves the executor works, but it is not the golden goal harness output.",
+    "tests/golden_goals.yaml does not exist (disclosed in evidence). The golden goal runner is therefore untested infrastructure. If a v0.5.1 sprint is opened, creating this YAML and running at least one goal end-to-end is the smallest unblocking action.",
+    "For the next sprint or rubric amendment: the 'crawl4ai broken (lxml 6.0.2 vs 5.3)' blocker is a one-line pyproject.toml constraint (lxml<6) plus a rebuild. The SearXNG 404 is likely a wrong endpoint path (/search vs /). Both are <1h fixes and should not be carried as gaps into a release."
   ],
   "dimension_scores": {
     "1_end_to_end_correctness": "FAIL",
@@ -14,23 +14,23 @@
     "3_hygiene": "PASS",
     "4_test_quality": "PARTIAL",
     "5_evidence_honesty": "PASS",
-    "6_migration_path": "PARTIAL"
+    "6_migration_path": "PASS"
   },
   "evidence_pointers": {
-    "streaming absent": "final-evidence.md 'Architectural deltas' P1 streaming line — 'DEFERRED — deliberately deferred'; no tools/streaming or agent/streaming module in diff_stat",
-    "golden goals not run": "final-evidence.md 'Golden goals breakdown' — 'Golden goals were not executed end-to-end'",
-    "rc1 not actually tagged": "state.json has no released_tag field; diff_stat shows no tag-creation artifact; CHANGELOG.md exists (+53 lines) but is not equivalent to a tag",
-    "table truncated": "final-evidence.md 'Phase-by-phase summary' — table ends at Phase 7, missing rows for 8 and 9",
-    "executor default flipped (good)": "final-evidence.md 'Architectural deltas' P0-2 — 'ReAct IS the default' confirmed in agent/config.py executor_mode='react'",
-    "CHANGELOG present (good)": "diff_stat CHANGELOG.md +53 lines",
-    "cost delta explained (good)": "final-evidence.md 'Cost' — $3.07 reviews + $0.36 demos + $5.81 dev LLM = $9.24, breakdown is plausible",
-    "Phase 5 commit reconciled (good)": "final-evidence.md 'Migration' — explicit note that 98c3e3e is approval commit, 7dbe6a6 is evidence commit, both on phase5 branch",
-    "honest gaps comprehensive (good)": "final-evidence.md 'Honest gaps' — 5 items, all material gaps disclosed plainly",
-    "tool count math": "final-evidence.md 'Migration' — '16 to 17 (sub_agent added, webapp_builder removed, wide_research removed)' but this phase's diff_stat shows only sub_agent addition; earlier-phase deletions not cross-referenced"
+    "two consecutive REVISE rule": "Rubric 'Verdict mapping' table: 'Two consecutive REVISE on final | ABORT'. Prior review (review-final.json round 2) verdict was REVISE; this round still has FAILs on dimensions 1 and 2.",
+    "streaming absent": "final-evidence.md 'Architectural deltas' P1 streaming — 'DEFERRED'; diff_stat contains no tools/streaming, no agent/streaming, no SSE/WebSocket module",
+    "golden goals not run": "final-evidence.md 'Golden goals breakdown' — 'Golden goals were not executed end-to-end'; no run-log artifact in diff_stat",
+    "golden_goals.yaml missing": "final-evidence.md 'Golden goals breakdown' — 'tests/golden_goals.yaml ... does not exist, needs to be created'",
+    "Phase 7 live demo proves executor (mitigating)": "key_logs.live_demo — fibonacci(50) returned 12586269025, cost $0.1054, demonstrates executor + sandbox work end-to-end against real vLLM model",
+    "rc1 tagging": "final-evidence.md 'Honest gaps' item 4 — 'v0.5.0-rc1 tagged. Tag created on current HEAD. No merge of phase branches yet'; state.json shows no released_tag field, so the tag-claim is still partially unreconciled but no longer in the headline",
+    "table now complete": "final-evidence.md 'Phase-by-phase summary' — now includes Phase 8 (deferred) and Phase 9 (deferred) rows (resolves prior finding)",
+    "tool count math reconciled": "final-evidence.md 'Migration' — '`webapp_builder` and `wide_research` removed in Phase 0... `sub_agent` added in Phase 7. Net change: +1 tool' (resolves prior finding)",
+    "evidence honesty intact": "final-evidence.md 'Honest gaps' — 5 items, all material gaps disclosed plainly including the streaming deferral rationale and golden goal blockers",
+    "test count": "final-evidence.md 'Test counts' — 121 → 229 (+108), 6 skipped with reasons; ruff clean; unit suite green"
   },
-  "_cost_usd": 0.4374,
-  "_tokens_in": 20364,
-  "_tokens_out": 1759,
+  "_cost_usd": 0.4535,
+  "_tokens_in": 20784,
+  "_tokens_out": 1890,
   "_model": "claude-opus-4-7",
   "_scope": "final",
   "_phase": 7

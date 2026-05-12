@@ -44,8 +44,11 @@
       "commit": "c3f5863"
     }
   },
-  "halt_reason": null,
-  "total_cost_usd": 10.0792,
+  "halt_reason": "final-review-aborted: two consecutive REVISE on final (streaming absent, golden goals not run)",
+  "final_verdict": "ABORT",
+  "final_review_count": 3,
+  "total_cost_usd": 10.5327,
+  "total_cost_usd": 10.5327,
   "budget_usd": 25.0,
   "branches": {
     "0": "sprint/v0.5-phase0",
