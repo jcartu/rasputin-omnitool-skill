@@ -40,5 +40,6 @@
     "output": {"type": "string"},
     "content": {"type": "string"}
   },
+  "tags": ["communication", "email"],
   "errors": ["HIMALAYA_FAILED", "HIMALAYA_NOT_INSTALLED", "TIMEOUT", "INVALID_INPUT", "INVALID_OPERATION"]
 }

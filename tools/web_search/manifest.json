@@ -42,6 +42,7 @@
       }
     }
   },
+  "tags": ["web", "search"],
   "errors": ["SEARXNG_UNREACHABLE", "TIMEOUT", "INVALID_INPUT"],
   "backends": [
     {

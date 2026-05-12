@@ -30,6 +30,7 @@
       "type": "number"
     }
   },
+  "tags": ["media", "audio", "synthesis"],
   "errors": [
     "MODEL_UNAVAILABLE",
     "SYNTHESIS_FAILED"

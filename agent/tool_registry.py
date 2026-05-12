@@ -4,8 +4,10 @@ from __future__ import annotations
 import importlib
 import json
 import os
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
+from threading import Lock
 from typing import Callable, Optional
 
 from jsonschema import validate, ValidationError
@@ -14,6 +16,11 @@ from agent.observability import observe
 
 TOOLS_DIR = Path(__file__).parent.parent / "tools"
 SCHEMA_PATH = Path(__file__).parent / "schemas" / "tool_manifest.schema.json"
+
+_METADATA_CACHE: dict[str, list[dict]] = {}
+_METADATA_CACHE_AT: dict[str, float] = {}
+_METADATA_LOCK = Lock()
+_METADATA_TTL_S = 30.0
 
 
 @dataclass
@@ -164,11 +171,99 @@ def load_tool_definitions() -> dict[str, ToolDefinition]:
     return probe_backends(discover_tools())
 
 
-def load_tool_metadata() -> list[dict]:
-    """Load tool metadata for the planner (name + description)."""
-    discover_tools()
-    return [
-    ]
+def load_tool_metadata(include_unavailable: bool = False) -> list[dict]:
+    """Return tool metadata for the planner and future function-calling executors."""
+    cache_key = "all" if include_unavailable else "available"
+
+    with _METADATA_LOCK:
+        cached_at = _METADATA_CACHE_AT.get(cache_key, 0.0)
+        if time.monotonic() - cached_at < _METADATA_TTL_S and cache_key in _METADATA_CACHE:
+            return _METADATA_CACHE[cache_key]
+
+        definitions = probe_backends(discover_tools())
+        out: list[dict] = []
+        for _name, td in sorted(definitions.items()):
+            manifest = td.schema or {}
+            entry = {
+                "name": td.name,
+                "version": td.version,
+                "description": td.description,
+                "inputs": manifest.get("inputs", {}),
+                "outputs": manifest.get("outputs", {}),
+                "errors": manifest.get("errors", []),
+                "tags": manifest.get("tags", []),
+                "available": td.available,
+                "backend_statuses": [
+                    {"name": bs.name, "available": bs.available, "message": bs.message}
+                    for bs in td.backend_statuses
+                ],
+            }
+            if entry["available"] or include_unavailable:
+                out.append(entry)
+
+        _METADATA_CACHE[cache_key] = out
+        _METADATA_CACHE_AT[cache_key] = time.monotonic()
+        return out
+
+
+def invalidate_metadata_cache() -> None:
+    """Test hook: force the next load_tool_metadata() call to re-probe."""
+    with _METADATA_LOCK:
+        _METADATA_CACHE.clear()
+        _METADATA_CACHE_AT.clear()
+
+
+def to_openai_tool_schemas(metadata: list[dict]) -> list[dict]:
+    """Convert metadata entries into OpenAI function-call tool schemas."""
+    schemas: list[dict] = []
+    for t in metadata:
+        if not t["available"]:
+            continue
+        schemas.append({
+            "type": "function",
+            "function": {
+                "name": t["name"],
+                "description": _build_description(t),
+                "parameters": _inputs_to_json_schema(t["inputs"]),
+            },
+        })
+    return schemas
+
+
+def _build_description(t: dict) -> str:
+    base = t["description"].strip()
+    tags = t.get("tags", [])
+    errors = t.get("errors", [])
+    tail = ""
+    if tags:
+        tail += f"\nTags: {', '.join(tags)}."
+    if errors:
+        tail += f"\nMay return these error codes: {', '.join(errors)}."
+    return base + tail
+
+
+def _inputs_to_json_schema(inputs: dict) -> dict:
+    props: dict = {}
+    required: list[str] = []
+    for field_name, spec in inputs.items():
+        prop: dict = {"type": spec.get("type", "string")}
+        if "enum" in spec:
+            prop["enum"] = spec["enum"]
+        if "items" in spec:
+            prop["items"] = spec["items"]
+        if "description" in spec:
+            prop["description"] = spec["description"]
+        if "default" in spec:
+            prop["default"] = spec["default"]
+        props[field_name] = prop
+        if spec.get("required"):
+            required.append(field_name)
+    return {
+        "type": "object",
+        "properties": props,
+        "required": required,
+        "additionalProperties": False,
+    }
 
 
 def _load_mock_tools() -> dict[str, Callable]:

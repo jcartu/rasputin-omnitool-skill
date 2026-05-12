@@ -54,6 +54,7 @@
       "type": "array"
     }
   },
+  "tags": ["compute", "code", "execution"],
   "errors": [
     "SANDBOX_UNREACHABLE",
     "TIMEOUT",

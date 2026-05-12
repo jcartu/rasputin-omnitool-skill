@@ -21,6 +21,7 @@
       "type": "number"
     }
   },
+  "tags": ["media", "audio", "transcription"],
   "errors": [
     "FILE_NOT_FOUND",
     "MODEL_UNAVAILABLE",

@@ -18,6 +18,7 @@
       "type": "string"
     }
   },
+  "tags": ["media", "audio", "generation"],
   "errors": [
     "MODEL_UNAVAILABLE",
     "GENERATION_FAILED"

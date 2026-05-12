@@ -38,6 +38,7 @@
       "type": "array"
     }
   },
+  "tags": ["output", "file", "report"],
   "errors": [
     "INVALID_FORMAT",
     "WRITE_FAILED"

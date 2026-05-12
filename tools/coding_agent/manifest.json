@@ -32,5 +32,6 @@
     "output": {"type": "string"},
     "stderr": {"type": "string"}
   },
+  "tags": ["code", "editing", "files"],
   "errors": ["AIDER_FAILED", "AIDER_NOT_INSTALLED", "TIMEOUT", "INVALID_INPUT"]
 }

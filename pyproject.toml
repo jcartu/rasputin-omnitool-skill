@@ -37,6 +37,9 @@ include = ["tools*", "agent*", "prompts*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+markers = [
+    "real_planner: tests that call the real planner and skip without API credentials",
+]
 filterwarnings = [
     "ignore:The pynvml package is deprecated:FutureWarning",
 ]
