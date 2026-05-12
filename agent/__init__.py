@@ -58,3 +58,38 @@ def run_goal(goal: str, goal_id: str | None = None) -> dict[str, Any]:
                 "details": {"spent": exc.current, "limit": exc.limit},
                 "results": [],
             }
+
+
+def resume_goal(goal_id: str, allow_session_loss: bool = False) -> dict[str, Any]:
+    """Resume a goal from its latest checkpoint."""
+    from agent.checkpoint import get_checkpoint_manager
+
+    mgr = get_checkpoint_manager()
+    cp = mgr.latest(goal_id)
+    if cp is None:
+        return {
+            "goal_id": goal_id,
+            "halted": True,
+            "reason": "NO_CHECKPOINT",
+            "details": {"message": f"No checkpoint found for goal {goal_id}"},
+        }
+
+    # Verify sessions are alive
+    dead_sessions: list[str] = []
+    if not allow_session_loss:
+        from agent.session_manager import get_sandbox_session_manager
+        sandbox_mgr = get_sandbox_session_manager()
+        for sid in cp.sandbox_session_ids:
+            if not sandbox_mgr.is_alive(sid):
+                dead_sessions.append(sid)
+        if dead_sessions:
+            return {
+                "goal_id": goal_id,
+                "halted": True,
+                "reason": "SESSIONS_EXPIRED",
+                "details": {"dead_sessions": dead_sessions},
+            }
+
+    # Re-run with checkpoint context
+    goal_text = cp.goal_text
+    return run_goal(goal_text, goal_id=goal_id)

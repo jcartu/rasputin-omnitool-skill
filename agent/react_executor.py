@@ -22,6 +22,11 @@ from agent.observability import (
 )
 from agent.planner import Plan
 from agent.tool_registry import to_openai_tool_schemas
+from agent.checkpoint import (
+    GoalCheckpoint,
+    get_checkpoint_manager,
+)
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -198,6 +203,10 @@ def react_execute(
                 break
 
         messages = _compact_if_oversize(messages, soft_cap_tokens)
+
+        # Checkpoint after each step
+        if goal_id:
+            _write_checkpoint(goal_id, goal, step + 1, spent_usd, messages, trace, sandbox_session_id)
     else:
         trace.halted_for = "MAX_STEPS"
 
@@ -307,3 +316,32 @@ def _estimate_tokens(message: dict) -> int:
     if isinstance(content, list):
         content = json.dumps(content)
     return max(1, len(str(content)) // 4)
+
+def _write_checkpoint(
+    goal_id: str,
+    goal_text: str,
+    step_count: int,
+    cost_usd: float,
+    messages: list[dict],
+    trace: ExecutionTrace,
+    sandbox_session_id: str | None,
+    browser_session_id: str | None = None,
+) -> None:
+    try:
+        mgr = get_checkpoint_manager()
+        cp = GoalCheckpoint(
+            goal_id=goal_id,
+            sprint_id=None,
+            goal_text=goal_text,
+            step_count=step_count,
+            cost_usd=cost_usd,
+            messages=list(messages),
+            trace_steps=[dict(s) for s in trace.steps],
+            artifact_ids=list(trace.artifacts),
+            sandbox_session_ids=[sandbox_session_id] if sandbox_session_id else [],
+            browser_session_ids=[browser_session_id] if browser_session_id else [],
+            created_at=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+        )
+        mgr.write(cp)
+    except Exception:
+        logger.exception("checkpoint write failed for goal %s", goal_id)
