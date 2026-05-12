@@ -131,7 +131,6 @@ def call_opus(system_prompt: str, payload: dict) -> tuple[dict, int, int]:
             response = client.messages.create(
                 model=REVIEW_MODEL,
                 max_tokens=2000,
-                temperature=0,
                 system=system_prompt,
                 messages=[{"role": "user", "content": user_content}],
             )
