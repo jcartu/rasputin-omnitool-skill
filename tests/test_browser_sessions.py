@@ -191,3 +191,56 @@ def test_evaluate_returns_value(manager):
         result, _ = manager.run_action(sess, lambda page: {"result": page.evaluate("2+2")})
 
     assert result == {"result": 42}
+
+def test_storage_state_written_after_run_action(manager):
+    sess = manager.create()
+    storage_path = Path(sess.storage_state_path)
+    assert not storage_path.exists()
+
+    mock_page = MagicMock()
+    mock_page.evaluate.return_value = 1
+    mock_context = MagicMock()
+    mock_context.pages = [mock_page]
+    mock_context.storage_state.return_value = {"origins": [{"origin": "https://example.com"}]}
+    mock_context.add_cookies = MagicMock()
+    mock_chromium = MagicMock()
+    mock_chromium.launch_persistent_context.return_value = mock_context
+    mock_pw = MagicMock()
+    mock_pw.chromium = mock_chromium
+    mock_ctx_mgr = MagicMock()
+    mock_ctx_mgr.__enter__.return_value = mock_pw
+    mock_ctx_mgr.__exit__.return_value = None
+
+    with patch("playwright.sync_api.sync_playwright", return_value=mock_ctx_mgr):
+        _, storage = manager.run_action(sess, lambda page: {"result": page.evaluate("1")})
+        manager.save_storage_state(sess.session_id, storage)
+
+    assert storage_path.exists()
+    data = __import__("json").loads(storage_path.read_text())
+    assert "origins" in data
+
+
+def test_evaluate_non_serializable_returns_error(manager):
+    sess = manager.create()
+    mock_page = MagicMock()
+    mock_page.evaluate.side_effect = TypeError("cannot serialize")
+    mock_context = MagicMock()
+    mock_context.pages = [mock_page]
+    mock_context.storage_state.return_value = {}
+    mock_context.add_cookies = MagicMock()
+    mock_chromium = MagicMock()
+    mock_chromium.launch_persistent_context.return_value = mock_context
+    mock_pw = MagicMock()
+    mock_pw.chromium = mock_chromium
+    mock_ctx_mgr = MagicMock()
+    mock_ctx_mgr.__enter__.return_value = mock_pw
+    mock_ctx_mgr.__exit__.return_value = None
+
+    with patch("playwright.sync_api.sync_playwright", return_value=mock_ctx_mgr):
+        with pytest.raises(TypeError, match="cannot serialize"):
+            manager.run_action(sess, lambda page: {"result": page.evaluate("undefined")})
+
+    # Tool layer (_classify_error) catches TypeError and returns NAVIGATION_FAILED
+    from tools.browser.index import _classify_error
+    result = _classify_error(TypeError("cannot serialize"), "evaluate")
+    assert result.get("error", {}).get("code") == "NAVIGATION_FAILED"

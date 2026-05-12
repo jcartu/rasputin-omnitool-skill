@@ -1,0 +1,37 @@
+{
+  "verdict": "REVISE",
+  "notes": "The core functionality works — live cookie-persistence demo passes, 12 browser-session tests + 22 total browser tests green, ruff clean, scope discipline is reasonable. However, the evidence file is materially incomplete relative to the phase brief and rubric template: several acceptance criteria are missing from the table (authenticated flow, wait_for_selector, evaluate JSON-serializable handling), the standard template sections (pytest -v tail, mypy, cost, wall-clock, halt records, open questions) are absent, and the phase brief's explicit additional evidence requirements (authenticated flow trace, disk-state listing of ~/.rasputin/sessions/browser/, cross-session isolation test output) are not pasted.",
+  "findings": [
+    "Acceptance criteria table is missing rows for: (a) authenticated httpbin basic-auth multi-step flow, (b) wait_for_selector action against a delayed-render fixture, (c) evaluate returning non-serializable value handled with an error, (d) storage_state.json mtime check after each action. Add rows with PASS/FAIL and log/test pointers for each — the phase brief lists 10 required unit-test scenarios; the evidence table only covers 6.",
+    "Phase brief 'Phase evidence' section explicitly requires: (1) the authenticated flow trace (login to httpbin basic-auth then access protected URL), (2) disk-state confirmation via `ls ~/.rasputin/sessions/browser/` showing session dirs, (3) cross-session isolation test output pasted literally. None of these are in the evidence file. Add them.",
+    "Standard evidence template sections missing: pytest -v tail (last 50 lines), mypy status, cost (LLM cost this phase + sprint to date + headroom), wall-clock (start/end/duration), halt records line, open questions / risks for next phase. Add all per `prompts/grading-rubric.md` template.",
+    "`tests/test_browser_sessions.py` is reported as 12 tests but the phase brief lists 10 mandatory scenarios. Confirm each of the 10 brief scenarios maps to a named test (e.g. provide a checklist: scenario 1 → `test_create_generates_user_data_dir`, etc.). Currently the evidence does not show that scenarios 5 (storage_state mtime), 8 (wait_for_selector with delayed div fixture), and 9 (evaluate non-serializable error path) are covered.",
+    "The 'Out-of-spec changes' note about cookie restoration via `context.add_cookies()` rather than `storage_state` kwarg is a meaningful architectural deviation from the phase brief's stated 'Use launch_persistent_context — it's strictly more powerful' premise. Document the Playwright version observed, the exact API call site, and confirm storage_state.json is still written after each action as the phase brief requires (this is acceptance criterion 5 from the unit-test list).",
+    "Manifest.json (top-level skill manifest) was regenerated (64-line diff) but not listed in 'Files to change' nor in 'Out-of-spec changes'. Add to out-of-spec with justification (same pattern as prior phases).",
+    "Live demo log file is only 4 lines per diff_stat — confirm it contains the full python -c output including the final assertion line, not a truncated copy. Paste the full contents into the evidence file."
+  ],
+  "dimension_scores": {
+    "1_goal_completion": "PARTIAL",
+    "2_code_quality": "PASS",
+    "3_test_quality": "PARTIAL",
+    "4_evidence_honesty": "PARTIAL",
+    "5_scope_discipline": "PARTIAL",
+    "6_reversibility": "PASS"
+  },
+  "evidence_pointers": {
+    "missing AC rows": "phase-4-evidence.md 'Acceptance Criteria' table — 6 rows present, phase brief lists 7 acceptance criteria + 10 unit-test scenarios",
+    "missing authenticated flow trace": "phase-4-evidence.md — no section for httpbin basic-auth login trace; phase brief 'Phase evidence' bullet 2 requires it",
+    "missing disk-state listing": "phase-4-evidence.md — no `ls ~/.rasputin/sessions/browser/` output; phase brief 'Phase evidence' bullet 3 requires it",
+    "missing cross-session isolation output": "phase-4-evidence.md — test name cited but no pasted output",
+    "missing template sections": "phase-4-evidence.md — no pytest -v tail, no mypy, no cost, no wall-clock, no halt records, no open questions sections per `prompts/grading-rubric.md`",
+    "manifest.json undisclosed": "diff_stat line: manifest.json | 64 ++++++++- — not in Files Changed or Out-of-spec sections of evidence",
+    "live demo log size": "diff_stat: sprint/v0.5/phase-4-live-demo.log | 4 ++++ — appears truncated",
+    "cookie restoration deviation": "phase-4-evidence.md 'Out-of-spec Changes' — mentions add_cookies workaround but lacks Playwright version and storage_state.json mtime confirmation"
+  },
+  "_cost_usd": 0.3394,
+  "_tokens_in": 13674,
+  "_tokens_out": 1790,
+  "_model": "claude-opus-4-7",
+  "_scope": "phase",
+  "_phase": 4
+}

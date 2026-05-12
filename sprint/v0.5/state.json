@@ -1,7 +1,7 @@
 {
   "sprint": "v0.5",
   "started_at": "2026-05-12T08:25:00Z",
-  "current_phase": 3,
+  "current_phase": 4,
   "phase_status": {
     "0": {
       "status": "approved",
@@ -23,14 +23,20 @@
       "review_count": 3,
       "commit": "ab56e95"
     },
+    "4": {
+      "status": "awaiting_review",
+      "review_count": 0,
+      "commit": "c88d61b"
+    }
   },
   "halt_reason": null,
-  "total_cost_usd": 3.5513,
+  "total_cost_usd": 4.3012,
   "budget_usd": 25.0,
   "branches": {
     "0": "sprint/v0.5-phase0",
     "1": "sprint/v0.5-phase1",
     "2": "sprint/v0.5-phase2",
-    "3": "sprint/v0.5-phase3"
+    "3": "sprint/v0.5-phase3",
+    "4": "sprint/v0.5-phase4"
   }
 }
