@@ -20,7 +20,7 @@ M  tests/test_tool_registry.py          # tool count 16 → 17
 sprint/v0.5/phase-7-evidence.md         # this file
 sprint/v0.5/phase-7-pytest.log          # evidence artifact
 sprint/v0.5/phase-7-ruff.log            # evidence artifact
-sprint/v0.5/phase-7-live-demo.log      # evidence artifact (model 404)
+sprint/v0.5/phase-7-live-demo.log      # evidence artifact (vLLM run, 77.2s, 1/3 subs ok)
 sprint/v0.5/phase-7-wallclock.log       # wall-clock comparison artifact
 ```
 
