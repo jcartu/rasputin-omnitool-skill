@@ -18,6 +18,7 @@ class ExecutionTrace:
     steps: list[dict[str, Any]] = field(default_factory=list)
     artifacts: list[str] = field(default_factory=list)
     halted_for: str | None = None
+    final_answer: str | None = None
 
 
 @observe("executor.execute")

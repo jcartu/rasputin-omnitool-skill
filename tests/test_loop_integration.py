@@ -19,6 +19,8 @@ from agent.tool_registry import invalidate_metadata_cache, load_tool_metadata
 
 
 def test_run_goal_with_mocked_tools(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    # Force static executor mode for this test (it was written for the static executor).
+    monkeypatch.setenv("RASPUTIN_OMNITOOL_EXECUTOR_MODE", "static")
     """Full plan → execute → review loop completes with mocked tools in ≤2 minutes."""
     monkeypatch.chdir(tmp_path)
 

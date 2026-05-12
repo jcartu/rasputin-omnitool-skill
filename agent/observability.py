@@ -152,6 +152,27 @@ def extract_usage(response: Any) -> tuple[int, int]:
     return (0, 0)
 
 
+def estimate_message_tokens(messages: list[dict[str, Any]]) -> int:
+    """Approximate OpenAI-style chat token usage at ~4 characters per token."""
+    total = 0
+    for message in messages:
+        content = message.get("content", "")
+        if not isinstance(content, str):
+            content = str(content)
+        total += max(1, len(content) // 4)
+    return total
+
+
+def truncate_observation(observation: dict[str, Any], max_chars: int) -> str:
+    """Serialize and truncate a tool observation for model context."""
+    import json
+
+    text = json.dumps(observation, ensure_ascii=False, default=str)
+    if len(text) <= max_chars:
+        return text
+    return text[:max_chars] + f"\n... [observation truncated; original length {len(text)} chars]"
+
+
 # ---- @observe decorator ----
 
 

@@ -10,6 +10,7 @@ class Config:
     """Environment-backed config defaults."""
 
     planner_model: str = os.getenv("RASPUTIN_OMNITOOL_PLANNER_MODEL", "gpt-oss-120b")
+    executor_mode: str = os.getenv("RASPUTIN_OMNITOOL_EXECUTOR_MODE", "react")
     executor_model: str = os.getenv("RASPUTIN_OMNITOOL_EXECUTOR_MODEL", "gpt-oss-120b")
     executor_endpoint: str = os.getenv("RASPUTIN_OMNITOOL_EXECUTOR_ENDPOINT", "http://localhost:11434/v1")
     reviewer_model: str = os.getenv("RASPUTIN_OMNITOOL_REVIEWER_MODEL", "claude-opus-4-7")
@@ -17,6 +18,7 @@ class Config:
     max_steps_per_goal: int = int(os.getenv("RASPUTIN_OMNITOOL_MAX_STEPS", "30"))
     max_tool_failure_rate: float = float(os.getenv("RASPUTIN_OMNITOOL_MAX_TOOL_FAILURE_RATE", "0.30"))
     max_wallclock_per_goal_min: int = int(os.getenv("RASPUTIN_OMNITOOL_MAX_WALLCLOCK_MIN", "20"))
+    soft_cap_tokens: int = int(os.getenv("RASPUTIN_OMNITOOL_SOFT_CAP_TOKENS", "18000"))
     langfuse_public_key: str | None = os.getenv("LANGFUSE_PUBLIC_KEY")
     langfuse_secret_key: str | None = os.getenv("LANGFUSE_SECRET_KEY")
     langfuse_host: str = os.getenv("LANGFUSE_HOST", "http://localhost:3000")

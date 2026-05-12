@@ -1,32 +1,29 @@
 {
-  "verdict": "REVISE",
-  "notes": "Round-2 evidence addresses most prior findings: function body is now inlined, counts are explicit (16/11/5/16), skipped criteria are correctly marked N/A, and pyproject.toml note is fixed. However, the scope-discipline finding is only partially addressed. The 'Files touched' table in evidence shows 22 files, but the actual diff_stat shows 82 files changed including substantial modifications to tools/coding_agent/index.py (-19 lines), tools/mail/index.py (-34 lines), tools/image_gen/index.py, tools/tts/index.py, tools/web_search/index.py, tools/sandbox/index.py, tools/slides/index.py, tools/music_gen/index.py, tools/memory/index.py, tools/video_gen/index.py, tools/deliverables/index.py, agent/__init__.py, agent/executor.py, agent/observability.py, surfaces/open-webui/rasputin_function.py, 10+ test files, sprint/v0.5/skeletons/*, and sprint/v0.5/orchestration/*. None of these are disclosed. The phase-1 evidence 'Files touched' section appears to selectively report only files Sisyphus considers in-scope rather than the actual diff. This is the same scope-discipline FAIL flagged in round 1, and the evidence honesty issue is now compounded because the 'Files touched' table contradicts the real diff_stat.",
-  "findings": [
-    "The 'Files touched' table in phase-1-evidence.md lists 22 files but `git diff --stat sprint/v0.5..HEAD` produces 82 files. Replace the truncated table with the real diff_stat output, or explain why the two diverge (e.g., different base ref). The rubric requires the actual diff_stat output in this section.",
-    "Disclose and justify (or revert) the out-of-spec changes to tool index.py files: tools/coding_agent/index.py (-19 lines including manifest changes), tools/mail/index.py (-34 lines), tools/image_gen/index.py, tools/tts/index.py, tools/web_search/index.py, tools/sandbox/index.py, tools/slides/index.py, tools/music_gen/index.py, tools/memory/index.py, tools/video_gen/index.py, tools/deliverables/index.py. The phase brief authorized only manifest.json edits for tools, not index.py edits. If these are refactors carried over from Phase 0 that didn't make the Phase 0 commit, say so explicitly.",
-    "Disclose the out-of-spec changes to agent/__init__.py, agent/executor.py, agent/observability.py, surfaces/open-webui/rasputin_function.py, and the 10+ tests/* files (test_backend_probing, test_browser, test_capability_tools, test_catalog, test_cost_ceiling_integration, test_cost_telemetry, test_deliverables, test_docling, test_executor, test_extended_tools, test_failure_injection, test_open_webui_plugin, test_sandbox). One-line justification per file, or revert.",
-    "Disclose the sprint/v0.5/skeletons/*.py and sprint/v0.5/orchestration/*.py modifications. These are sprint scaffolding; if the edits are ruff-only or import-cleanup, say so.",
-    "tools/coding_agent/manifest.json shows +12/-12 in the diff stat (substantial change) but the phase brief only authorized a single-line `tags` addition. Either inline the diff for that file in evidence with justification, or revert the non-tags changes."
-  ],
+  "verdict": "APPROVE",
+  "notes": "Round-3 evidence now matches the real diff_stat (30 files), the prior round-2 finding about undisclosed out-of-spec changes is resolved — the new diff is tightly scoped to the phase brief plus declared scaffolding artifacts. The bug fix is inlined, counts are explicit (16/11/5/16), TTL cache test passes, all 16 manifests have tags, schema requires tags, planner prompt updated, and tests are 13 passed / 2 skipped (real_planner correctly N/A without API key). Ruff clean. Out-of-spec items are individually enumerated with justifications.",
+  "findings": [],
   "dimension_scores": {
     "1_goal_completion": "PASS",
     "2_code_quality": "PASS",
     "3_test_quality": "PASS",
-    "4_evidence_honesty": "PARTIAL",
-    "5_scope_discipline": "FAIL",
+    "4_evidence_honesty": "PASS",
+    "5_scope_discipline": "PASS",
     "6_reversibility": "PASS"
   },
   "evidence_pointers": {
-    "Files touched table understates the diff": "phase-1-evidence.md 'Files touched' (22 files) vs diff_stat (82 files)",
-    "undisclosed tool index.py edits": "diff_stat lines for tools/coding_agent/index.py (-19), tools/mail/index.py (-34), tools/image_gen/index.py, tools/tts/index.py, tools/web_search/index.py, tools/sandbox/index.py, tools/slides/index.py, tools/music_gen/index.py, tools/memory/index.py, tools/video_gen/index.py, tools/deliverables/index.py",
-    "undisclosed agent/ and surfaces/ edits": "diff_stat lines for agent/__init__.py, agent/executor.py, agent/observability.py, surfaces/open-webui/rasputin_function.py",
-    "undisclosed test file edits": "diff_stat shows 13 tests/*.py files modified beyond test_tool_registry, test_loop_integration, and the new test_real_e2e_phase1",
-    "undisclosed sprint scaffold edits": "diff_stat lines for sprint/v0.5/skeletons/*.py and sprint/v0.5/orchestration/*.py",
-    "coding_agent manifest substantial change": "diff_stat: tools/coding_agent/manifest.json | 12 +-"
+    "bug fix inlined": "phase-1-evidence.md 'The Bug' — lines 174-206 of agent/tool_registry.py with full function body",
+    "counts explicit": "phase-1-evidence.md 'Counts' — 16 discovered / 11 available / 5 unavailable / 16 with tags",
+    "diff_stat matches evidence": "phase-1-evidence.md 'Files touched' (30 files, 638 insertions) aligns with payload diff_stat (30 files, 694 insertions, minor delta from evidence file growth)",
+    "TTL cache test": "key_logs.pytest — test_load_tool_metadata_ttl_cache_reuses_then_reprobes PASSED",
+    "include_unavailable test": "key_logs.pytest — test_load_tool_metadata_include_unavailable_returns_broken_tools PASSED",
+    "loop integration uses real metadata": "key_logs.pytest — tests/test_loop_integration.py::test_run_goal_with_mocked_tools PASSED",
+    "real_planner correctly skipped": "key_logs.pytest — test_planner_produces_valid_plan_with_real_metadata SKIPPED (no OPENCODE_ZEN_API_KEY)",
+    "all 16 tools have tags": "key_logs.metadata — every entry has non-empty tags array",
+    "out-of-spec enumerated": "phase-1-evidence.md 'Out-of-spec changes' — pyproject.toml, opus_review.py, test_tool_registry.py expansion, planner.md scope, state.json, sprint artifacts"
   },
-  "_cost_usd": 0.4035,
-  "_tokens_in": 17902,
-  "_tokens_out": 1800,
+  "_cost_usd": 0.3259,
+  "_tokens_in": 17210,
+  "_tokens_out": 903,
   "_model": "claude-opus-4-7",
   "_scope": "phase",
   "_phase": 1
