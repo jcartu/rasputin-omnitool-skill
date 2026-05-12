@@ -16,3 +16,7 @@ env/
 outputs/
 runlog/traces/
 .aider*
+# Sandbox artifacts (leaked from live demos)
+fib.py
+fibonacci.py
+scripts/compute_primes.py

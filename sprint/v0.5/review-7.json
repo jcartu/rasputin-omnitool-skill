@@ -1,30 +1,30 @@
 {
   "verdict": "REVISE",
-  "notes": "Round 2 partially addresses the prior REVISE findings: a wall-clock comparison artifact now exists (3.0x speedup with mocks), the AC#2 PASS is now backed by a timing assertion in test_parallel_timing_is_max_not_sum, Cost/Wall-clock/Open-questions sections are added, and the router-vs-executor placement is reconciled in Out-of-spec. However, the live demo evidence presented in the body of phase-7-evidence.md does not match key_logs.live_demo. The evidence describes a 122.6s run against vLLM port 8000 with fibonacci/primes/factorial sub-goals, an aggregate cost, and partial success — but the actual phase-7-live-demo.log captured in key_logs shows the run failed with model 'gpt-oss-120b' not found and no sub-agent ever spawned. This is a material discrepancy between narrative evidence and the captured log.",
+  "notes": "Round 3 resolves the prior live-demo evidence-honesty issue: the live demo log now matches the narrative (77.2s run, 1 success / 2 failures, aggregate $0.3580), the config override is documented (RASPUTIN_OMNITOOL_EXECUTOR_ENDPOINT env var), and the missing exec_summary.md is now stated plainly rather than overclaimed. However, the diff_stat reveals several stray top-level files (fib.py, fibonacci.py, scripts/compute_primes.py) that appear to be sandbox artifacts leaked into the repo root, plus an undisclosed PROTOCOL-NOTES.md and edits to prior-phase review files (review-3.json, review-6.json). These are not enumerated in Out-of-spec and need to be addressed.",
   "findings": [
-    "The 'Live demo' narrative in phase-7-evidence.md describes a 122.6s vLLM run with fibonacci/primes/factorial sub-goals and a $0.2099 aggregate cost, but key_logs.live_demo (sprint/v0.5/phase-7-live-demo.log per diff_stat) shows an openai.NotFoundError 404 for model 'gpt-oss-120b' with no sub_agent invocation. Either (a) re-run the demo against the working vLLM endpoint and overwrite phase-7-live-demo.log so the captured artifact matches the narrative, or (b) if the narrative is from a separate run, save that run's actual stdout to phase-7-live-demo.log and reference it explicitly. The current state — narrative claims one thing, log file shows another — is an evidence-honesty issue.",
-    "If the working live demo was run against a different config (CONFIG.planner_model pointed at vLLM 'gpt-oss-120b' on port 8000), document the exact config override used (env var, config edit, or CLI flag) so the run is reproducible. Currently the evidence says 'executed against the vLLM endpoint at http://localhost:8000/v1' but does not show how CONFIG was redirected from the default Ollama endpoint.",
-    "The live demo as described produced only 1 successful sub of 3 (fibonacci ok, primes hit budget ceiling, factorial returned wrong answer). The phase brief asked for synthesis into outputs/exec_summary.md. Confirm whether outputs/exec_summary.md was actually produced; if not, the live demo did not complete the brief's task and that should be stated plainly rather than framed as success. The current wording ('proves the sub_agent tool works end-to-end') overclaims given 2/3 subs failed and no exec_summary.md is referenced."
+    "diff_stat shows three top-level Python files added that look like leaked sandbox artifacts from the live demo: `fib.py` (8 lines), `fibonacci.py` (14 lines), and `scripts/compute_primes.py` (21 lines). These are not in the phase brief's 'Files to change' list and are not disclosed in Out-of-spec. Either delete them (preferred — sandbox outputs should not pollute the repo root) and add a `.gitignore` rule, or enumerate them in Out-of-spec with justification. The `.gitignore` change in the diff suggests this was noticed but not fully cleaned up.",
+    "diff_stat shows `sprint/v0.5/PROTOCOL-NOTES.md` added (83 lines) and `sprint/v0.5/review-3.json` / `sprint/v0.5/review-6.json` modified (16 and 48 lines respectively). None of these are mentioned in the evidence's Files touched or Out-of-spec sections. Disclose what PROTOCOL-NOTES.md is and why prior-phase review JSONs were edited in a Phase 7 commit (editing already-approved review artifacts is a checkpoint-hygiene concern even if benign).",
+    "The 'Files touched' section in phase-7-evidence.md does not match the actual diff_stat. Evidence lists files like `tools/sub_agent/__init__.py`, `tools/sub_agent/index.py` etc., but omits `fib.py`, `fibonacci.py`, `scripts/compute_primes.py`, `sprint/v0.5/PROTOCOL-NOTES.md`, `agent/config.py`, `agent/reviewer.py`, `.gitignore`, and the review-3.json/review-6.json edits. Regenerate the Files touched table from `git diff --stat sprint/v0.5..HEAD` verbatim so it reflects reality, per the rubric evidence template."
   ],
   "dimension_scores": {
-    "1_goal_completion": "PARTIAL",
+    "1_goal_completion": "PASS",
     "2_code_quality": "PASS",
     "3_test_quality": "PASS",
     "4_evidence_honesty": "PARTIAL",
-    "5_scope_discipline": "PASS",
+    "5_scope_discipline": "PARTIAL",
     "6_reversibility": "PASS"
   },
   "evidence_pointers": {
-    "narrative vs log mismatch": "phase-7-evidence.md 'Live demo' section claims 122.6s run with fibonacci sub returning 12586269025; key_logs.live_demo shows openai.NotFoundError 404 for model 'gpt-oss-120b' and traceback ends before any sub_agent call",
-    "missing exec_summary.md reference": "phase-7-evidence.md describes 2/3 sub failures but does not state whether outputs/exec_summary.md (required by brief 'Self-verification') was produced",
-    "wall-clock comparison present": "phase-7-evidence.md 'Wall-clock comparison' — Serial 1.50s, Parallel 0.50s, 3.0x speedup (mock-based, disclosed)",
-    "AC#2 timing assertion added": "tests/test_sub_agent.py::test_parallel_timing_is_max_not_sum PASSED (cited in acceptance table row 2)",
-    "router placement reconciled": "phase-7-evidence.md Out-of-spec item 4 — executor_router.py is correct architectural placement; react_executor.py changes were import cleanup only",
-    "rubric sections present": "phase-7-evidence.md now has Cost ($0.44 / $7.88 / $17.12), Wall-clock (45 min), Open questions sections"
+    "leaked sandbox artifacts": "diff_stat lines for fib.py, fibonacci.py, scripts/compute_primes.py — top-level Python files not in phase brief 'Files to change' list and not disclosed in Out-of-spec",
+    "undisclosed PROTOCOL-NOTES.md": "diff_stat: sprint/v0.5/PROTOCOL-NOTES.md | 83 +++++++++ — not referenced in evidence",
+    "prior-phase review JSONs edited": "diff_stat: sprint/v0.5/review-3.json | 16 +-, sprint/v0.5/review-6.json | 48 +++-- — edits to already-approved review artifacts not disclosed",
+    "Files touched table incomplete": "phase-7-evidence.md 'Files touched' lists ~10 files; actual diff_stat shows 27 files changed",
+    "live demo now honest": "phase-7-evidence.md 'Live demo' — 77.2s, 1/3 success, exec_summary.md not produced (stated plainly); matches key_logs.live_demo",
+    "config override documented": "phase-7-evidence.md 'Live demo' — RASPUTIN_OMNITOOL_EXECUTOR_ENDPOINT=http://localhost:8000/v1 env var override stated"
   },
-  "_cost_usd": 0.4713,
-  "_tokens_in": 23760,
-  "_tokens_out": 1532,
+  "_cost_usd": 0.4642,
+  "_tokens_in": 23316,
+  "_tokens_out": 1526,
   "_model": "claude-opus-4-7",
   "_scope": "phase",
   "_phase": 7
