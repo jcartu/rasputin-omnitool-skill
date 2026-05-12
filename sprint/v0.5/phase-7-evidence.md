@@ -31,7 +31,7 @@ A  sprint/v0.5/phase-7-live-demo.log   # evidence artifact (vLLM run, 77.2s, 1/3
 A  sprint/v0.5/phase-7-wallclock.log   # wall-clock comparison artifact
 M  .gitignore                           # added sandbox artifact patterns to prevent leaks
 ```
-(27 files changed, 1160 insertions(+), 55 deletions(-))
+(24 files changed, 1137 insertions(+), 55 deletions(-))
 
 ## Counts
 - Unit tests: 16 passed, 0 failed
