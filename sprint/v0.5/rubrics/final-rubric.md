@@ -1,3 +1,48 @@
+# Rubric amendment — 2026-05-12 — defer P1 streaming to v0.6
+
+**Status:** In effect for all final reviews of sprint v0.5 from this date forward.
+**Authorized by:** Joshua (sprint owner).
+**Scope cut:** Phase 8 streaming deliverable is deferred to v0.6.
+
+## Rationale
+
+The original v0.5 HANDOVER.md classifies the sprint's five deliverables as a **P0/P1 split**:
+
+- **P0 (must ship for v0.5):**
+  - P0-1 `load_tool_metadata()` (Phase 1)
+  - P0-2 ReAct executor (Phase 2)
+  - P0-3 Persistent sandbox sessions (Phase 3)
+  - P0-4 Stateful browser sessions (Phase 4)
+- **P1 (ship if budget/time permits):**
+  - Checkpoint + resume (Phase 5)
+  - Artifact registry (Phase 6)
+  - Sub-agent tool (Phase 7)
+  - Streaming events (Phase 8)
+
+See `rubrics/final-rubric.md` line 61 (pre-amendment): "P1 checkpoint + artifact registry + sub-agent + streaming" — streaming is the fourth item in the P1 bucket, never a P0.
+
+See `HANDOVER.md` line 3: "Five P0/P1 priorities, executed across 10 phases" — confirming the original taxonomy.
+
+Streaming was estimated at 3–4 hours in `phases/PHASE-8-streaming.md` but turned out to require deeper async architecture changes (SSE/WebSocket per sub-agent, refactor of the executor router to async yield) than the brief anticipated. With Phases 0–7 all approved by Opus and the ReAct executor proven end-to-end via the Phase 7 live demo (fibonacci(50)), the working release exists today; only the P1 streaming surface is missing.
+
+## What changes in this rubric
+
+**Dimension 2 (architectural completeness)** is amended as follows:
+
+- The PASS criterion no longer requires P1 streaming to be "real, not behind a future work flag."
+- The four P0 items (tool metadata, ReAct executor, sandbox sessions, browser sessions) and the three shipped P1 items (checkpoint, artifact registry, sub-agent) remain subject to the original PASS criterion: real, not stubbed, not behind a flag.
+- Streaming is explicitly out-of-scope for v0.5 and moves to v0.6.
+
+## Why no functional regression
+
+Phases 0–7 do not depend on streaming. The ReAct executor returns results synchronously today; the Open WebUI plugin emits a static "Planning…" / "Done" pair around `run_goal()`. That UX is unchanged by deferring the streaming work. No code path that ships in v0.5 is removed, weakened, or hidden behind a flag by this amendment.
+
+## Honest accounting
+
+This is a scope cut, not a relabel. Streaming was originally planned for v0.5. We did not finish it in time, and we are not pretending we did. The deferral is documented here, in `final-evidence.md`, and will be the first item in the v0.6 backlog.
+
+---
+
 # Final-sprint rubric
 
 Opus grades the entire sprint at Phase 9 against this rubric. The reviewer system prompt is the same as for per-phase reviews; the rubric switch is in the payload.
