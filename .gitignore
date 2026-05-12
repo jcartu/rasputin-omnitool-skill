@@ -23,5 +23,17 @@ factorial.py
 test_factorial.py
 scripts/compute_primes.py
 scripts/rename_file.py
-# Stdout-as-filename glitches from sandboxed executor
+scripts/run_pytest.py
+# Stdout-as-filename glitches from sandboxed executor (filenames starting with English sentence fragments)
 Assuming the tests pass*
+The expected output*
+To run the tests*
+
+# Build-goal sandbox writes
+mycode/
+
+# Final-review transient logs (regenerated on every run)
+sprint/v0.5/final-ruff.log
+sprint/v0.5/final-unit.log
+sprint/v0.5/final-e2e.log
+sprint/v0.5/final-golden-rerun-*.log

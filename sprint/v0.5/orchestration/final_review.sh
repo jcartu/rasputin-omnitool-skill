@@ -56,11 +56,22 @@ else
 fi
 
 # ---- 5. Golden goals ----
+# IMPORTANT: golden goals are inherently flaky (LLM non-determinism + external services).
+# Non-zero RC must NOT abort the script via set -e — we want to forward results to Opus.
+# Also: never clobber a committed canonical final-golden.log. If it exists in HEAD,
+# write this run to a timestamped sibling file instead.
 echo ""
 echo "--[ golden goals ]--"
+GOLDEN_LOG="sprint/v0.5/final-golden.log"
+if git ls-files --error-unmatch "$GOLDEN_LOG" >/dev/null 2>&1; then
+    GOLDEN_LOG="sprint/v0.5/final-golden-rerun-$(date -u +%Y%m%dT%H%M%SZ).log"
+    echo "(canonical final-golden.log already committed; writing this run to $GOLDEN_LOG)"
+fi
 if [[ -f sprint/v0.5/orchestration/run_golden_goals.py ]]; then
-    python3 sprint/v0.5/orchestration/run_golden_goals.py 2>&1 | tee sprint/v0.5/final-golden.log
+    set +e
+    python3 sprint/v0.5/orchestration/run_golden_goals.py 2>&1 | tee "$GOLDEN_LOG"
     GOLDEN_RC=${PIPESTATUS[0]}
+    set -e
 else
     echo "run_golden_goals.py missing"
     GOLDEN_RC=1

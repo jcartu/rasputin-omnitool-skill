@@ -83,6 +83,42 @@ Aggregate cost: $0.7753. Aggregate wallclock: ~6m.
 - Two goals (`multimedia`, `login`) exceeded their per-goal cost budgets. Not unexpected given the executor needed extra steps to converge.
 - This is data, not a bug fix attempt: per the task brief, the run was not retried to make goals pass. A mixed-result log is exactly what the dimension-1 PARTIAL grade requires.
 
+### Execution variance finding (v0.5 → v0.6 followup)
+
+During final review preparation, the golden goals harness was run **three** times on identical inputs and produced different results. All three runs are preserved as evidence:
+
+**Round 1 — canonical, committed in `57a4e87` (`final-golden.log`, `final-golden-summary.json`):**
+- build:      ABORT, $0.1210, 55.7s, 0 artifacts
+- multimedia: ABORT, $0.4471, 154.4s, 4 artifacts
+- login:      ABORT, $0.2072, 150.5s, 0 artifacts
+- Aggregate: **0/3 APPROVE**, ~$0.78, ~360s wallclock
+
+**Run 2 — ephemeral, executed inside `final_review.sh` (not preserved; overwritten by Round 2 below):**
+- build:      ABORT, $0.2055, 360.9s
+- multimedia: verdict=None (executor crashed mid-run), $0.0000, 58.0s, 0 artifacts
+- login:      APPROVE, $0.0442, 18.7s
+- Aggregate: **1/3 APPROVE**, ~$0.25, ~437s wallclock
+
+**Round 2 — deliberate re-run, committed alongside as `final-golden-round2.log` / `final-golden-round2-summary.json`:**
+- build:      verdict=None (executor crashed), $0.0000, 202.0s, 0 artifacts
+- multimedia: ABORT, $0.2797, 56.3s, 0 artifacts
+- login:      ABORT, $0.1800, 130.5s, 0 artifacts
+- Aggregate: **0/3 APPROVE**, ~$0.46, ~389s wallclock
+
+The infrastructure works the same way each time: the runner executes goals, costs and timings are tracked, state is not corrupted, no crashes propagate to the orchestration layer. The variance is in the **executor's path through each problem**: different tool selections, different cost profiles, different terminal states, occasional mid-run crashes that surface as `verdict=None`.
+
+Sources of variance (most to least likely):
+1. **Non-zero LLM temperature in the executor.** `gpt-oss-120b` served via vLLM is being called without a fixed seed; default sampling is non-deterministic.
+2. **Flaky external services** touched by `multimedia` and `login` goals (image generators, login mock targets).
+3. **Session state leakage** across runs (sandbox container reuse, browser session persistence, checkpoint pollution).
+4. **Concurrent state** in checkpoint or artifact registry under repeated runs.
+
+This is **not** claimed to be deterministic in v0.5. The v0.5 contract is “the infrastructure components work as designed,” demonstrated by phase-by-phase live demos and the unit suite (223 passing). Deterministic execution is a **v0.6 concern**. Documenting this finding here so v0.6 has a concrete starting point:
+- Pin executor temperature/seed in the golden harness.
+- Scrub sandbox sessions and browser state between goals.
+- Add a seeded mode for golden-goal regression so CI can detect real regressions distinct from sampling noise.
+- Investigate the `verdict=None` failure mode (mid-run executor crash; likely a tool-error path that the orchestrator currently swallows).
+
 ## Halt records during sprint
 - Phase 1: 3 review rounds (exceeded 2-round default, documented in PROTOCOL-NOTES.md)
 - Phase 3: 4 review rounds (live demo couldn't run initially due to sandbox container issue, analogous to Phase 3 halt condition)
