@@ -40,14 +40,25 @@ def run(inputs: dict[str, Any]) -> dict[str, Any]:
             if resp.status_code >= 500:
                 return {"error": {"code": "SANDBOX_UNREACHABLE", "message": f"Sandbox returned {resp.status_code}"}}
             data = resp.json()
-            return _with_session_id({
-                "result": {
-                    "stdout": data.get("stdout", ""),
-                    "stderr": data.get("stderr", ""),
-                    "exit_code": data.get("exit_code", 0),
-                    "artifacts": data.get("artifacts", []),
-                }
-            }, session)
+            # New API format: response has success/data wrapper
+            if data.get("success"):
+                inner = data.get("data", {})
+                stdout = inner.get("stdout", "") or ""
+                stderr = inner.get("stderr", "") or ""
+                # Extract text from outputs for richer stdout
+                for out in inner.get("outputs", []):
+                    if out.get("output_type") == "stream" and out.get("name") == "stdout":
+                        stdout = (stdout or "") + (out.get("text", "") or "")
+                return _with_session_id({
+                    "result": {
+                        "stdout": stdout,
+                        "stderr": stderr,
+                        "exit_code": inner.get("exit_code", 0) or 0,
+                        "artifacts": inner.get("artifacts", []),
+                    }
+                }, session)
+            # Error response
+            return {"error": {"code": "EXECUTION_ERROR", "message": data.get("message", "Unknown error"), "details": data.get("data", {})}}
 
         elif operation == "jupyter_kernels_list":
             resp = httpx.get(f"{base_url}/v1/jupyter/kernelspecs", timeout=timeout_s)

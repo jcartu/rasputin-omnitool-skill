@@ -1,20 +1,19 @@
-Traceback (most recent call last):
-  File "/home/josh/workspace/rasputin-omnitool-skill/agent/session_manager.py", line 250, in _ensure_container_alive
-    r.raise_for_status()
-    ~~~~~~~~~~~~~~~~~~^^
-  File "/home/josh/.local/lib/python3.14/site-packages/httpx/_models.py", line 829, in raise_for_status
-    raise HTTPStatusError(message, request=request, response=self)
-httpx.HTTPStatusError: Client error '404 Not Found' for url 'http://localhost:8080/v1/health'
-For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "<string>", line 6, in <module>
-    sess = mgr.create()
-  File "/home/josh/workspace/rasputin-omnitool-skill/agent/session_manager.py", line 95, in create
-    container_id = self._ensure_container_alive()
-  File "/home/josh/workspace/rasputin-omnitool-skill/agent/session_manager.py", line 252, in _ensure_container_alive
-    raise SessionError(f"sandbox not reachable at {self.sandbox_url}: {exc}") from exc
-agent.session_manager.SessionError: sandbox not reachable at http://localhost:8080: Client error '404 Not Found' for url 'http://localhost:8080/v1/health'
-For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
+CALL 1 (write): {
+  "success": true,
+  "message": "Python code executed successfully via the unified runtime (Python, JavaScript, more coming)",
+  "data": {
+    "language": "python",
+    "status": "ok",
+    "outputs"
+CALL 2 (read): {
+  "success": true,
+  "message": "Python code executed successfully via the unified runtime (Python, JavaScript, more coming)",
+  "data": {
+    "language": "python",
+    "status": "ok",
+    "outputs": [
+      {
+        "output_type": "stream",
+        "name": "stdout",
+        "text": "phase3_live\
+SUCCESS: Cross-call filesystem persistence verified

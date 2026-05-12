@@ -27,7 +27,7 @@ def _mock_health_response(status_code: int = 200):
 def _mock_exec_response(stdout: str = "OK", status_code: int = 200):
     resp = MagicMock()
     resp.status_code = status_code
-    resp.json.return_value = {"stdout": stdout, "stderr": "", "exit_code": 0}
+    resp.json.return_value = {"success": True, "data": {"output": stdout, "exit_code": 0}}
     return resp
 
 

@@ -21,10 +21,14 @@ def test_code_execute_returns_result(mock_post):
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.json.return_value = {
-        "stdout": "hello\n",
-        "stderr": "",
+        "success": True,
+        "data": {
+"stdout": "hello\n",
+"stderr": "",
         "exit_code": 0,
-        "artifacts": [],
+            "outputs": [],
+"artifacts": [],
+    }
     }
     mock_post.return_value = mock_response
 

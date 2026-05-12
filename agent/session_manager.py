@@ -229,7 +229,7 @@ class SandboxSessionManager:
 
     def _is_alive_locked(self, sess: SandboxSession) -> bool:
         try:
-            r = httpx.get(f"{self.sandbox_url}/v1/health", timeout=3)
+            r = httpx.get(f"{self.sandbox_url}/v1/code/info", timeout=3)
             if r.status_code != 200:
                 return False
             res = self._exec_in_sandbox(
@@ -244,10 +244,12 @@ class SandboxSessionManager:
 
     def _ensure_container_alive(self) -> str:
         """Return a conceptual container ID for the shared sandbox API host."""
-
         try:
-            r = httpx.get(f"{self.sandbox_url}/v1/health", timeout=3)
-            r.raise_for_status()
+            r = httpx.get(f"{self.sandbox_url}/v1/code/info", timeout=3)
+            if r.status_code != 200:
+                raise SessionError(f"sandbox not reachable at {self.sandbox_url}: HTTP {r.status_code}")
+        except httpx.HTTPError:
+            raise
         except Exception as exc:
             raise SessionError(f"sandbox not reachable at {self.sandbox_url}: {exc}") from exc
         return f"shared@{self.sandbox_url}"
@@ -262,13 +264,17 @@ class SandboxSessionManager:
         del container_id
         try:
             r = httpx.post(
-                f"{self.sandbox_url}/v1/code/execute",
-                json={"code": bash_cmd, "language": "bash", "timeout": timeout},
+                f"{self.sandbox_url}/v1/shell/exec",
+                json={"command": bash_cmd, "timeout": timeout},
                 timeout=timeout + 5,
             )
             if r.status_code >= 500 and not allow_failure:
                 raise SessionError(f"sandbox returned {r.status_code}")
-            return r.json() if r.status_code < 500 else {"stdout": "", "stderr": r.text}
+            data = r.json()
+            # New API format: data.output contains stdout
+            if data.get("success"):
+                return {"stdout": data.get("data", {}).get("output", ""), "stderr": "", "exit_code": data.get("data", {}).get("exit_code", 0)}
+            return {"stdout": "", "stderr": data.get("message", r.text), "exit_code": -1}
         except Exception:
             if allow_failure:
                 return {"stdout": "", "stderr": "unreachable"}
