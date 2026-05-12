@@ -70,10 +70,14 @@ def collect_logs(phase: int) -> dict[str, str]:
 
 def collect_diff_stat(phase: int) -> str:
     import subprocess
-    branch = read_state().get("branches", {}).get(str(phase), f"sprint/v0.5-phase{phase}")
+    state = read_state()
+    branch = state.get("branches", {}).get(str(phase), f"sprint/v0.5-phase{phase}")
+    prev_phase = phase - 1
+    prev_branch = state.get("branches", {}).get(str(prev_phase), f"sprint/v0.5-phase{prev_phase}")
+    base_ref = prev_branch if prev_phase >= 0 else "sprint/v0.5"
     try:
         r = subprocess.run(
-            ["git", "diff", "--stat", f"sprint/v0.5...{branch}"],
+            ["git", "diff", "--stat", f"{base_ref}..{branch}"],
             capture_output=True, text=True, timeout=10,
         )
         return r.stdout
@@ -157,7 +161,12 @@ def call_opus(system_prompt: str, payload: dict) -> tuple[dict, int, int]:
             lines = lines[:-1]
         raw = "\n".join(lines).strip()
 
-    verdict = json.loads(raw)
+    try:
+        verdict = json.loads(raw)
+    except json.JSONDecodeError as e:
+        # save raw response for debugging
+        Path("sprint/v0.5/review-raw.txt").write_text(raw)
+        raise RuntimeError(f"Opus returned invalid JSON: {e}") from e
 
     tokens_in = response.usage.input_tokens
     tokens_out = response.usage.output_tokens
