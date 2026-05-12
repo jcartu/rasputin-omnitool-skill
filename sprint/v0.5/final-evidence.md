@@ -85,7 +85,7 @@ Aggregate cost: $0.7753. Aggregate wallclock: ~6m.
 
 ### Execution variance finding (v0.5 → v0.6 followup)
 
-During final review preparation, the golden goals harness was run **three** times on identical inputs and produced different results. All three runs are preserved as evidence:
+During final review preparation, the golden goals harness was run **four** times on identical inputs and produced different results. Three runs are preserved as committed evidence; one was ephemeral:
 
 **Round 1 — canonical, committed in `57a4e87` (`final-golden.log`, `final-golden-summary.json`):**
 - build:      ABORT, $0.1210, 55.7s, 0 artifacts
@@ -93,17 +93,23 @@ During final review preparation, the golden goals harness was run **three** time
 - login:      ABORT, $0.2072, 150.5s, 0 artifacts
 - Aggregate: **0/3 APPROVE**, ~$0.78, ~360s wallclock
 
-**Run 2 — ephemeral, executed inside `final_review.sh` (not preserved; overwritten by Round 2 below):**
+**Run 2 — ephemeral, executed inside a failed `final_review.sh` run (clobbered then; numbers from terminal log):**
 - build:      ABORT, $0.2055, 360.9s
 - multimedia: verdict=None (executor crashed mid-run), $0.0000, 58.0s, 0 artifacts
 - login:      APPROVE, $0.0442, 18.7s
 - Aggregate: **1/3 APPROVE**, ~$0.25, ~437s wallclock
 
-**Round 2 — deliberate re-run, committed alongside as `final-golden-round2.log` / `final-golden-round2-summary.json`:**
+**Round 2 — deliberate re-run, committed as `final-golden-round2.log` / `final-golden-round2-summary.json`:**
 - build:      verdict=None (executor crashed), $0.0000, 202.0s, 0 artifacts
 - multimedia: ABORT, $0.2797, 56.3s, 0 artifacts
 - login:      ABORT, $0.1800, 130.5s, 0 artifacts
 - Aggregate: **0/3 APPROVE**, ~$0.46, ~389s wallclock
+
+**Round 3 — the run that triggered the Opus APPROVE, committed as `final-golden-round3.log` / `final-golden-round3-summary.json`:**
+- build:      ABORT, $0.3277, 229.7s, 0 artifacts
+- multimedia: verdict=None (executor crashed), $0.0000, 328.5s, 0 artifacts
+- login:      ABORT, $0.2231, 166.9s, 0 artifacts
+- Aggregate: **0/3 APPROVE**, ~$0.55, ~725s wallclock
 
 The infrastructure works the same way each time: the runner executes goals, costs and timings are tracked, state is not corrupted, no crashes propagate to the orchestration layer. The variance is in the **executor's path through each problem**: different tool selections, different cost profiles, different terminal states, occasional mid-run crashes that surface as `verdict=None`.
 
@@ -118,6 +124,7 @@ This is **not** claimed to be deterministic in v0.5. The v0.5 contract is “the
 - Scrub sandbox sessions and browser state between goals.
 - Add a seeded mode for golden-goal regression so CI can detect real regressions distinct from sampling noise.
 - Investigate the `verdict=None` failure mode (mid-run executor crash; likely a tool-error path that the orchestrator currently swallows).
+- **NEW v0.6 follow-up identified during v0.5.1 closeout:** the executor's sandbox/file-write tool path corrupts the workspace `.gitignore` during goal runs (observed across rounds 2-3: gitignore reduced from 30 lines to 2, multiple sandbox artifacts leak into top-level paths). Mitigation in v0.5.1: hardened `.gitignore` patterns and verified clean tree before each commit. Fix in v0.6: sandbox the executor's writes to a dedicated `outputs/` subtree only, never the repo root.
 
 ## Halt records during sprint
 - Phase 1: 3 review rounds (exceeded 2-round default, documented in PROTOCOL-NOTES.md)
