@@ -16,7 +16,12 @@ env/
 outputs/
 runlog/traces/
 .aider*
-# Sandbox artifacts (leaked from live demos)
+# Sandbox artifacts (leaked from live demos / golden goal runs)
 fib.py
 fibonacci.py
+factorial.py
+test_factorial.py
 scripts/compute_primes.py
+scripts/rename_file.py
+# Stdout-as-filename glitches from sandboxed executor
+Assuming the tests pass*
