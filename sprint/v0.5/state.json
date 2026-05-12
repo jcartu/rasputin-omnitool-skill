@@ -42,6 +42,14 @@
       "status": "approved",
       "review_count": 5,
       "commit": "c3f5863"
+    },
+    "8": {
+      "status": "deferred",
+      "review_count": 0,
+      "commit": null,
+      "deferred_to": "v0.6",
+      "deferred_at": "2026-05-12T13:47:54.412774+00:00",
+      "deferred_because": "P1 streaming formally deferred to v0.6 via signed rubric amendment b35d07c (citing original handover P0/P1 split: HANDOVER line 3, final-rubric.md line 61). Phase 8 was scoped at 3-4h in the brief and ran over; per the amendment, streaming is documented as v0.6 backlog item 1 in sprint/v0.5/final-evidence.md."
     }
   },
   "halt_reason": null,

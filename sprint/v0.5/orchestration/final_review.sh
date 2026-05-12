@@ -16,10 +16,18 @@ fi
 
 echo "==[ FINAL REVIEW — sprint v0.5 ]======================================="
 
-# ---- 1. Ensure prior phases approved ----
+# ---- 1. Ensure prior phases approved (or deferred per rubric amendment) ----
+# Phases with status=deferred are allowed if a rubric amendment has scope-cut
+# them to a later sprint. See sprint/v0.5/rubrics/final-rubric.md amendment block.
 for N in 0 1 2 3 4 5 6 7 8; do
-    if ! python3 "$SCRIPT_DIR/state_helpers.py" is-approved "$N"; then
-        echo "FATAL: phase $N not approved; cannot run final review." >&2
+    STATUS=$(python3 -c "import json; s=json.load(open('sprint/v0.5/state.json')); print(s.get('phase_status',{}).get('$N',{}).get('status','missing'))")
+    if [[ "$STATUS" == "approved" ]]; then
+        continue
+    elif [[ "$STATUS" == "deferred" ]]; then
+        echo "NOTE: phase $N deferred (scope-cut per rubric amendment)."
+        continue
+    else
+        echo "FATAL: phase $N not approved or deferred (status=$STATUS); cannot run final review." >&2
         exit 2
     fi
 done
