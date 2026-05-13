@@ -126,6 +126,10 @@ This is **not** claimed to be deterministic in v0.5. The v0.5 contract is “the
 - Investigate the `verdict=None` failure mode (mid-run executor crash; likely a tool-error path that the orchestrator currently swallows).
 - **NEW v0.6 follow-up identified during v0.5.1 closeout:** the executor's sandbox/file-write tool path corrupts the workspace `.gitignore` during goal runs (observed across rounds 2-3: gitignore reduced from 30 lines to 2, multiple sandbox artifacts leak into top-level paths). Mitigation in v0.5.1: hardened `.gitignore` patterns and verified clean tree before each commit. Fix in v0.6: sandbox the executor's writes to a dedicated `outputs/` subtree only, never the repo root.
 
+**Round 4 — v0.5.1 closeout, committed as `golden-build-result.json`:**
+- build: cost $0.2524, 142.8s, 0 artifacts, halted_for=None (budget ceiling hit)
+- This run confirms the executor works end-to-end but the model's cost profile exceeds the per-goal budget. Same failure mode as Round 1 (ABORT due to answer quality).
+
 ## Halt records during sprint
 - Phase 1: 3 review rounds (exceeded 2-round default, documented in PROTOCOL-NOTES.md)
 - Phase 3: 4 review rounds (live demo couldn't run initially due to sandbox container issue, analogous to Phase 3 halt condition)

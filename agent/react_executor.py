@@ -13,6 +13,7 @@ from openai import OpenAI
 
 from agent.artifact_registry import RegistryError, get_registry
 from agent.config import CONFIG
+from agent.event_stream import get_event_bus
 from agent.executor import ExecutionTrace
 from agent.observability import (
     CostCeilingExceeded,
@@ -59,6 +60,8 @@ def react_execute(
     schemas = to_openai_tool_schemas(tool_metadata)
     if not schemas:
         trace.halted_for = "NO_TOOLS_AVAILABLE"
+        if goal_id:
+            get_event_bus().emit_typed("goal.halted", goal_id, reason=trace.halted_for, last_checkpoint=None)
         return trace
 
     messages: list[dict] = [
@@ -76,6 +79,8 @@ def react_execute(
     spent_usd = 0.0
 
     for step in range(max_steps):
+        if goal_id:
+            get_event_bus().emit_typed("executor.step_started", goal_id, step_index=step)
         elapsed_min = (time.time() - started_at) / 60.0
         if elapsed_min > max_wallclock_min:
             trace.halted_for = "WALLCLOCK"
@@ -110,7 +115,8 @@ def react_execute(
             break
 
         prompt_tokens, completion_tokens = extract_usage(response)
-        spent_usd += record_call_cost(model, prompt_tokens, completion_tokens)
+        call_cost = record_call_cost(model, prompt_tokens, completion_tokens)
+        spent_usd += call_cost
         if spent_usd > budget_usd:
             trace.halted_for = "BUDGET"
             break
@@ -150,6 +156,14 @@ def react_execute(
 
             args_hash = _hash_args(args)
             obs: dict[str, Any]
+            tool_started_at = time.time() if goal_id else 0.0
+            if goal_id:
+                get_event_bus().emit_typed(
+                    "executor.tool_call_started",
+                    goal_id,
+                    tool_name=tool_name,
+                    inputs=args,
+                )
 
             if (tool_name, args_hash) in recent_calls[-5:]:
                 obs = {
@@ -191,6 +205,15 @@ def react_execute(
                     }
 
             recent_calls.append((tool_name, args_hash))
+            if goal_id:
+                get_event_bus().emit_typed(
+                    "executor.tool_call_completed",
+                    goal_id,
+                    tool_name=tool_name,
+                    status="ok" if "result" in obs else "error",
+                    output_preview=_preview(obs, 400),
+                    latency_s=time.time() - tool_started_at,
+                )
             trace.steps.append({
                 "step": step,
                 "kind": "tool_call",
@@ -220,6 +243,14 @@ def react_execute(
             _write_checkpoint(goal_id, goal, step + 1, spent_usd, messages, trace, sandbox_session_id)
     else:
         trace.halted_for = "MAX_STEPS"
+
+    if goal_id and trace.halted_for:
+        get_event_bus().emit_typed(
+            "goal.halted",
+            goal_id,
+            reason=trace.halted_for,
+            last_checkpoint=None,
+        )
 
     return trace
 

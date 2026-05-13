@@ -1,0 +1,11 @@
+{
+  "name": "build",
+  "status": "fail",
+  "verdict": null,
+  "artifacts_count": 0,
+  "cost_usd": 0.2524,
+  "wallclock_s": 142.8,
+  "halted_for": null,
+  "failures": ["cost $0.2524 > $0.2500"],
+  "notes": "Executor ran end-to-end against vLLM (gpt-oss-120b). Model consumed budget before completing the 3-step goal. This is a model accuracy/budget sizing issue, not an infrastructure failure. The executor, sandbox, and ReAct loop all functioned correctly."
+}

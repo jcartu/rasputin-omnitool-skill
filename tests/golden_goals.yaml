@@ -5,24 +5,15 @@
 #
 # Pass criteria are per-goal.
 #
-# === 2026-05-12 trim ===
-# The full 7-goal suite was trimmed for the v0.5 final review to the goals
-# that can run on the current box. Documented in sprint/v0.5/final-evidence.md.
-#
-# Trimmed out (commented below, not deleted):
-#   - research   — depends on crawl4ai (lxml 6.0.2 vs 5.3 compat broken)
-#   - resume     — depends on crawl4ai + special fault-injection hook
-#   - wide       — depends on crawl4ai inside each sub-agent
-#   - streaming  — Phase 8 streaming deferred to v0.6 (rubric amendment)
-#
-# Remaining (runnable on this box):
-#   - build      — sandbox only, no external deps
-#   - multimedia — local slides/deliverables tools
-#   - login      — Playwright (verified working) + httpbin.org
+# === 2026-05-13 full suite ===
+# All 7 golden goals defined. The 'build' goal is sandbox-only (no external web
+# dependencies) so it can run immediately. Others may be trimmed at runtime if
+# their backends are unavailable (e.g., crawl4ai lxml compat issues).
 
 goals:
-  # 2. Build goal — sandbox-driven code + test.
+  # 1. Build goal — sandbox-driven code + test.
   # Exercises: ReAct executor, sandbox session, persistent filesystem state.
+  # SANDBOX-ONLY: uses coding_agent/sandbox tools only, no web dependencies.
   - name: build
     goal: >
       In a sandbox session: (1) write a Python file factorial.py with a
@@ -37,7 +28,7 @@ goals:
       max_cost_usd: 0.25
       max_wallclock_s: 300
 
-  # 3. Multimedia goal — multiple media tools.
+  # 2. Multimedia goal — multiple media tools.
   # Exercises: image_gen OR tts (one available), slides, deliverables, lineage.
   - name: multimedia
     goal: >
@@ -52,7 +43,7 @@ goals:
       max_cost_usd: 0.20
       max_wallclock_s: 300
 
-  # 4. Login goal — stateful browser.
+  # 3. Login goal — stateful browser.
   # Exercises: browser session, multi-step flow with state.
   - name: login
     goal: >
@@ -68,46 +59,68 @@ goals:
       max_cost_usd: 0.20
       max_wallclock_s: 180
 
-# === Trimmed goals (not deleted, for v0.6 restoration) ===
-#
-# - name: research
-#   goal: >
-#     Crawl https://example.com and https://httpbin.org/html.
-#     Produce a 1-paragraph markdown summary of each, plus a 2-sentence
-#     meta-summary comparing the two. Save to outputs/golden-research.md.
-#   budget_usd: 0.30
-#   timeout_min: 5
-#   expect: {verdict: APPROVE, min_artifacts: 1, max_cost_usd: 0.30, max_wallclock_s: 300}
-#
-# - name: resume
-#   goal: >
-#     Run a 6-step workflow that crawls 3 URLs (https://example.com,
-#     https://httpbin.org/html, https://httpbin.org/json), summarizes
-#     each, and emits a final combined markdown report saved to
-#     outputs/resume-test.md. The runner will inject a fault after step 3;
-#     a clean resume must complete the remaining steps and emit the report.
-#   budget_usd: 0.30
-#   timeout_min: 8
-#   expect: {verdict: APPROVE, min_artifacts: 1, max_cost_usd: 0.30, max_wallclock_s: 480}
-#
-# - name: wide
-#   goal: >
-#     Use the sub_agent tool to research three topics in parallel:
-#     (1) "structured outputs in modern LLM APIs",
-#     (2) "what changed in Python 3.13 type system features",
-#     (3) "best practices for agent observability in 2026".
-#     Each sub-agent uses crawl4ai and deliverables only. After all
-#     three return, write a 500-word executive summary saved to
-#     outputs/golden-wide.md.
-#   budget_usd: 0.80
-#   timeout_min: 10
-#   expect: {verdict: APPROVE, min_artifacts: 1, max_cost_usd: 0.80, max_wallclock_s: 600}
-#
-# - name: streaming
-#   goal: >
-#     Crawl https://example.com, produce a 1-paragraph summary, save to
-#     outputs/streaming-test.md. While this runs the event stream is
-#     observed externally.
-#   budget_usd: 0.10
-#   timeout_min: 3
-#   expect: {verdict: APPROVE, min_artifacts: 1, max_cost_usd: 0.10, max_wallclock_s: 180}
+  # 4. Research goal — web crawl + summarize.
+  # Exercises: crawl4ai, markdown output, deliverables.
+  - name: research
+    goal: >
+      Crawl https://example.com and https://httpbin.org/html.
+      Produce a 1-paragraph markdown summary of each, plus a 2-sentence
+      meta-summary comparing the two. Save to outputs/golden-research.md.
+    budget_usd: 0.30
+    timeout_min: 5
+    expect:
+      verdict: APPROVE
+      min_artifacts: 1
+      max_cost_usd: 0.30
+      max_wallclock_s: 300
+
+  # 5. Resume goal — checkpoint + resume workflow.
+  # Exercises: checkpoint/resume, multi-step crawl with fault injection.
+  - name: resume
+    goal: >
+      Run a 6-step workflow that crawls 3 URLs (https://example.com,
+      https://httpbin.org/html, https://httpbin.org/json), summarizes
+      each, and emits a final combined markdown report saved to
+      outputs/resume-test.md. The runner will inject a fault after step 3;
+      a clean resume must complete the remaining steps and emit the report.
+    budget_usd: 0.30
+    timeout_min: 8
+    expect:
+      verdict: APPROVE
+      min_artifacts: 1
+      max_cost_usd: 0.30
+      max_wallclock_s: 480
+
+  # 6. Wide goal — sub-agent parallel research.
+  # Exercises: sub_agent tool, parallel execution, artifact composition.
+  - name: wide
+    goal: >
+      Use the sub_agent tool to research three topics in parallel:
+      (1) "structured outputs in modern LLM APIs",
+      (2) "what changed in Python 3.13 type system features",
+      (3) "best practices for agent observability in 2026".
+      Each sub-agent uses crawl4ai and deliverables only. After all
+      three return, write a 500-word executive summary saved to
+      outputs/golden-wide.md.
+    budget_usd: 0.80
+    timeout_min: 10
+    expect:
+      verdict: APPROVE
+      min_artifacts: 1
+      max_cost_usd: 0.80
+      max_wallclock_s: 600
+
+  # 7. Streaming goal — event stream observation.
+  # Exercises: streaming events, external observation, artifact tracking.
+  - name: streaming
+    goal: >
+      Crawl https://example.com, produce a 1-paragraph summary, save to
+      outputs/streaming-test.md. While this runs the event stream is
+      observed externally.
+    budget_usd: 0.10
+    timeout_min: 3
+    expect:
+      verdict: APPROVE
+      min_artifacts: 1
+      max_cost_usd: 0.10
+      max_wallclock_s: 180

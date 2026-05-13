@@ -1,10 +1,12 @@
 """Agent loop — planner → executor → reviewer with one-shot revise."""
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 from agent.planner import Plan as Plan, plan
 from agent.executor import ExecutionTrace as ExecutionTrace
+from agent.event_stream import StreamEvent, get_event_bus
 from agent.executor_router import execute
 from agent.reviewer import Review as Review, review
 from agent.tool_registry import load_tools, load_tool_metadata
@@ -20,12 +22,17 @@ def run_goal(
     _max_wallclock_min: int | float | None = None,
     _depth: int = 0,
     _parent_goal_id: str | None = None,
+    on_event: Callable[[StreamEvent], None] | None = None,
 ) -> dict[str, Any]:
     """Run the full agent loop: plan → execute → review (with one revise attempt).
 
     Returns a dict with plan, trace, artifacts, and review.
     Halts cleanly with halted=True if cost ceiling is exceeded.
     """
+    event_bus = get_event_bus()
+    sub_id = event_bus.subscribe_sync(on_event) if on_event else None
+    effective_goal_id = goal_id or "ad-hoc"
+    event_bus.emit_typed("goal.started", effective_goal_id, goal_text=goal)
     with goal_trace(goal, goal_id):
         try:
             tools_meta = load_tool_metadata()
@@ -35,7 +42,7 @@ def run_goal(
                 plan_obj,
                 tools,
                 context={
-                    "goal_id": goal_id,
+                    "goal_id": effective_goal_id,
                     "_depth": _depth,
                     "_parent_goal_id": _parent_goal_id,
                 },
@@ -53,7 +60,7 @@ def run_goal(
                     plan_obj_v2,
                     tools,
                     context={
-                        "goal_id": goal_id,
+                        "goal_id": effective_goal_id,
                         "_depth": _depth,
                         "_parent_goal_id": _parent_goal_id,
                     },
@@ -62,8 +69,8 @@ def run_goal(
                 )
                 artifacts_v2 = list(trace_v2.artifacts)
                 rev_v2 = review(trace_v2, artifacts_v2)
-                return {
-                    "goal_id": goal_id,
+                result = {
+                    "goal_id": effective_goal_id,
                     "plan": plan_obj_v2,
                     "trace": trace_v2,
                     "artifacts": artifacts_v2,
@@ -71,9 +78,26 @@ def run_goal(
                     "revised": True,
                     "cost_usd": _current_goal_cost(),
                 }
+                if trace_v2.halted_for:
+                    event_bus.emit_typed(
+                        "goal.halted",
+                        effective_goal_id,
+                        reason=trace_v2.halted_for,
+                        last_checkpoint=None,
+                    )
+                else:
+                    event_bus.emit_typed(
+                        "goal.completed",
+                        effective_goal_id,
+                        verdict=rev_v2.verdict,
+                        artifacts=artifacts_v2,
+                        cost_usd=result["cost_usd"],
+                        halted_for=None,
+                    )
+                return result
 
-            return {
-                "goal_id": goal_id,
+            result = {
+                "goal_id": effective_goal_id,
                 "plan": plan_obj,
                 "trace": trace,
                 "artifacts": artifacts,
@@ -81,7 +105,30 @@ def run_goal(
                 "revised": False,
                 "cost_usd": _current_goal_cost(),
             }
+            if trace.halted_for:
+                event_bus.emit_typed(
+                    "goal.halted",
+                    effective_goal_id,
+                    reason=trace.halted_for,
+                    last_checkpoint=None,
+                )
+            else:
+                event_bus.emit_typed(
+                    "goal.completed",
+                    effective_goal_id,
+                    verdict=rev.verdict,
+                    artifacts=artifacts,
+                    cost_usd=result["cost_usd"],
+                    halted_for=None,
+                )
+            return result
         except CostCeilingExceeded as exc:
+            event_bus.emit_typed(
+                "goal.halted",
+                effective_goal_id,
+                reason="cost_ceiling_exceeded",
+                last_checkpoint=None,
+            )
             return {
                 "goal_id": goal_id,
                 "halted": True,
@@ -89,6 +136,9 @@ def run_goal(
                 "details": {"spent": exc.current, "limit": exc.limit},
                 "results": [],
             }
+        finally:
+            if sub_id is not None:
+                event_bus.unsubscribe(sub_id)
 
 
 def resume_goal(goal_id: str, allow_session_loss: bool = False) -> dict[str, Any]:
